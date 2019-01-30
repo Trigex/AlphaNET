@@ -1,0 +1,1 @@
+﻿currentDirectory = Filesystem.GetDirectoryByTitle(currentArgs[1])

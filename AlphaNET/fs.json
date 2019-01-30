@@ -1,0 +1,10 @@
+﻿{
+  "/root": {
+    "/bin": {
+      "sh.lua": "",
+      "cat.lua": "",
+      "echo.lua": "",
+      "init.lua":  ""
+    }
+  }
+}

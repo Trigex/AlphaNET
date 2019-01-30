@@ -1,0 +1,1 @@
+﻿Computer.WriteLine(Filesystem.GetFileByTitle(currentArgs[1]).data)
