@@ -17,6 +17,7 @@ while running do
 	command = StringMagick.SplitStringBySpaces(input)
 	-- the first argument should always be the name of the program
 	programArg = command[1]
+	-- relative or absolute path?
 	-- allow not needing to type .lua
 	if (not string.match(programArg, ".lua")) then
 		programArg = programArg..".lua"
@@ -26,7 +27,9 @@ while running do
 		currentArgs[i-1] = command[i]
 	end
 	-- get program code
-	programCode = Filesystem.GetFileByTitle(programArg).data
-	-- run
-	ExecuteScript(programCode)
+	if (Filesystem.GetFileByTitle(programArg) == null) then
+		Computer.WriteLine("The program "..programArg.." wasn't found!")
+	else
+		ExecuteScript(Filesystem.GetFileByTitle(programArg).data)
+	end
 end

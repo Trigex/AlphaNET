@@ -14,5 +14,10 @@ namespace AlphaNET.Lua
             string buf = input.CastToString();
             return StringMagick.SplitStringBySpaces(buf);
         }
+
+        public static bool StartsWith(DynValue input, DynValue startsWith)
+        {
+            return StringMagick.StartsWith(input.CastToString(), startsWith.CastToString());
+        }
     }
 }

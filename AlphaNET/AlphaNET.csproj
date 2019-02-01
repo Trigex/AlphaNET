@@ -57,6 +57,9 @@
     <Compile Include="Lua\ComputerProxy.cs" />
     <Compile Include="Lua\StringMagickProxy.cs" />
     <Compile Include="Utils\StringMagick.cs" />
+    <None Include="LuaScripts\math.lua">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="LuaScripts\cat.lua">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -85,8 +88,13 @@
     <None Include="LuaScripts\sh.lua">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="LuaScripts\touch.lua">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Networking\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

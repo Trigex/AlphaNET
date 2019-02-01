@@ -128,6 +128,8 @@ namespace AlphaNET.IO
         public void SaveFileSystemToJson()
         {
             System.IO.File.WriteAllText(fsJsonPath, FilesystemToJson());
+            // reload the filesystem from json
+            //LoadFileSystemFromJson();
         }
 
         /// <summary>
@@ -154,6 +156,14 @@ namespace AlphaNET.IO
             sw.Close();
 
             return jsonText;
+        }
+
+        public void ReloadFilesystem()
+        {
+            directories.Clear();
+            files.Clear();
+            rootDirectory = null;
+            LoadFileSystemFromJson();
         }
 
         /// <summary>

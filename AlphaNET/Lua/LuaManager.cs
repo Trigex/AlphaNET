@@ -27,10 +27,13 @@ namespace AlphaNET.Lua
             script.Globals["Computer"] = new ComputerProxy(computer);
             // LuaManager
             script.Globals["ExecuteScript"] = (Func<string, DynValue>)ExecuteScript;
-            // FilesystemProxy instance
+            // Filesystem
             script.Globals["Filesystem"] = new FilesystemProxy(filesystem);
+            script.Globals["File"] = typeof(File);
+            script.Globals["Directory"] = typeof(Directory);
             // Utils
             script.Globals["StringMagick"] = typeof(StringMagickProxy);
+            
         }
 
         public DynValue ExecuteScript(string code)

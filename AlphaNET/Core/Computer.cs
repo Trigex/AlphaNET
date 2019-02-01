@@ -8,7 +8,7 @@ namespace AlphaNET.Core
 {
     class Computer
     {
-        private Filesystem filesystem;
+        public Filesystem filesystem;
         private LuaManager luaManager;
 
         public Computer(string filesystemPath, string wsServerHost = null)
@@ -31,13 +31,20 @@ namespace AlphaNET.Core
             {
                 // get text from file
                 string luaCode = System.IO.File.ReadAllText(filename);
+                string name = filename.Replace(@"LuaScripts\", String.Empty);
                 // get the file in the virtual fs representing the real lua file
-                IO.File vLuaFile = filesystem.GetFileByTitle(filename.Replace(@"LuaScripts\", String.Empty));
-                // set that file's data to the code from the real file
-                vLuaFile.data = luaCode;
+                if (filesystem.GetFileByTitle(name) == null)
+                {
+                    filesystem.GetDirectoryByTitle("bin").AddFile(new IO.File(name, luaCode));
+                } else
+                {
+                    filesystem.GetFileByTitle(name).data = luaCode;
+                }
+                
             }
             // save the changes to the filesystem
             filesystem.SaveFileSystemToJson();
+            filesystem.ReloadFilesystem();
         }
 
         public void Write(string text)

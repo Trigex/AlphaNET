@@ -9,5 +9,10 @@ namespace AlphaNET.Utils
         {
             return input.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
         }
+
+        public static bool StartsWith(string input, string startsWith)
+        {
+            return input.StartsWith(startsWith);
+        }
     }
 }
