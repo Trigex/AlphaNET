@@ -47,6 +47,17 @@ func (fs *Filesystem) AddDirectory(dir Directory) {
 	fs.Directories = append(fs.Directories, &dir)
 }
 
+func (fs *Filesystem) Save(fsJsonPath string) {
+	fsJson := ConvertFilesystemToJSON(*fs)
+	fmt.Println(string(fsJson))
+
+	err := ioutil.WriteFile(fsJsonPath, fsJson, 0644)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
 func CreateFilesystem(fsJsonPath string) Filesystem {
 	// convert json to FilesystemJSON struct
 	jsonBuf, ioErr := ioutil.ReadFile(fsJsonPath)
@@ -55,7 +66,7 @@ func CreateFilesystem(fsJsonPath string) Filesystem {
 		log.Fatalln(ioErr)
 	}
 
-	jsonFs := CreateFilesystemJSON(jsonBuf)
+	jsonFs := ConvertJSONToFilesystem(jsonBuf)
 	// parse FilesystemJSON struct and create "real" filesystem
 	fs := new(Filesystem)
 

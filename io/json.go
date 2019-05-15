@@ -2,6 +2,7 @@ package io
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 )
 
@@ -21,7 +22,7 @@ type FilesystemJSON struct {
 	Files       []FileJSON      `json:"files"`
 }
 
-func CreateFilesystemJSON(jsonBuf []byte) FilesystemJSON {
+func ConvertJSONToFilesystem(jsonBuf []byte) FilesystemJSON {
 	fs := new(FilesystemJSON)
 	err := json.Unmarshal(jsonBuf, fs)
 	if err != nil {
@@ -29,6 +30,40 @@ func CreateFilesystemJSON(jsonBuf []byte) FilesystemJSON {
 	}
 
 	return *fs
+}
+
+func ConvertFilesystemToJSON(fs Filesystem) []byte {
+	fsJson := new(FilesystemJSON)
+
+	for i := range fs.Files {
+		file := fs.Files[i]
+		fsJson.Files = append(fsJson.Files, FileJSON{file.Name, file.Contents})
+	}
+
+	for i := range fs.Directories {
+		dir := fs.Directories[i]
+		jsonDir := new(DirectoryJSON)
+		jsonDir.Name = dir.Name
+
+		// get directory children
+		for f := range dir.ChildrenFiles {
+			jsonDir.ChildrenFiles = append(jsonDir.ChildrenFiles, dir.ChildrenFiles[f].Name)
+		}
+
+		for d := range dir.ChildrenDirectories {
+			jsonDir.ChildrenDirectories = append(jsonDir.ChildrenDirectories, dir.ChildrenDirectories[d].Name)
+		}
+
+		fsJson.Directories = append(fsJson.Directories, *jsonDir)
+	}
+
+	fsJsonBuf, err := json.Marshal(fsJson)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return fsJsonBuf
 }
 
 func FindParentJSON(name string, jsonFs FilesystemJSON) DirectoryJSON {
