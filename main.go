@@ -9,14 +9,7 @@ import (
 func main() {
 	// create fs
 	fs := io.CreateFilesystem("fs.json")
-	// create modifications
-	dir := io.CreateDirectory("usr", fs.Directories[0])
-	file := io.CreateFile("zoomers.txt", "lol funny 4chan :)", &dir)
-	fs.AddDirectory(dir)
-	fs.AddFile(file)
-
 	fs.DebugPrint()
-	fs.Save("fs.json")
 
 	// create javascript vm
 	jsVm := js.CreateJsVm()

@@ -1,6 +1,7 @@
 package io
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -9,10 +10,17 @@ import (
 type Filesystem struct {
 	Directories []*Directory
 	Files       []*File
+	fsJsonPath  string
 }
 
 func (fs *Filesystem) AddFile(file File) {
 	fs.Files = append(fs.Files, &file)
+	fs.Save()
+}
+
+func (fs *Filesystem) AddDirectory(dir Directory) {
+	fs.Directories = append(fs.Directories, &dir)
+	fs.Save()
 }
 
 func (fs *Filesystem) DebugPrint() {
@@ -43,19 +51,17 @@ func (fs *Filesystem) DebugPrint() {
 	}
 }
 
-func (fs *Filesystem) AddDirectory(dir Directory) {
-	fs.Directories = append(fs.Directories, &dir)
-}
-
-func (fs *Filesystem) Save(fsJsonPath string) {
+func (fs *Filesystem) Save() error {
 	fsJson := ConvertFilesystemToJSON(*fs)
 	fmt.Println(string(fsJson))
 
-	err := ioutil.WriteFile(fsJsonPath, fsJson, 0644)
+	err := ioutil.WriteFile(fs.fsJsonPath, fsJson, 0644)
 
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
+
+	return nil
 }
 
 func CreateFilesystem(fsJsonPath string) Filesystem {
@@ -69,6 +75,7 @@ func CreateFilesystem(fsJsonPath string) Filesystem {
 	jsonFs := ConvertJSONToFilesystem(jsonBuf)
 	// parse FilesystemJSON struct and create "real" filesystem
 	fs := new(Filesystem)
+	fs.fsJsonPath = fsJsonPath
 
 	// loop for directory list, create directory structs, append to fs list
 	for i := range jsonFs.Directories {
@@ -87,10 +94,14 @@ func CreateFilesystem(fsJsonPath string) Filesystem {
 		// find parent json
 		parentJson := FindParentJSON(realFile.Name, jsonFs)
 		// find real directory
-		parentReal := FindDirectory(parentJson.Name, *fs)
-		// set parenting and children
-		realFile.ParentDirectory = parentReal
-		parentReal.ChildrenFiles = append(parentReal.ChildrenFiles, &realFile)
+		parentReal, err := FindDirectory(parentJson.Name, *fs)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			// set parenting and children
+			realFile.ParentDirectory = parentReal
+			parentReal.ChildrenFiles = append(parentReal.ChildrenFiles, &realFile)
+		}
 	}
 
 	// find and set parent of directories (own loop, because all directories must be created for it to work)
@@ -101,9 +112,14 @@ func CreateFilesystem(fsJsonPath string) Filesystem {
 			// find parent json
 			parentJson := FindParentJSON(curDir.Name, jsonFs)
 			// find real directory
-			parentReal := FindDirectory(parentJson.Name, *fs)
-			curDir.ParentDirectory = parentReal
-			parentReal.ChildrenDirectories = append(parentReal.ChildrenDirectories, curDir)
+			parentReal, err := FindDirectory(parentJson.Name, *fs)
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				curDir.ParentDirectory = parentReal
+				parentReal.ChildrenDirectories = append(parentReal.ChildrenDirectories, curDir)
+			}
+
 		} else {
 			// root is a parent of itself
 			// crazy, I know
@@ -114,7 +130,7 @@ func CreateFilesystem(fsJsonPath string) Filesystem {
 	return *fs
 }
 
-func FindDirectory(name string, fs Filesystem) *Directory {
+func FindDirectory(name string, fs Filesystem) (*Directory, error) {
 	var dir *Directory
 
 	for i := range fs.Directories {
@@ -125,10 +141,14 @@ func FindDirectory(name string, fs Filesystem) *Directory {
 		}
 	}
 
-	return dir
+	if dir == nil {
+		return nil, errors.New("Unable to find directory")
+	}
+
+	return dir, nil
 }
 
-func FindFile(name string, fs Filesystem) *File {
+func FindFile(name string, fs Filesystem) (*File, error) {
 	var file *File
 
 	for i := range fs.Files {
@@ -139,5 +159,9 @@ func FindFile(name string, fs Filesystem) *File {
 		}
 	}
 
-	return file
+	if file == nil {
+		return nil, errors.New("Unable to find file")
+	}
+
+	return file, nil
 }

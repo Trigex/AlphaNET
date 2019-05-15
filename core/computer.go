@@ -1,6 +1,9 @@
 package core
 
 import (
+	"fmt"
+	"io/ioutil"
+
 	"github.com/trigex/alphanet/io"
 	"github.com/trigex/alphanet/js"
 )
@@ -20,5 +23,39 @@ func (comp *Computer) Start() {
 }
 
 func CreateComputer(fs io.Filesystem, jsVm js.JsVm) Computer {
-	return Computer{&fs, &jsVm, false}
+	comp := Computer{&fs, &jsVm, false}
+	InstallScripts(&comp)
+
+	return comp
+}
+
+func InstallScripts(comp *Computer) {
+	// install scripts (won't be in the release)
+
+	bin, err := io.FindDirectory("bin", *comp.fs)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// get scripts/ files
+	files, err := ioutil.ReadDir("./scripts/")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	for _, f := range files {
+		// read
+		script, err := ioutil.ReadFile("./scripts/" + f.Name())
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		fsFile, err := io.FindFile(f.Name(), *comp.fs)
+		if err != nil { // create file
+			newFile := io.CreateFile(f.Name(), string(script), bin)
+			comp.fs.AddFile(newFile)
+		} else { // update file
+			fsFile.Contents = string(script)
+		}
+	}
 }
