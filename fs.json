@@ -1,0 +1,38 @@
+{
+    "directories": [
+        {
+            "name": "root",
+            "childrenDirectories": ["bin", "home"],
+            "childrenFiles": ["test.txt"]
+        },
+        {
+            "name": "bin",
+            "childrenDirectories": null,
+            "childrenFiles": ["cat.js"]
+        },
+        {
+            "name": "home",
+            "childrenDirectories": ["trigex"],
+            "childrenFiles": null
+        },
+        {
+            "name": "trigex",
+            "childrenFiles": ["hello.txt"],
+            "childrenDirectories": null
+        }
+    ],
+    "files": [
+        {
+            "name": "test.txt",
+            "contents": "Hello, World!"
+        },
+        {
+            "name": "cat.js",
+            "contents": "print(\"covert cat\")"
+        },
+        {
+            "name": "hello.txt",
+            "contents": "hey gamer"
+        }
+    ]
+}
