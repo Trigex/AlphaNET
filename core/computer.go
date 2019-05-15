@@ -10,27 +10,26 @@ import (
 
 type Computer struct {
 	fs      *io.Filesystem
-	jsVm    *js.JsVm
+	jsVM    *js.JsVM
 	running bool
 }
 
 func (comp *Computer) Start() {
 	comp.running = true
-	// get shell script
-	shell, err := io.FindFile("shell.js", *comp.fs)
-	fmt.Println(shell.Contents)
+	// get init script
+	init, err := comp.fs.FindFile("init.js")
 	if err != nil {
 		//fmt.Println(err)
 	}
 
 	for comp.running {
 		// run shell script
-		comp.jsVm.RunScript(shell.Contents)
+		comp.jsVM.RunScript(init.Contents)
 	}
 }
 
-func CreateComputer(fs io.Filesystem, jsVm js.JsVm) Computer {
-	comp := Computer{&fs, &jsVm, false}
+func CreateComputer(fs io.Filesystem, jsVM js.JsVM) Computer {
+	comp := Computer{&fs, &jsVM, false}
 	InstallScripts(&comp)
 	return comp
 }
@@ -38,7 +37,7 @@ func CreateComputer(fs io.Filesystem, jsVm js.JsVm) Computer {
 func InstallScripts(comp *Computer) {
 	// install scripts (won't be in the release)
 
-	bin, err := io.FindDirectory("bin", *comp.fs)
+	bin, err := comp.fs.FindDirectory("bin")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -56,7 +55,7 @@ func InstallScripts(comp *Computer) {
 			fmt.Println(err)
 		}
 
-		fsFile, err := io.FindFile(f.Name(), *comp.fs)
+		fsFile, err := comp.fs.FindFile(f.Name())
 		if err != nil { // create file
 			newFile := io.CreateFile(f.Name(), string(script), bin)
 			comp.fs.AddFile(newFile)

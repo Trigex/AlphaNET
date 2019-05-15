@@ -1,4 +1,4 @@
 // prompt
-printLn("> ")
-var input = getLine()
+print("> ")
+var input = readLine()
 printLn(input)

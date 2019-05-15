@@ -9,13 +9,15 @@ import (
 func main() {
 	// create fs
 	fs := io.CreateFilesystem("fs.json")
-	fs.DebugPrint()
+	//fs.DebugPrint()
+
+	console := io.CreateConsole()
 
 	// create javascript vm
-	jsVm := js.CreateJsVm()
+	jsVM := js.CreateJsVM(&console, &fs)
 
 	// create computer, which holds these structs
-	comp := core.CreateComputer(fs, jsVm)
+	comp := core.CreateComputer(fs, jsVM)
 	// start main loop
 	comp.Start()
 }

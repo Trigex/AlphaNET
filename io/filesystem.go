@@ -53,7 +53,8 @@ func (fs *Filesystem) DebugPrint() {
 
 func (fs *Filesystem) Save() error {
 	fsJson := ConvertFilesystemToJSON(*fs)
-	fmt.Println(string(fsJson))
+	//fmt.Println(string(fsJson))
+	fmt.Println("FS Saved")
 
 	err := ioutil.WriteFile(fs.fsJsonPath, fsJson, 0644)
 
@@ -62,6 +63,42 @@ func (fs *Filesystem) Save() error {
 	}
 
 	return nil
+}
+
+func (fs *Filesystem) FindDirectory(name string) (*Directory, error) {
+	var dir *Directory
+
+	for i := range fs.Directories {
+		curDir := fs.Directories[i]
+
+		if curDir.Name == name {
+			dir = curDir
+		}
+	}
+
+	if dir == nil {
+		return nil, errors.New("Unable to find directory")
+	}
+
+	return dir, nil
+}
+
+func (fs *Filesystem) FindFile(name string) (*File, error) {
+	var file *File
+
+	for i := range fs.Files {
+		curFile := fs.Files[i]
+
+		if curFile.Name == name {
+			file = curFile
+		}
+	}
+
+	if file == nil {
+		return nil, errors.New("Unable to find file")
+	}
+
+	return file, nil
 }
 
 func CreateFilesystem(fsJsonPath string) Filesystem {
@@ -94,7 +131,7 @@ func CreateFilesystem(fsJsonPath string) Filesystem {
 		// find parent json
 		parentJson := FindParentJSON(realFile.Name, jsonFs)
 		// find real directory
-		parentReal, err := FindDirectory(parentJson.Name, *fs)
+		parentReal, err := fs.FindDirectory(parentJson.Name)
 		if err != nil {
 			fmt.Println(err)
 		} else {
@@ -112,7 +149,7 @@ func CreateFilesystem(fsJsonPath string) Filesystem {
 			// find parent json
 			parentJson := FindParentJSON(curDir.Name, jsonFs)
 			// find real directory
-			parentReal, err := FindDirectory(parentJson.Name, *fs)
+			parentReal, err := fs.FindDirectory(parentJson.Name)
 			if err != nil {
 				fmt.Println(err)
 			} else {
@@ -128,40 +165,4 @@ func CreateFilesystem(fsJsonPath string) Filesystem {
 	}
 
 	return *fs
-}
-
-func FindDirectory(name string, fs Filesystem) (*Directory, error) {
-	var dir *Directory
-
-	for i := range fs.Directories {
-		curDir := fs.Directories[i]
-
-		if curDir.Name == name {
-			dir = curDir
-		}
-	}
-
-	if dir == nil {
-		return nil, errors.New("Unable to find directory")
-	}
-
-	return dir, nil
-}
-
-func FindFile(name string, fs Filesystem) (*File, error) {
-	var file *File
-
-	for i := range fs.Files {
-		curFile := fs.Files[i]
-
-		if curFile.Name == name {
-			file = curFile
-		}
-	}
-
-	if file == nil {
-		return nil, errors.New("Unable to find file")
-	}
-
-	return file, nil
 }
