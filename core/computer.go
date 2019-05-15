@@ -16,16 +16,22 @@ type Computer struct {
 
 func (comp *Computer) Start() {
 	comp.running = true
+	// get shell script
+	shell, err := io.FindFile("shell.js", *comp.fs)
+	fmt.Println(shell.Contents)
+	if err != nil {
+		//fmt.Println(err)
+	}
 
 	for comp.running {
 		// run shell script
+		comp.jsVm.RunScript(shell.Contents)
 	}
 }
 
 func CreateComputer(fs io.Filesystem, jsVm js.JsVm) Computer {
 	comp := Computer{&fs, &jsVm, false}
 	InstallScripts(&comp)
-
 	return comp
 }
 
@@ -58,4 +64,6 @@ func InstallScripts(comp *Computer) {
 			fsFile.Contents = string(script)
 		}
 	}
+
+	comp.fs.Save()
 }

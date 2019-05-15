@@ -13,7 +13,6 @@ func main() {
 
 	// create javascript vm
 	jsVm := js.CreateJsVm()
-	jsVm.RunScript(`console.log("hello, world! ( from javascript :) )")`)
 
 	// create computer, which holds these structs
 	comp := core.CreateComputer(fs, jsVm)

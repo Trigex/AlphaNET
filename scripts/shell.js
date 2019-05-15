@@ -1,1 +1,4 @@
-console.log("Hello, World!")
+// prompt
+printLn("> ")
+var input = getLine()
+printLn(input)
