@@ -28,8 +28,8 @@ func (comp *Computer) Start() {
 	}
 }
 
-func CreateComputer(fs io.Filesystem, jsVM js.JsVM) Computer {
-	comp := Computer{&fs, &jsVM, false}
+func CreateComputer(fs *io.Filesystem, jsVM *js.JsVM) Computer {
+	comp := Computer{fs, jsVM, false}
 	InstallScripts(&comp)
 	return comp
 }

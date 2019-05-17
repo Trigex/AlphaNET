@@ -25,9 +25,9 @@ func (vm *JsVM) RunScript(script string) {
 	}
 }
 
-func CreateJsVM(c *io.Console, fs *io.Filesystem) JsVM {
-	vm := JsVM{*otto.New(), c, fs}
-	// set api functions
+func (vm *JsVM) InstallAPIs() {
+	c := vm.console
+	fs := vm.fs
 
 	// Console
 	vm.vm.Set("print", func(call otto.FunctionCall) otto.Value {
@@ -64,6 +64,10 @@ func CreateJsVM(c *io.Console, fs *io.Filesystem) JsVM {
 		result, _ := vm.vm.Run(arg)
 		return result
 	})
+}
 
+func CreateJsVM(c *io.Console, fs *io.Filesystem) JsVM {
+	vm := JsVM{*otto.New(), c, fs}
+	vm.InstallAPIs()
 	return vm
 }

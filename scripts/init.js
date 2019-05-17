@@ -4,7 +4,7 @@
     Who wins?
 */
 
-printLn("init.js running...")
+printLn("Loading shell...")
 
 // load shell
 var shell = getFile("shell.js")

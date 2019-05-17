@@ -17,7 +17,7 @@ func main() {
 	jsVM := js.CreateJsVM(&console, &fs)
 
 	// create computer, which holds these structs
-	comp := core.CreateComputer(fs, jsVM)
+	comp := core.CreateComputer(&fs, &jsVM)
 	// start main loop
 	comp.Start()
 }
