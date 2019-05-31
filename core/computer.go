@@ -10,7 +10,7 @@ import (
 
 type Computer struct {
 	fs      *io.Filesystem
-	jsVM    *js.JsVM
+	VM      *js.VM
 	running bool
 }
 
@@ -22,14 +22,11 @@ func (comp *Computer) Start() {
 		//fmt.Println(err)
 	}
 
-	for comp.running {
-		// run shell script
-		comp.jsVM.RunScript(init.Contents)
-	}
+	comp.VM.RunScript(init.Contents)
 }
 
-func CreateComputer(fs *io.Filesystem, jsVM *js.JsVM) Computer {
-	comp := Computer{fs, jsVM, false}
+func CreateComputer(fs *io.Filesystem, VM *js.VM) Computer {
+	comp := Computer{fs, VM, false}
 	InstallScripts(&comp)
 	return comp
 }

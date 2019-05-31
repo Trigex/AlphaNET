@@ -8,7 +8,8 @@ import (
 	"github.com/trigex/alphanet/io"
 )
 
-type JsVM struct {
+// VM is a struct holding pointers to the various objects it requires
+type VM struct {
 	vm otto.Otto
 	// pointers to structs the vm uses in it's api
 	// these should probably the the same pointers the computer holds
@@ -16,16 +17,26 @@ type JsVM struct {
 	fs      *io.Filesystem
 }
 
-func (vm *JsVM) RunScript(script string) {
-	result, err := vm.vm.Run(script)
+// RunScript runs a given string on the VM, printing an error if one appears
+func (vm *VM) RunScript(script string) {
+	// compile script before hand
+	scr, cErr := vm.vm.Compile("", script)
 
-	if err != nil {
-		resultS, _ := result.ToString()
-		fmt.Printf("Error!: %s, Result: %s", err.Error(), resultS)
+	if cErr != nil {
+		fmt.Printf("Error!: %s", cErr.Error())
+	} else {
+		// run script
+		result, rErr := vm.vm.Run(scr)
+
+		if rErr != nil {
+			resultS, _ := result.ToString()
+			fmt.Printf("Error!: %s, Result: %s", rErr.Error(), resultS)
+		}
 	}
 }
 
-func (vm *JsVM) InstallAPIs() {
+// InstallAPIs setups a various AlphaNET APIs used by the VM
+func (vm *VM) InstallAPIs() {
 	c := vm.console
 	fs := vm.fs
 
@@ -66,8 +77,9 @@ func (vm *JsVM) InstallAPIs() {
 	})
 }
 
-func CreateJsVM(c *io.Console, fs *io.Filesystem) JsVM {
-	vm := JsVM{*otto.New(), c, fs}
+// CreateVM returns a new VM object
+func CreateVM(c *io.Console, fs *io.Filesystem) VM {
+	vm := VM{*otto.New(), c, fs}
 	vm.InstallAPIs()
 	return vm
 }

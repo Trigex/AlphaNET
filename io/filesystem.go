@@ -7,22 +7,26 @@ import (
 	"log"
 )
 
+// Filesystem is a representation of the filesystem as a whole, holding directories and files.
 type Filesystem struct {
 	Directories []*Directory
 	Files       []*File
 	fsJsonPath  string
 }
 
+// AddFile adds a given file to the Filesystem
 func (fs *Filesystem) AddFile(file File) {
 	fs.Files = append(fs.Files, &file)
 	fs.Save()
 }
 
+// AddDirectory adds a given directory to the Filesystem
 func (fs *Filesystem) AddDirectory(dir Directory) {
 	fs.Directories = append(fs.Directories, &dir)
 	fs.Save()
 }
 
+// DebugPrint gives a text output representation of the whole Filesystem
 func (fs *Filesystem) DebugPrint() {
 	fmt.Println("=============\nDirectories\n=============")
 	for d := range fs.Directories {
@@ -51,6 +55,7 @@ func (fs *Filesystem) DebugPrint() {
 	}
 }
 
+// Save converts the Filesystem to it's JSON representation and writes it to fsJsonPath
 func (fs *Filesystem) Save() error {
 	fsJson := ConvertFilesystemToJSON(*fs)
 	//fmt.Println(string(fsJson))
@@ -65,6 +70,7 @@ func (fs *Filesystem) Save() error {
 	return nil
 }
 
+// FindDirectory returns any matching directories by name in the Filesystem
 func (fs *Filesystem) FindDirectory(name string) (*Directory, error) {
 	var dir *Directory
 
@@ -83,6 +89,7 @@ func (fs *Filesystem) FindDirectory(name string) (*Directory, error) {
 	return dir, nil
 }
 
+// FindFile returns any matching Files by name in the Filesystem
 func (fs *Filesystem) FindFile(name string) (*File, error) {
 	var file *File
 
@@ -101,6 +108,7 @@ func (fs *Filesystem) FindFile(name string) (*File, error) {
 	return file, nil
 }
 
+// CreateFilesystem creates a new Filesystem object
 func CreateFilesystem(fsJsonPath string) Filesystem {
 	// convert json to FilesystemJSON struct
 	jsonBuf, ioErr := ioutil.ReadFile(fsJsonPath)

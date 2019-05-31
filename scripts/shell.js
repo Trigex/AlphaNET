@@ -4,18 +4,28 @@
 
 PROMPT = "> ";
 VERSION = 0.1;
+RUNNING = true;
+PATH = ["/bin"];
 
-function init(version) {
-    printLn("shell.js version " + version);
+function init() {
+    printLn("shell.js version " + VERSION);
     start();
 }
 
 function start() {
     while(true) {
-        print(prompt);
+        print(PROMPT);
         var input = readLine();
         printLn(input);
+        parseCommand(input);
     }
 }
 
-init(VERSION)
+function parseCommand(input) {
+    // split string into array by spaces
+    var command = input.split(" ");
+    // search for command executable
+     
+}
+
+init();

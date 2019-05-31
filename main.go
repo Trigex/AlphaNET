@@ -14,10 +14,10 @@ func main() {
 	console := io.CreateConsole()
 
 	// create javascript vm
-	jsVM := js.CreateJsVM(&console, &fs)
+	VM := js.CreateVM(&console, &fs)
 
 	// create computer, which holds these structs
-	comp := core.CreateComputer(&fs, &jsVM)
+	comp := core.CreateComputer(&fs, &VM)
 	// start main loop
 	comp.Start()
 }

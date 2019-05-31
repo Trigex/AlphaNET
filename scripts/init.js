@@ -4,8 +4,8 @@
     Who wins?
 */
 
-printLn("Loading shell...")
+printLn("Loading shell...");
 
 // load shell
-var shell = getFile("shell.js")
-run(shell)
+var shell = getFile("shell.js");
+run(shell);
