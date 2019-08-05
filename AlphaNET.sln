@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29123.88
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlphaFramework", "AlphaFramework\AlphaFramework.csproj", "{3395D494-B85B-4F20-A4A1-CC0C3BBD82A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlphaNET.Framework.Standard", "AlphaNET.Framework.Standard\AlphaNET.Framework.Standard.csproj", "{625E3E33-3725-40E5-B508-C52A66AC035C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlphaNET", "AlphaNET\AlphaNET.csproj", "{E402A6DA-9B20-4D39-9BB8-AE86C29B99B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlphaNET.Client.Console", "AlphaNET.Client.Console\AlphaNET.Client.Console.csproj", "{4C11B844-E48F-4425-882F-F9ADB55AA21E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlphaServer", "AlphaServer\AlphaServer.csproj", "{F63AA9B9-B6ED-408D-A330-3958EA204629}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlphaNET.Server", "AlphaNET.Server\AlphaNET.Server.csproj", "{AF86407E-0E06-4366-B9E1-277833E63956}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,18 +15,18 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3395D494-B85B-4F20-A4A1-CC0C3BBD82A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3395D494-B85B-4F20-A4A1-CC0C3BBD82A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3395D494-B85B-4F20-A4A1-CC0C3BBD82A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3395D494-B85B-4F20-A4A1-CC0C3BBD82A9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E402A6DA-9B20-4D39-9BB8-AE86C29B99B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E402A6DA-9B20-4D39-9BB8-AE86C29B99B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E402A6DA-9B20-4D39-9BB8-AE86C29B99B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E402A6DA-9B20-4D39-9BB8-AE86C29B99B0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F63AA9B9-B6ED-408D-A330-3958EA204629}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F63AA9B9-B6ED-408D-A330-3958EA204629}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F63AA9B9-B6ED-408D-A330-3958EA204629}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F63AA9B9-B6ED-408D-A330-3958EA204629}.Release|Any CPU.Build.0 = Release|Any CPU
+		{625E3E33-3725-40E5-B508-C52A66AC035C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{625E3E33-3725-40E5-B508-C52A66AC035C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{625E3E33-3725-40E5-B508-C52A66AC035C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{625E3E33-3725-40E5-B508-C52A66AC035C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C11B844-E48F-4425-882F-F9ADB55AA21E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C11B844-E48F-4425-882F-F9ADB55AA21E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C11B844-E48F-4425-882F-F9ADB55AA21E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C11B844-E48F-4425-882F-F9ADB55AA21E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF86407E-0E06-4366-B9E1-277833E63956}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF86407E-0E06-4366-B9E1-277833E63956}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF86407E-0E06-4366-B9E1-277833E63956}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF86407E-0E06-4366-B9E1-277833E63956}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

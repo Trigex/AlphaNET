@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <AssemblyName>AlphaNET.Client.Console</AssemblyName>
+    <RootNamespace>AlphaNET.Client.Console</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AlphaNET.Framework.Standard\AlphaNET.Framework.Standard.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="OS\**\*.*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="OS\Kernel_H.ts" />
+  </ItemGroup>
+
+</Project>
