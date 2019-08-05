@@ -10,7 +10,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\JS\*.js"></EmbeddedResource>
+    <EmbeddedResource Include="Resources/JS/TSCompiler/*.js"></EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources/JS/AlphaOS/src/**/*"></EmbeddedResource>
   </ItemGroup>
 
 </Project>

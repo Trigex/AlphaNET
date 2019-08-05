@@ -11,14 +11,4 @@
     <ProjectReference Include="..\AlphaNET.Framework.Standard\AlphaNET.Framework.Standard.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="OS\**\*.*">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="OS\Kernel_H.ts" />
-  </ItemGroup>
-
 </Project>
