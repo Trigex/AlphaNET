@@ -1,7 +1,6 @@
 # AlphaNET
-AlphaNET is a neato sandbox programming MMO, written in Go, utilizing JS as the in-game scripting language. It'll be pretty cool fellas
 
-# Building
-Ensure you have a proper Go development enviroment setup (With $GOPATH set), and run `go get github.com/trigex/alphanet`
+It's AlphaNET, but the 4th rewrite!
 
-Run `cd $GOPATH/src/github.com/trigex/alphanet && go build`, the source will be built into the resulting binary, `alphanet`, execute it with `./alphanet`
+Hacking games are a very niche and underexplored genre. You’ve got the bigger games like Hacker Experience, Hacknet, Hackmud, Dark Signs/Hacking Simulator. But, there’s an issue with all these games: it’s nothing like actual hacking. They are essentially puzzle games, with a hacking/computer theme. Some have programming (they’re the better ones!) which does make them a bit more accurate and realistic, but they’re not too in-depth. Hackmud for example, makes heavy use of JavaScript scripting. But, to accomplish what in the end? Solving puzzles to get more of the in game currency. Hacking Simulator had programming (in an awful, awful original language), but it was quite limited. You could program your given server project, and do things locally, but that was about it. All these limitations frustrate me! What I want in a hacking game is a nice, open sandbox, with a complete scripting engine and API, so I can write whatever the hell I want; I want hacking that’s more than just a simple puzzle; I want a complete, virtual operating system environment to play in to my heart's content!
+And that’s the goal of AlphaNET. AlphaNET aims to be a complete sandbox, with a full featured scripting API, realistic and open operating system internals, complete customization, and can’t forget: Actual hacking and cracking! AlphaNET aims to be something you can immerse yourself in, something you can learn from, something you can be apart of.

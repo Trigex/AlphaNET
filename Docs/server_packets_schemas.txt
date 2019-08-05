@@ -1,0 +1,17 @@
+AlphaNET network architecture:
+All clients automatically connect to a central server, which relays out information to clients. Usually, these are "direct", virutal socket communications (Two AlphaNET clients open and connect two virtual sockets, which the server facilitates, and proxies the sent virtual socket information to the clients. This is done as a matter of security, people might not like P2P and leaked IPs!)
+
+On the opening of a tcp connection, a client's real IP is compared to a database, if they're a new IP, they are added to the database, and are then assigned a new virtual IP, linked to their real IP, which is used for all of the AlphaNET networking functionallity.
+
+Client (server) socket timeline:
+Client open()s socket, binded to IP and port
+Client listens for connections
+Client accepts connections and transfers information
+
+
+Data packet type codes: (All 1 byte)
+1 = Socket information alert:
+    Socket open state: (Open, closed)
+    Socket port: (Number)
+    Socket IP: (Number)
+    
