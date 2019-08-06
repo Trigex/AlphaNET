@@ -15,7 +15,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\AlphaNET.Framework.Standard\AlphaNET.Framework.Standard.csproj" />
+    <ProjectReference Include="..\AlphaNET.Framework\AlphaNET.Framework.csproj" />
   </ItemGroup>
   
 </Project>

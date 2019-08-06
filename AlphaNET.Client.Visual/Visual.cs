@@ -2,8 +2,8 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Text;
-using AlphaNET.Framework.Standard.Client;
-using AlphaNET.Framework.Standard.IO;
+using AlphaNET.Framework.Client;
+using AlphaNET.Framework.IO;
 
 namespace AlphaNET.Client.Visual
 {

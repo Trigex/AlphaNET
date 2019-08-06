@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Text;
-using AlphaNET.Framework.Standard.IO;
+using AlphaNET.Framework.IO;
 
 namespace AlphaNET.Client.Visual
 {

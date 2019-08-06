@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Text;
-using AlphaNET.Framework.Standard.Client;
-using AlphaNET.Framework.Standard.IO;
-using AlphaNET.Framework.Standard.JS;
+using AlphaNET.Framework.Client;
+using AlphaNET.Framework.IO;
+using AlphaNET.Framework.JS;
 using Jint;
 
 namespace AlphaNET.Client.Console

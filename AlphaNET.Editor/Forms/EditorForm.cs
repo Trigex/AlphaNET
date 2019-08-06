@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using AlphaNET.Framework.Standard.IO;
+using AlphaNET.Framework.IO;
 using AlphaNET.Editor.Commands;
 using Eto.Forms;
-using Eto.Drawing;
-using System.Linq;
-using System.Diagnostics;
+using AlphaNET.Editor.GridItems;
+using AlphaNET.Editor.Controls;
+using AlphaNET.Editor.Layouts;
 
 namespace AlphaNET.Editor.Forms
 {
@@ -17,12 +17,11 @@ namespace AlphaNET.Editor.Forms
         private Uri initalDirectory;
         private const string baseTitle = "AlphaNET Editor";
 
-        private TreeGridView treeView;
-        private TreeGridItemCollection treeViewItems;
+        private FilesystemView fsView;
         private TextArea textArea;
         private string currentlyEditedPath;
         private File currentlyEditedFile;
-        public Command openFs, saveFs, saveAs, createFile, importAst, deleteObj;
+        private Command openFs, saveFs, saveAs, createFile, importAst, deleteObj;
 
         public EditorForm()
         {
@@ -33,6 +32,8 @@ namespace AlphaNET.Editor.Forms
             InitControls();
             InitInterface();
         }
+
+        // INIT METHODS
 
         private void InitCommands()
         {
@@ -53,79 +54,8 @@ namespace AlphaNET.Editor.Forms
 
         private void InitControls()
         {
-            treeViewItems = new TreeGridItemCollection();
-
-            treeView = new TreeGridView()
-            {
-                BackgroundColor = Colors.White
-            };
-            // FILESYSTEM OBJECT TITLE TREE
-            treeView.Columns.Add(new GridColumn
-            {
-                HeaderText = "Filesystem",
-                Width = 250,
-                DataCell = new CustomCell
-                {
-                    CreateCell = r =>
-                    {
-                        var item = r.Item as TreeGridItem;
-                        var label = new Label() { Text = item.Values[0] as string,  };
-                        return label;
-                    }
-                }
-            });
-            // FILESYSTEM OBJECT TYPE
-            treeView.Columns.Add(new GridColumn
-            {
-                HeaderText = "Type",
-                Width = 95,
-                DataCell = new CustomCell
-                {
-                    CreateCell = r =>
-                    {
-                        var item = r.Item as TreeGridItem;
-                        Label label = new Label();
-
-                        if(fs.GetFilesystemObjectByID((uint)item.Tag).GetType() == typeof(Directory))
-                        {
-                            label.Text = "Directory";
-                        }
-                        if (fs.GetFilesystemObjectByID((uint)item.Tag).GetType() == typeof(File))
-                        {
-                            label.Text = "File";
-                        }
-
-                        return label;
-                    }
-                }
-            });
-            // FILE CONTENTS TYPE
-            treeView.Columns.Add(new GridColumn
-            {
-                HeaderText = "Contents Type",
-                DataCell = new CustomCell
-                {
-                    CreateCell = r =>
-                    {
-                        var item = r.Item as TreeGridItem;
-                        Label label = new Label();
-                        // only apply to file items
-                        if(fs.GetFilesystemObjectByID((uint)item.Tag).GetType() == typeof(File))
-                        {
-                            if((string)item.Values[1] == true.ToString())
-                            {
-                                label.Text = "Text";
-                            } else
-                            {
-                                label.Text = "Binary";
-                            }
-                        }
-
-                        return label;
-                    }
-                }
-            });
-            treeView.Activated += TreeItemActivated;
+            fsView = new FilesystemView();
+            fsView.Activated += FsViewItemActivated;
 
             textArea = new TextArea();
             textArea.TextChanged += TextChanged;
@@ -136,45 +66,14 @@ namespace AlphaNET.Editor.Forms
             Title = baseTitle;
             ClientSize = new Eto.Drawing.Size(800, 600);
             // FORM CONTENTS
-            Content = new TableLayout
-            {
-                Spacing = new Eto.Drawing.Size(5, 5),
-                Padding = new Eto.Drawing.Padding(10, 10, 10, 10),
-                Rows =
-                {
-                     new TableRow() { ScaleHeight = true, Cells = { treeView } },
-                     new TableRow() { ScaleHeight = true, Cells = { textArea } },
-                }
-            };
+            Content = EditorLayout.CreateInstance(fsView, textArea);
 
             // MENUBAR
-            Menu = new MenuBar
-            {
-                Items =
-                {
-                    new ButtonMenuItem // FILE MENU
-                    {
-                        Text = "File",
-                        Items =
-                        {
-                            openFs,
-                            saveFs,
-                            saveAs
-                        }
-                    },
+            Dictionary<string, Command[]> items = new Dictionary<string, Command[]>();
+            items.Add("File", new Command[] { openFs, saveFs, saveAs });
+            items.Add("Edit", new Command[] { importAst, createFile, deleteObj });
 
-                    new ButtonMenuItem // EDIT MENU
-                    {
-                        Text = "Edit",
-                        Items =
-                        {
-                            importAst,
-                            deleteObj,
-                            createFile
-                        }
-                    }
-                }
-            };
+            Menu = MenuLayout.CreateInstance(items);
         }
 
         // COMMAND HANDLERS
@@ -196,7 +95,7 @@ namespace AlphaNET.Editor.Forms
             // Load fs
             fs = BinaryManager.CreateFilesystemFromBinary(BinaryManager.ReadBinaryFromFile(openFile.FileName));
             currentlyEditedPath = openFile.FileName;
-            LoadFilesystemIntoTreeView();
+            fsView.LoadFilesystem(fs);
             Title = baseTitle + " - " + System.IO.Path.GetFileName(currentlyEditedPath);
             textArea.Text = "";
         }
@@ -214,7 +113,7 @@ namespace AlphaNET.Editor.Forms
                 var saveFile = new SaveFileDialog();
                 saveFile.Filters.Add(_fsFilter);
                 saveFile.CurrentFilter = _fsFilter;
-                saveFile.Directory = initalDirectory;
+                saveFile.Directory = new Uri(currentlyEditedPath);
                 var result = saveFile.ShowDialog(this);
 
                 if (result == DialogResult.Ok)
@@ -232,19 +131,19 @@ namespace AlphaNET.Editor.Forms
         {
             if(fs != null)
             {
-                TreeGridItem selectedItem = (TreeGridItem)treeView.SelectedItem;
-                TreeGridItem selectedDir;
+                FilesystemObjectGridItem selectedItem = (FilesystemObjectGridItem)fsView.SelectedItem;
                 Directory importDirectory;
                 // if the selected item isn't a directory, set selected to the item's parent (the directory whom holds it)
-                if (!IsTreeGridItemDirectory(selectedItem))
+                if (selectedItem.GetType() != typeof(DirectoryGridItem))
                 {
-                    selectedDir = (TreeGridItem)selectedItem.Parent;
+                    var parentDir = (DirectoryGridItem)selectedItem.Parent;
+                    importDirectory = (Directory)parentDir.FilesystemObject;
+                    selectedItem = (FilesystemObjectGridItem)selectedItem.Parent;
                 }
-                else
+                else // the selected item is a directory
                 {
-                    selectedDir = selectedItem;
+                    importDirectory = (Directory)selectedItem.FilesystemObject;
                 }
-                importDirectory = (Directory)fs.GetFilesystemObjectByID((uint)selectedDir.Tag);
 
                 var openFile = new OpenFileDialog();
                 openFile.MultiSelect = true;
@@ -273,16 +172,16 @@ namespace AlphaNET.Editor.Forms
                         plaintext = true;
                     else
                         plaintext = false;
-
-
                     var file = new File(bin.Key, importDirectory, IOUtils.GenerateID(), plaintext, bin.Value);
+                    var fileItem = new FileGridItem(file.ID, file.Title, file.IsPlaintext, file);
                     fs.AddFilesystemObject(file, importDirectory);
-                    selectedDir.Children.Add(new TreeGridItem { Tag = file.ID, Values = new string[] { file.Title, file.IsPlaintext.ToString() } });
+
+                    selectedItem.Children.Add(fileItem);
                 }
 
-                selectedDir.Expanded = true;
+                selectedItem.Expanded = true;
                 // refresh view
-                treeView.ReloadData();
+                fsView.ReloadData();
             }
         }
 
@@ -297,43 +196,37 @@ namespace AlphaNET.Editor.Forms
         {
             if(fs != null)
             {
-                var selectedItem = (TreeGridItem)treeView.SelectedItem;
-                var parent = (TreeGridItem)selectedItem.Parent;
-                var fsObj = fs.GetFilesystemObjectByID((uint)selectedItem.Tag);
+                var selectedItem = (FilesystemObjectGridItem)fsView.SelectedItem;
+                var parent = (FilesystemObjectGridItem)selectedItem.Parent;
+                var fsObj = selectedItem.FilesystemObject;
+
                 // remove from tree
                 if (selectedItem.Parent == null) // probably root
                     MessageBox.Show("Filesystems are required to have a root directory", MessageBoxType.Error);
                 else
                 {
                     parent.Children.Remove(selectedItem);
-
                     // remove from filesystem
                     fs.DeleteFilesystemObject(fsObj);
-
                     // reload
-                    treeView.ReloadData();
+                    fsView.ReloadData();
                 }
             }
         }
 
         // CONTROL HANDLERS
-        private void TreeItemActivated(object sender, EventArgs e)
+        private void FsViewItemActivated(object sender, EventArgs e)
         {
             // reset text area
             currentlyEditedFile = null;
             textArea.Text = "";
-            var selectedItem = (TreeGridItem)treeView.SelectedItem;
-            if(IsTreeGridItemFile(selectedItem))
+            var selectedItem = (FilesystemObjectGridItem)fsView.SelectedItem;
+            if(selectedItem.GetType() == typeof(FileGridItem))
             {
-                File file = (File)fs.GetFilesystemObjectByID((uint)selectedItem.Tag);
-                this.currentlyEditedFile = file;
+                File file = (File)selectedItem.FilesystemObject;
+                currentlyEditedFile = file;
                 textArea.Text = Encoding.UTF8.GetString(file.Contents);
             }
-        }
-
-        private void TreeCell(object sender, EventArgs e)
-        {
-
         }
 
         private void TextChanged(object sender, EventArgs e)
@@ -341,73 +234,6 @@ namespace AlphaNET.Editor.Forms
             // modify file contents
             if(currentlyEditedFile != null)
                 currentlyEditedFile.ModifyContents(Encoding.UTF8.GetBytes(textArea.Text), true);
-        }
-
-        // VARIOUS METHODS
-        private void LoadFilesystemIntoTreeView()
-        {
-            // if attempting to load from an already active session
-            if(treeView.DataStore != null && treeViewItems != null)
-            {
-                treeViewItems.Clear();
-            }
-
-            var root = (Directory)fs.GetFilesystemObjectsByTitle("root")[0];
-            var rootItem = new TreeGridItem { Tag = root.ID, Values = new string[] { root.Title } };
-            FilesystemTraverse(root, rootItem);
-            treeViewItems.Add(rootItem);
-
-            treeView.DataStore = treeViewItems;
-        }
-
-        private void FilesystemTraverse(Directory dir, TreeGridItem lastItem)
-        {
-            foreach (FilesystemObject child in dir.Children)
-            {
-                if(child.GetType()==typeof(File))
-                {
-                    File childFile = (File)child;
-                    TreeGridItem fileItem = new TreeGridItem();
-                    fileItem.Tag = childFile.ID;
-                    fileItem.Values = new string[] { childFile.Title, childFile.IsPlaintext.ToString() };
-                    lastItem.Children.Add(fileItem);
-                }
-
-                if(child.GetType()==typeof(Directory))
-                {
-                    Directory childDir = (Directory)child;
-
-                    TreeGridItem dirItem = new TreeGridItem();
-                    dirItem.Tag = childDir.ID;
-                    dirItem.Values = new string[] { childDir.Title };
-                    lastItem.Children.Add(dirItem);
-
-                    FilesystemTraverse((Directory)child, dirItem);
-                }
-            }
-        }
-
-        private bool IsTreeGridItemFile(TreeGridItem item)
-        {
-            if(fs.GetFilesystemObjectByID((uint)item.Tag).GetType() == typeof(File))
-            {
-                return true;
-            } else
-            {
-                return false;
-            }
-        }
-
-        private bool IsTreeGridItemDirectory(TreeGridItem item)
-        {
-            if (fs.GetFilesystemObjectByID((uint)item.Tag).GetType() == typeof(Directory))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
         }
     }
 }
