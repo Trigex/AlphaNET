@@ -59,23 +59,25 @@ namespace AlphaNET.Framework.Standard.IO
             {
                 return StatusCode.ObjectNotFound;
             }
-            // Remove from Owner's object list
-            obj.Owner.RemoveChildFilesystemObjectByID(obj.ID);
-            // Remove from Filesystem object list
-            FilesystemObjects.Remove(GetFilesystemObjectByID(obj.ID));
-            // If it's a directory, delete all it's children as well
-            if(obj.GetType() == typeof(Directory))
+
+            // If it's a directory, delete all it's children
+            if (obj.GetType() == typeof(Directory))
             {
                 // Cast to Directory
                 var dirObj = (Directory)obj;
 
                 // Loop for all children
-                foreach(var subObj in dirObj.Children)
+                foreach (var subObj in dirObj.Children.ToList())
                 {
                     // Recurrsion!!! This'll probably work, I hope
                     DeleteFilesystemObject(subObj);
                 }
             }
+
+            // Remove from Owner's object list
+            obj.Owner.RemoveChildFilesystemObjectByID(obj.ID);
+            // Remove from Filesystem object list
+            FilesystemObjects.Remove(GetFilesystemObjectByID(obj.ID));
 
             return StatusCode.ObjectDeleted;
         }
@@ -187,6 +189,16 @@ namespace AlphaNET.Framework.Standard.IO
             Console.WriteLine(returnPath);
 
             return returnPath;
+        }
+
+        public Directory[] GetAllDirectories()
+        {
+            return FilesystemObjects.OfType<Directory>().ToArray();
+        }
+
+        public File[] GetAllFiles()
+        {
+            return FilesystemObjects.OfType<File>().ToArray();
         }
     }
 }
