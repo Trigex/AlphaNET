@@ -1,10 +1,6 @@
-﻿using System;
-using System.Diagnostics;
-using System.Text;
-using AlphaNET.Framework.Client;
+﻿using AlphaNET.Framework.Client;
 using AlphaNET.Framework.IO;
-using AlphaNET.Framework.JS;
-using Jint;
+using System.Text;
 
 namespace AlphaNET.Client.Console
 {
@@ -14,7 +10,16 @@ namespace AlphaNET.Client.Console
         static void Main(string[] args)
         {
             // Create filesystem
-            Filesystem fs = BootstrapFilesystem();
+            Filesystem fs;
+            if (args.Length > 0)
+            {
+                fs = BinaryManager.CreateFilesystemFromBinary(BinaryManager.ReadBinaryFromFile(args[0]));
+            }
+            else
+            {
+                fs = BootstrapFilesystem();
+            }
+
             // Create computer
             Computer computer = new Computer(fs);
             computer.Start();

@@ -1,5 +1,5 @@
-﻿using AlphaNET.Framework.Client;
-using AlphaNET.Framework.IO;
+﻿using AlphaNET.Framework.IO;
+using AlphaNET.Framework.Net;
 using AlphaNET.Framework.Proxies;
 using Jint;
 using Jint.Runtime.Interop;
@@ -28,17 +28,19 @@ namespace AlphaNET.Framework.JS
         private Client.Console _console;
         public TypescriptCompilerProxy CompilerProxy;
         private TypescriptCompiler _compiler;
+        private SocketManager _socketManager;
 
         /// <summary>
         /// Instantiate an <c>JSInterpreter</c>
         /// </summary>
         /// <param name="filesystemProxy"></param>
         /// <param name="console"></param>
-        public JSInterpreter(Filesystem fs, Client.Console console)
+        public JSInterpreter(Filesystem fs, Client.Console console, SocketManager socketManager)
         {
             _engine = new Engine();
             _console = console;
             _filesystemProxy = new FilesystemProxy(fs);
+            _socketManager = socketManager;
 
             // Compiler should use a seperate engine, as not to muck up this classes' engine's global scope
             _compiler = new TypescriptCompiler(new Engine());
@@ -70,6 +72,10 @@ namespace AlphaNET.Framework.JS
             _engine.SetValue("UTF_8", Encoding.UTF8);
             // TypescriptCompiler
             _engine.SetValue("TypescriptCompiler", CompilerProxy);
+            // NET
+            _engine.SetValue("SocketManager", _socketManager);
+            _engine.SetValue("Socket", TypeReference.CreateTypeReference(_engine, typeof(Socket)));
+            _engine.SetValue("Address", TypeReference.CreateTypeReference(_engine, typeof(Address)));
 
             // Create global object, and add kernel functions to global scope
             _engine.Execute("var Global = {};").Execute(kernelScript);
@@ -83,12 +89,15 @@ namespace AlphaNET.Framework.JS
         public void ExecuteScript(string script, bool isTypescript)
         {
             if (isTypescript)
+            {
                 script = _compiler.Compile(script);
+            }
 
             try
             {
                 _engine.Execute(script);
-            } catch(Exception e)
+            }
+            catch (Exception e)
             {
                 _console.WriteLine(string.Format("There was a JSInterpreter error!: {0}", e.ToString()));
             }

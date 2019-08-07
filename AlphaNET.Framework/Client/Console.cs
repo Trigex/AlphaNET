@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace AlphaNET.Framework.Client
+﻿namespace AlphaNET.Framework.Client
 {
     public class Console
     {
@@ -34,7 +30,7 @@ namespace AlphaNET.Framework.Client
         {
             return System.Console.Read();
         }
-        
+
         public string ReadLine()
         {
             return System.Console.ReadLine();

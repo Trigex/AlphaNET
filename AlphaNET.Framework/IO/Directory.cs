@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace AlphaNET.Framework.IO
 {
@@ -33,7 +31,9 @@ namespace AlphaNET.Framework.IO
         public FilesystemObject GetChildFilesystemObjectByID(uint id)
         {
             if (Children.Count < 1)
+            {
                 return null;
+            }
 
             return Children.Where(obj => obj.ID == id).ToArray()[0];
         }
@@ -46,7 +46,9 @@ namespace AlphaNET.Framework.IO
         public FilesystemObject GetChildFilesystemObjectByTitle(string title)
         {
             if (Children.Count < 1)
+            {
                 return null;
+            }
 
             var objects = Children.Where(obj => obj.Title == title).ToArray();
             if (objects == null || objects.Length == 0)
@@ -65,10 +67,11 @@ namespace AlphaNET.Framework.IO
         public StatusCode RemoveChildFilesystemObjectByID(uint id)
         {
             // attempt to remove the object of the given ID
-            if(Children.Remove(GetChildFilesystemObjectByID(id)))
+            if (Children.Remove(GetChildFilesystemObjectByID(id)))
             {
                 return StatusCode.ObjectDeleted;
-            } else
+            }
+            else
             {
                 return StatusCode.ObjectNotDeleted;
             }

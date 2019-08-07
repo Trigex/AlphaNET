@@ -1,8 +1,7 @@
 ﻿using AlphaNET.Framework.IO;
 using AlphaNET.Framework.JS;
-using AlphaNET.Framework.Proxies;
+using AlphaNET.Framework.Net;
 using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace AlphaNET.Framework.Client
@@ -12,12 +11,29 @@ namespace AlphaNET.Framework.Client
         private Filesystem _filesystem;
         private JSInterpreter _interpreter;
         private Console _console;
+        private ServerClient _serverClient;
+        private SocketManager _socketManager;
 
         public Computer(Filesystem filesystem)
         {
             _filesystem = filesystem;
             _console = new Console();
-            _interpreter = new JSInterpreter(_filesystem, _console);
+            _serverClient = new ServerClient();
+
+            _console.WriteLine("Attempting server connection...");
+            try
+            {
+                _serverClient.Start();
+            }
+            catch (Exception e)
+            {
+                _console.WriteLine(e.ToString());
+            }
+            // establish server connection
+
+            _socketManager = new SocketManager(_serverClient);
+
+            _interpreter = new JSInterpreter(_filesystem, _console, _socketManager);
             _console.WriteLine("Compiling kernel...");
             _interpreter.InitAPI(_interpreter.CompilerProxy.CompileTypescript(new string[] { IOUtils.ReadManifestData<Computer>("kernel.ts"), IOUtils.ReadManifestData<Computer>("minimist.js") }));
             InstallOS();

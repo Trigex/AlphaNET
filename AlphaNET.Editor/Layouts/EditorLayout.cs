@@ -1,9 +1,6 @@
 ﻿using AlphaNET.Editor.Controls;
 using Eto.Forms;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
 
 namespace AlphaNET.Editor.Layouts
 {

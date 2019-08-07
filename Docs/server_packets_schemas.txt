@@ -3,15 +3,56 @@ All clients automatically connect to a central server, which relays out informat
 
 On the opening of a tcp connection, a client's real IP is compared to a database, if they're a new IP, they are added to the database, and are then assigned a new virtual IP, linked to their real IP, which is used for all of the AlphaNET networking functionallity.
 
-Client (server) socket timeline:
-Client open()s socket, binded to IP and port
-Client listens for connections
-Client accepts connections and transfers information
+Example Virtual Socket Timeline:
+Server socket is binded to a client local address
+Server socket listens for connections
+Server socket accepts connections
+Client socket is created and binded to local address, sets target remote address
+Client socket requests the socket status of remote address (RequestSocketStatus)
+Real server requests SocketStatus packet of the remote address client
+Remote address client sends SocketStatus packet to real server
+Real server sends SocketStatus packet to client
+Client socket sends RequestSocketConnection packet to remote address socket (if SocketStatus was open and listening)
+Real server sends RequestSocketConnection to remote address client
+Remote address client sends SocketConnectStatus to real server
+Real server adds the two sockets to the ConnectedSockets list if SocketConnectStatus was true
+Real server sends SocketConnectStatus to requesting client
+Client socket is connected to server socket
+Client socket sends arbitrary data packet to real server
+Real server sends arbitrary data packet to server socket
+Server socket sends arbitrary data packet to real server
+Real server sends arbitrary data packet to client socket
+Server socket closes client socket connection
+Server socket sends to real server SocketConnectionClosed
+Real server sends client socket SocketConnectionClosed
+Real server removes the sockets from ConnectedSockets list
+~fin
 
+Packet Type:
+1 = RequestSocketStatus
+    <Address Object ( Address.ToBytes() ), Remote address to get status of>
+    IpAddressLength: Max length is 32 characters, hold count in a byte
+    IpAddress: UTF-8 Encoded string of length IpAddressLength
+    Port: ushort, port socket is listening on
 
-Data packet type codes: (All 1 byte)
-1 = Socket information alert:
-    Socket open state: (Open, closed)
-    Socket port: (Number)
-    Socket IP: (Number)
-    
+2 = SocketStatus
+    Open: Bool byte (1 or 0, true, false)
+    Listening: Bool byte (1 or 0, true, false)
+
+3 = RequestSocketConnection
+    <Address Object ( Address.ToBytes(), Remote address to connect to )>
+    IpAddressLength: Max length is 32 characters, hold count in a byte
+    IpAddress: UTF-8 Encoded string of length IpAddressLength
+    Port: ushort, port socket is listening on
+
+    <Address Object ( Address.ToBytes(), Address requesting to connect )>
+    IpAddressLength: Max length is 32 characters, hold count in a byte
+    IpAddress: UTF-8 Encoded string of length IpAddressLength
+    Port: ushort, port socket is listening on
+
+4 = SocketConnectionStatus
+    Connected: Bool byte (1 or 0, true = Connected, false = Rejected)
+
+5 = ArbitraryData
+    DataLength: ushort (Max of 65535 bytes sent in a packet)
+    Data: next (1-65535) bytes

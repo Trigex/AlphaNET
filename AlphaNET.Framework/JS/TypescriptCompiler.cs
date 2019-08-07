@@ -1,11 +1,6 @@
 ﻿using AlphaNET.Framework.IO;
 using Jint;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Text;
-using System.Reflection;
 
 namespace AlphaNET.Framework.JS
 {
@@ -26,7 +21,8 @@ namespace AlphaNET.Framework.JS
                 Console.WriteLine("Installing compiler...");
                 _engine.Execute(services);
                 _engine.Execute(bootstrap);
-            } catch(Exception e)
+            }
+            catch (Exception e)
             {
                 Console.WriteLine(String.Format("Error while initalizing compiler: {0}", e.ToString()));
             }
@@ -39,7 +35,8 @@ namespace AlphaNET.Framework.JS
             {
                 var transpiledSource = _engine.Invoke("tsTranspile", script).AsObject();
                 outputSource = _engine.Invoke("getTranspileResultCode", transpiledSource).AsString();
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 Console.WriteLine(String.Format("Error while compiling TypeScript: {0}", e.ToString()));
             }

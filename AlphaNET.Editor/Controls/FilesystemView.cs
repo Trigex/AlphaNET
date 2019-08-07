@@ -2,10 +2,6 @@
 using AlphaNET.Framework.IO;
 using Eto.Drawing;
 using Eto.Forms;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
 
 namespace AlphaNET.Editor.Controls
 {

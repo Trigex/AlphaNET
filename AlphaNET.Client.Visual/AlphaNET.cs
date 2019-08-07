@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Text;
-using AlphaNET.Framework.IO;
 
 namespace AlphaNET.Client.Visual
 {
@@ -12,7 +10,9 @@ namespace AlphaNET.Client.Visual
         static void Main()
         {
             using (var game = new Visual())
+            {
                 game.Run();
+            }
         }
     }
 }

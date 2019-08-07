@@ -1,14 +1,11 @@
 ﻿using AlphaNET.Framework.IO;
 using Eto.Forms;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AlphaNET.Editor.GridItems
 {
     public class FilesystemObjectGridItem : TreeGridItem
     {
-        public FilesystemObject FilesystemObject { get; set; } 
+        public FilesystemObject FilesystemObject { get; set; }
         public uint ID { get; set; }
         public string Title { get; set; }
         public int Size { get; set; }
@@ -18,7 +15,7 @@ namespace AlphaNET.Editor.GridItems
             {
                 FilesystemObject = fsObj;
             }
-                
+
             ID = id;
             Title = title;
             Tag = id;

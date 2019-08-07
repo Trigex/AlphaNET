@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace AlphaNET.Framework.IO
+﻿namespace AlphaNET.Framework.IO
 {
     /// <summary>
     /// <c>File</c> is a class representing a <c>Filesystem</c> file; it is capable of holding arbitrary byte array contents

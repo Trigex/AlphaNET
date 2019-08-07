@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace AlphaNET.Framework.IO
+﻿namespace AlphaNET.Framework.IO
 {
     /// <summary>
     /// <c>FilesystemObject</c> is an abstract class representing a given Filesystem entity (<c>File</c> and <c>Directory</c>)
@@ -42,7 +38,7 @@ namespace AlphaNET.Framework.IO
         /// <returns>A <c>StatusCode</c> representing the success of this renaming operation</returns>
         public StatusCode Rename(string title)
         {
-            if(string.IsNullOrEmpty(title) || string.IsNullOrWhiteSpace(title))
+            if (string.IsNullOrEmpty(title) || string.IsNullOrWhiteSpace(title))
             {
                 return StatusCode.ObjectNotRenamed;
             }

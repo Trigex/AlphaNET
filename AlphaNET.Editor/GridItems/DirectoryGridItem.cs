@@ -1,7 +1,4 @@
 ﻿using AlphaNET.Framework.IO;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AlphaNET.Editor.GridItems
 {
@@ -9,7 +6,7 @@ namespace AlphaNET.Editor.GridItems
     {
         public DirectoryGridItem(uint id, string title, Directory fsObj = null) : base(id, title, fsObj)
         {
-            if(fsObj != null)
+            if (fsObj != null)
             {
                 Size = GetDirectorySize(fsObj, 0);
             }

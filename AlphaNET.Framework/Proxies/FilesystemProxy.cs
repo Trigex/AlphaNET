@@ -1,7 +1,4 @@
 ﻿using AlphaNET.Framework.IO;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AlphaNET.Framework.Proxies
 {
@@ -19,13 +16,18 @@ namespace AlphaNET.Framework.Proxies
         public File GetFileByTitle(string title)
         {
             var files = _filesystem.GetFilesystemObjectsByTitle(title);
-            if(files != null && files.Length > 0)
+            if (files != null && files.Length > 0)
             {
                 if (files[0].GetType() == typeof(File))
+                {
                     return (File)files[0];
+                }
                 else
+                {
                     return null;
-            } else
+                }
+            }
+            else
             {
                 return null;
             }
@@ -37,9 +39,13 @@ namespace AlphaNET.Framework.Proxies
             if (dirs != null && dirs.Length > 0)
             {
                 if (dirs[0].GetType() == typeof(Directory))
+                {
                     return (Directory)dirs[0];
+                }
                 else
+                {
                     return null;
+                }
             }
             else
             {

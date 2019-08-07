@@ -1,5 +1,4 @@
 ﻿using AlphaNET.Framework.Exceptions;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -38,13 +37,17 @@ namespace AlphaNET.Framework.IO
             var files = new List<File>();
 
             // Get files and directories
-            foreach(var fsObj in filesystem.FilesystemObjects)
+            foreach (var fsObj in filesystem.FilesystemObjects)
             {
                 if (fsObj.GetType() == typeof(Directory))
+                {
                     directories.Add((Directory)fsObj);
+                }
 
                 if (fsObj.GetType() == typeof(File))
+                {
                     files.Add((File)fsObj);
+                }
             }
 
             writer.Write(FS_HEADER_START); // FS Header start flag
@@ -52,7 +55,7 @@ namespace AlphaNET.Framework.IO
             writer.Write(FS_HEADER_END); // FS Header end flag
 
             writer.Write(DIR_LIST_START); // Dir list start flag
-            foreach(var dir in directories)
+            foreach (var dir in directories)
             {
                 writer.Write(DIR_START); // dir start flag
                 WriteGenericObjectMeta(writer, dir);
@@ -61,7 +64,7 @@ namespace AlphaNET.Framework.IO
             writer.Write(DIR_LIST_END); // Dir list end flag
 
             writer.Write(FILE_LIST_START);
-            foreach(var file in files)
+            foreach (var file in files)
             {
                 writer.Write(FILE_START); // file start flag
                 WriteGenericObjectMeta(writer, file);
@@ -87,7 +90,7 @@ namespace AlphaNET.Framework.IO
             Filesystem fs = new Filesystem();
 
             var headerStart = reader.ReadByte();
-            if(headerStart != FS_HEADER_START) // FS File Header Start
+            if (headerStart != FS_HEADER_START) // FS File Header Start
             {
                 throw new InvalidFilesystemHeaderException("Start", headerStart);
             }
@@ -220,9 +223,13 @@ namespace AlphaNET.Framework.IO
                 }
 
                 if (reader.ReadByte() == DIR_LIST_END)
+                {
                     listEnd = true;
+                }
                 else
+                {
                     reader.BaseStream.Position -= 1; // go back a byte
+                }
             }
         }
 
@@ -242,7 +249,9 @@ namespace AlphaNET.Framework.IO
                 var plaintext = false;
 
                 if (filePlaintext == 1)
+                {
                     plaintext = true;
+                }
 
                 var fileContentsLength = reader.ReadUInt32();
                 var fileContents = reader.ReadBytes((int)fileContentsLength);
@@ -258,9 +267,13 @@ namespace AlphaNET.Framework.IO
                 filesystem.AddFilesystemObject(newFile, fileOwner);
 
                 if (reader.ReadByte() == FILE_LIST_END)
+                {
                     listEnd = true;
+                }
                 else
+                {
                     reader.BaseStream.Position -= 1;
+                }
             }
         }
 

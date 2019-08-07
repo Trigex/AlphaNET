@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using AlphaNET.Framework.Net.Packets;
+using System.Diagnostics;
 using WatsonTcp;
 
 namespace AlphaNET.Framework.Net
 {
-    public class AlphaServerClient
+    public class ServerClient
     {
         const string IP = "127.0.0.1";
         const int PORT = 1337;
 
         private WatsonTcpClient _client;
 
-        public AlphaServerClient()
+        public ServerClient()
         {
             _client = new WatsonTcpClient(IP, PORT);
             _client.ServerConnected = ServerConnected;
@@ -20,25 +19,32 @@ namespace AlphaNET.Framework.Net
             _client.MessageReceived = MessageRecieved;
         }
 
-        public void Send()
+        public void Start()
         {
+            _client.Start();
+        }
 
+        public void Send(Packet packet)
+        {
+            Debug.WriteLine("Sent: " + packet.GetType());
+            _client.Send(packet.ToBytes());
         }
 
         private bool ServerConnected()
         {
-            Console.WriteLine("Connected to server");
+            Debug.WriteLine("Connected to server");
             return true;
         }
 
         private bool ServerDisconnected()
         {
-            Console.WriteLine("Server disconnected");
+            Debug.WriteLine("Server disconnected");
             return true;
         }
 
         private bool MessageRecieved(byte[] data)
         {
+            Debug.WriteLine("Recieved: " + data.ToString());
             return true;
         }
     }
