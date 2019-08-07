@@ -6,15 +6,12 @@ namespace AlphaNET.Framework.Net
 {
     public class TcpClient
     {
-        private const string IP = "127.0.0.1";
-        private const int PORT = 1337;
-
         private WatsonTcpClient _client;
         public VirtualIP virtualIp { get; private set; }
 
-        public TcpClient()
+        public TcpClient(string ip, int port)
         {
-            _client = new WatsonTcpClient(IP, PORT);
+            _client = new WatsonTcpClient(ip, port);
             _client.ServerConnected = ServerConnected;
             _client.ServerDisconnected = ServerDisconnected;
             _client.MessageReceived = MessageRecieved;

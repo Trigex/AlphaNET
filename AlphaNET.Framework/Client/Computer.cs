@@ -14,24 +14,26 @@ namespace AlphaNET.Framework.Client
         private TcpClient _TcpClient;
         private SocketManager _socketManager;
 
-        public Computer(Filesystem filesystem)
+        public Computer(Filesystem filesystem, bool offlineMode, string ip = null, int port = 0)
         {
             _filesystem = filesystem;
             _console = new Console();
-            _TcpClient = new TcpClient();
-
-            _console.WriteLine("Attempting server connection...");
-            try
+            if(!offlineMode && ip != null && port != 0) // Not in offline mode
             {
-                _TcpClient.Start();
-            }
-            catch (Exception e)
-            {
-                _console.WriteLine("Unable to establish connection with server; To retry a connection, issue \"server reconnect\" to the shell");
-            }
-            // establish server connection
+                _TcpClient = new TcpClient(ip, port);
 
-            _socketManager = new SocketManager(_TcpClient);
+                _console.WriteLine("Attempting server connection...");
+                try
+                {
+                    _TcpClient.Start();
+                    _socketManager = new SocketManager(_TcpClient);
+                }
+                catch (Exception e)
+                {
+                    _console.WriteLine("Error: " + e.Message + "\n\nUnable to establish connection with server; To retry a connection, issue \"server reconnect\" to the shell...");
+                }
+            }
+                
             _interpreter = new JSInterpreter(_filesystem, _console, _socketManager);
             _console.WriteLine("Compiling kernel...");
             _interpreter.InitAPI(_interpreter.CompilerProxy.CompileTypescript(new string[] { IOUtils.ReadManifestData<Computer>("kernel.ts"), IOUtils.ReadManifestData<Computer>("minimist.js") }));
