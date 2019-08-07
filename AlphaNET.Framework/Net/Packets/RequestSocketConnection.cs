@@ -20,7 +20,7 @@ namespace AlphaNET.Framework.Net.Packets
             byte[] bytes;
             var stream = new MemoryStream();
             var writer = new BinaryWriter(stream);
-            writer.Write(PacketTypeCodes.REQUEST_SOCKET_CONNECTION); // RequestSocketConnection Packet Code
+            writer.Write(PacketType.REQUEST_SOCKET_CONNECTION); // RequestSocketConnection Packet Code
             writer.Write(remoteAddress.ToBytes()); // Remote Address
             writer.Write(requestingAddress.ToBytes()); // Requesting Address
             bytes = stream.ToArray();
@@ -34,7 +34,7 @@ namespace AlphaNET.Framework.Net.Packets
             var stream = new MemoryStream(bytes);
             var reader = new BinaryReader(stream);
             byte packetCode = reader.ReadByte();
-            if (packetCode != PacketTypeCodes.REQUEST_SOCKET_CONNECTION)
+            if (packetCode != PacketType.REQUEST_SOCKET_CONNECTION)
             {
                 return null;
             }

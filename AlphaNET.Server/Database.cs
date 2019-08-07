@@ -1,9 +1,28 @@
-﻿namespace AlphaNET.Server
+﻿using Microsoft.EntityFrameworkCore;
+using NLog;
+using System.ComponentModel.DataAnnotations;
+
+namespace AlphaNET.Server
 {
-    public class Database
+    class UserContext : DbContext
     {
-        public Database(string connString)
+        public DbSet<User> Users { get; set; }
+        private Logger _logger;
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            _logger = LogManager.GetCurrentClassLogger();
+
+            optionsBuilder.UseSqlServer(
+                @"Server=(localdb)\mssqllocaldb;Database=AlphaNET;Integrated Security=True");
         }
+    }
+
+    public class User
+    {
+        [Key]
+        public string RealIp { get; set; }
+        [Required]
+        public string VirtualIp { get; set; }
     }
 }

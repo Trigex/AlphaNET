@@ -4,14 +4,15 @@ using WatsonTcp;
 
 namespace AlphaNET.Framework.Net
 {
-    public class ServerClient
+    public class TcpClient
     {
-        const string IP = "127.0.0.1";
-        const int PORT = 1337;
+        private const string IP = "127.0.0.1";
+        private const int PORT = 1337;
 
         private WatsonTcpClient _client;
+        public VirtualIP virtualIp { get; private set; }
 
-        public ServerClient()
+        public TcpClient()
         {
             _client = new WatsonTcpClient(IP, PORT);
             _client.ServerConnected = ServerConnected;
@@ -45,6 +46,16 @@ namespace AlphaNET.Framework.Net
         private bool MessageRecieved(byte[] data)
         {
             Debug.WriteLine("Recieved: " + data.ToString());
+            switch(data[0])
+            {
+                case PacketType.VIRTUAL_IP: // We recieved our Virtual IP from the server, set it
+                    virtualIp = VirtualIP.FromBytes(data);
+                    Debug.WriteLine(string.Format("VirtualIP: {0}", virtualIp.ip));
+                    break;
+                default:
+                    Debug.WriteLine(string.Format("Unknown or incorrect context PacketType: {0}", data[0]));
+                    break;
+            }
             return true;
         }
     }

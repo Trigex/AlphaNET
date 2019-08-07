@@ -130,7 +130,6 @@ namespace AlphaNET.Framework.IO
             foreach (string resource in resources)
             {
                 FilesystemObject child = null;
-                Console.WriteLine(resource);
                 child = dir.GetChildFilesystemObjectByTitle(resource);
 
                 if (child != null)
@@ -189,8 +188,6 @@ namespace AlphaNET.Framework.IO
                     returnPath += resource + "/";
                 }
             }
-
-            Console.WriteLine(returnPath);
 
             return returnPath;
         }

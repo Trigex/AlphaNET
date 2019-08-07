@@ -1,23 +1,35 @@
-﻿namespace AlphaNET.Server
+﻿using NLog;
+
+namespace AlphaNET.Server
 {
     public class AlphaServer
     {
-        public const string CONNECTION_STRING = "mongodb://localhost:27017";
-        public const string DB = "alphanet";
         public const string IP = "127.0.0.1";
         public const int PORT = 1337;
-        public static Database db;
-        public static TcpServer server;
+        public static TcpServer Server;
 
         static void Main(string[] args)
         {
-            db = new Database(CONNECTION_STRING);
-            server = new TcpServer(IP, PORT);
+            bool running = false;
 
-            while (true)
+            LogManager.LoadConfiguration("nlog.config");
+            var log = LogManager.GetCurrentClassLogger();
+            log.Info("Server is starting...");
+            Server = new TcpServer();
+            if (Server.Init(IP, PORT) != true)
             {
-                // ah
+                log.Fatal("Tcp Server unsuccessfully initialized, exiting...");
+                return;
+            }  
+            else
+                running = true;
+
+            log.Info("Entering main loop...");
+            while (running)
+            {
             }
+
+            log.Info("The server is shutting down! Broke out of main loop");
         }
     }
 }

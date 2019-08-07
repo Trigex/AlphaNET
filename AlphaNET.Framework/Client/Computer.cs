@@ -11,28 +11,27 @@ namespace AlphaNET.Framework.Client
         private Filesystem _filesystem;
         private JSInterpreter _interpreter;
         private Console _console;
-        private ServerClient _serverClient;
+        private TcpClient _TcpClient;
         private SocketManager _socketManager;
 
         public Computer(Filesystem filesystem)
         {
             _filesystem = filesystem;
             _console = new Console();
-            _serverClient = new ServerClient();
+            _TcpClient = new TcpClient();
 
             _console.WriteLine("Attempting server connection...");
             try
             {
-                _serverClient.Start();
+                _TcpClient.Start();
             }
             catch (Exception e)
             {
-                _console.WriteLine(e.ToString());
+                _console.WriteLine("Unable to establish connection with server; To retry a connection, issue \"server reconnect\" to the shell");
             }
             // establish server connection
 
-            _socketManager = new SocketManager(_serverClient);
-
+            _socketManager = new SocketManager(_TcpClient);
             _interpreter = new JSInterpreter(_filesystem, _console, _socketManager);
             _console.WriteLine("Compiling kernel...");
             _interpreter.InitAPI(_interpreter.CompilerProxy.CompileTypescript(new string[] { IOUtils.ReadManifestData<Computer>("kernel.ts"), IOUtils.ReadManifestData<Computer>("minimist.js") }));

@@ -17,7 +17,7 @@ namespace AlphaNET.Framework.Net.Packets
             byte[] bytes;
             var stream = new MemoryStream();
             var writer = new BinaryWriter(stream);
-            writer.Write(PacketTypeCodes.REQUEST_SOCKET_STATUS); // RequestSocketStatus Packet Code
+            writer.Write(PacketType.REQUEST_SOCKET_STATUS); // RequestSocketStatus Packet Code
             writer.Write(remoteAddress.ToBytes()); // IpAddressLength(byte) IpAddress(UTF8 bytes) Port(uint16)
             bytes = stream.ToArray();
             writer.Close();
@@ -31,7 +31,7 @@ namespace AlphaNET.Framework.Net.Packets
             var stream = new MemoryStream(bytes);
             var reader = new BinaryReader(stream);
             byte packetType = reader.ReadByte(); // Packet Type
-            if (packetType != PacketTypeCodes.REQUEST_SOCKET_STATUS)
+            if (packetType != PacketType.REQUEST_SOCKET_STATUS)
             {
                 return null;
             }

@@ -5,34 +5,11 @@ namespace AlphaNET.Framework.Net
 {
     public class SocketManager
     {
-        public List<Socket> Sockets { get; private set; }
-        private ServerClient serverClient;
+        private TcpClient _tcpClient;
 
-        public SocketManager(ServerClient serverClient)
+        public SocketManager(TcpClient TcpClient)
         {
-            this.serverClient = serverClient;
-        }
-
-        public NetStatusCode AddSocket(Socket socket)
-        {
-            if (Sockets.Count != 0)
-            {
-                foreach (Socket addedSocket in Sockets)
-                {
-                    if (addedSocket.Address.ToString() == socket.Address.ToString())
-                    {
-                        return NetStatusCode.AddressInUse;
-                    }
-                }
-
-                Sockets.Add(socket);
-                return NetStatusCode.AddedSocket;
-            }
-            else
-            {
-                Sockets.Add(socket);
-                return NetStatusCode.AddedSocket;
-            }
+            _tcpClient = TcpClient;
         }
 
         public void ConnectSocketToEndpoint(Socket socket)
@@ -40,7 +17,7 @@ namespace AlphaNET.Framework.Net
             Address endpoint = socket.EndpointAddress;
             Address client = socket.Address;
             // Send RequestSocketStatus to server
-            serverClient.Send(new RequestSocketConnection(endpoint, client));
+            _tcpClient.Send(new RequestSocketConnection(endpoint, client));
         }
     }
 }

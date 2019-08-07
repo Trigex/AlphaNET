@@ -17,7 +17,7 @@ namespace AlphaNET.Framework.Net.Packets
             byte[] bytes;
             var stream = new MemoryStream();
             var writer = new BinaryWriter(stream);
-            writer.Write(PacketTypeCodes.SOCKET_CONNECTION_STATUS); // SocketStatus Packet Code
+            writer.Write(PacketType.SOCKET_CONNECTION_STATUS); // SocketStatus Packet Code
             writer.Write(Connected); // Connected
             bytes = stream.ToArray();
             writer.Close();
@@ -31,7 +31,7 @@ namespace AlphaNET.Framework.Net.Packets
             var stream = new MemoryStream(bytes);
             var reader = new BinaryReader(stream);
             byte packetType = reader.ReadByte(); // Packet Type
-            if (packetType != PacketTypeCodes.SOCKET_CONNECTION_STATUS)
+            if (packetType != PacketType.SOCKET_CONNECTION_STATUS)
             {
                 return null;
             }

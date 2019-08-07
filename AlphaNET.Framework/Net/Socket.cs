@@ -24,7 +24,6 @@
         /// <summary>
         /// The <c>ProtocolType</c> this socket is using
         /// </summary>
-        public ProtocolType ProtocolType { get; private set; }
         public SocketManager socketManager { get; private set; }
 
         public Socket(Address localAddress)
