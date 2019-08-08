@@ -11,14 +11,16 @@ namespace AlphaNET.Framework.Net
     public class TcpClient
     {
         private WatsonTcpClient _client;
+        private SocketManager _socketManager;
         public VirtualIP virtualIp { get; private set; }
 
-        public TcpClient(string ip, int port)
+        public TcpClient(string ip, int port, SocketManager socketManager)
         {
             _client = new WatsonTcpClient(ip, port);
             _client.ServerConnected = ServerConnected;
             _client.ServerDisconnected = ServerDisconnected;
             _client.MessageReceived = MessageRecieved;
+            _socketManager = socketManager;
         }
 
         public void Start()
@@ -39,18 +41,18 @@ namespace AlphaNET.Framework.Net
             dataList.Insert(0, packet.Type); // set first byte to packet type
             packetData = dataList.ToArray(); // set final buffer to list array contents
             _client.Send(packetData); // send
-            Debug.WriteLine("Sent: " + packet.GetType());
+            Console.WriteLine("Sent: " + packet.GetType());
         }
 
         private bool ServerConnected()
         {
-            Debug.WriteLine("Connected to server");
+            Console.WriteLine("Connected to server");
             return true;
         }
 
         private bool ServerDisconnected()
         {
-            Debug.WriteLine("Server disconnected");
+            Console.WriteLine("Server disconnected");
             return true;
         }
 
@@ -61,23 +63,30 @@ namespace AlphaNET.Framework.Net
             dataList.RemoveAt(0);
             var stream = new MemoryStream(dataList.ToArray());
             var formatter = new BinaryFormatter();
-            Debug.WriteLine("Recieved: " + data.ToString());
+            Console.WriteLine("Recieved: " + data.ToString());
             try
             {
                 switch (data[0])
                 {
                     case PacketType.VIRTUAL_IP: // We recieved our Virtual IP from the server, set it
                         virtualIp = (VirtualIP)formatter.Deserialize(stream);
-                        Debug.WriteLine(string.Format("VirtualIP: {0}", virtualIp.ip));
+                        Console.WriteLine(string.Format("VirtualIP: {0}", virtualIp.ip));
+                        break;
+                    case PacketType.REQUEST_SOCKET_STATUS: // Recieved RequestSocketStatus from the server. Send a response!
+                        var reqSocketStatus = (RequestSocketStatus)formatter.Deserialize(stream);
+                        // pass to SocketManager
+                        Console.WriteLine(string.Format("RequestSocketStatus: {0}", reqSocketStatus.requestedAddress.ToString()));
+                        var resSocketStatus = _socketManager.OnSocketStatusRequested(reqSocketStatus);
+                        Send(resSocketStatus);
                         break;
                     default:
-                        Debug.WriteLine(string.Format("Unknown or incorrect context PacketType: {0}", data[0]));
+                        Console.WriteLine(string.Format("Unknown or incorrect context PacketType: {0}", data[0]));
                         break;
                 }
             }
             catch (Exception e)
             {
-                Debug.WriteLine(e.ToString());
+                Console.WriteLine(e.ToString());
             }
             stream.Close();
             return true;

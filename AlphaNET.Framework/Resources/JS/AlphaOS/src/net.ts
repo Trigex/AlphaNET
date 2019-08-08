@@ -9,6 +9,8 @@ function net() {
                 SocketManager.ConnectSocketToEndpoint(socket);
                 break;
             case "server":
+                let socket = new Socket(new Address(SocketManager._tcpClient.virtualIp.ip, 8020));
+                SocketManager.ListenOnSocket(socket);
                 break;
         }
     } else {
