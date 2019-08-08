@@ -50,8 +50,8 @@ declare interface FilesystemObject {
 }
 
 declare interface List {
-    Count: number,
-        Add(entry: any): void;
+    Count: number;
+    Add(entry: any): void;
     Remove(entry: any): void;
     ToArray(): Array < any > ;
 }
@@ -81,11 +81,31 @@ declare interface TypescriptCompiler {
     CompileTypescript(scripts: Array<string>): string;
 }
 
+declare interface Address {
+    Port: number;
+    IpAddress: string;
+    ToString(): string;
+    constructor(ipAddress: string, port: number): Address;
+}
+
+declare interface Socket {
+    Address: Address;
+    EndpointAddress: Address;
+    Connected: boolean;
+    Listening: boolean;
+    constructor(localAddress: Address): Socket;
+}
+
+declare interface SocketManager {
+    ConnectSocketToEndpoint(socket: Socket);
+}
+
 declare const Terminal: Terminal;
 declare const JSInterpreter: JSInterpreter;
 declare const Filesystem: Filesystem;
 declare const UTF_8: UTF_8;
 declare const TypescriptCompiler: TypescriptCompiler;
+declare const SocketManager: SocketManager;
 
 declare interface GenericObject {
     [key: string]: any

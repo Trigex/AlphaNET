@@ -71,6 +71,7 @@ namespace AlphaNET.Framework.Client
             var lsProgram = IOUtils.ReadManifestData<Computer>("ls.ts");
             var catProgram = IOUtils.ReadManifestData<Computer>("cat.ts");
             var cdProgram = IOUtils.ReadManifestData<Computer>("cd.ts");
+            var netProgram = IOUtils.ReadManifestData<Computer>("net.ts");
 
             var bin = (Directory)_filesystem.GetFilesystemObjectByAbsolutePath("/bin/");
             _filesystem.AddFilesystemObject(new File("kernel.js", bin, IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes(_interpreter.CompilerProxy.CompileTypescript(IOUtils.ReadManifestData<Computer>("kernel.ts")))), bin);
@@ -79,6 +80,7 @@ namespace AlphaNET.Framework.Client
             _filesystem.AddFilesystemObject(new File("ls.js", bin, IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes(_interpreter.CompilerProxy.CompileTypescript(lsProgram))), bin);
             _filesystem.AddFilesystemObject(new File("cat.js", bin, IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes(_interpreter.CompilerProxy.CompileTypescript(catProgram))), bin);
             _filesystem.AddFilesystemObject(new File("cd.js", bin, IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes(_interpreter.CompilerProxy.CompileTypescript(cdProgram))), bin);
+            _filesystem.AddFilesystemObject(new File("net.js", bin, IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes(_interpreter.CompilerProxy.CompileTypescript(netProgram))), bin);
 
             BinaryManager.WriteBinaryToFile("debug.fs", BinaryManager.CreateBinaryFromFilesystem(_filesystem));
             BinaryManager.ReloadFilesystemFromBinary(_filesystem, System.IO.File.ReadAllBytes("debug.fs"));

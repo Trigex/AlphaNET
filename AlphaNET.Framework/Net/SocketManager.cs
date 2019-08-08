@@ -1,8 +1,10 @@
-﻿namespace AlphaNET.Framework.Net
+﻿using AlphaNET.Framework.Net.Packets;
+
+namespace AlphaNET.Framework.Net
 {
     public class SocketManager
     {
-        private TcpClient _tcpClient;
+        public TcpClient _tcpClient; // temp public for testing
 
         public SocketManager(TcpClient TcpClient)
         {
@@ -14,7 +16,7 @@
             Address endpoint = socket.EndpointAddress;
             Address client = socket.Address;
             // Send RequestSocketStatus to server
-
+            _tcpClient.Send(new RequestSocketStatus(endpoint, client));
         }
     }
 }

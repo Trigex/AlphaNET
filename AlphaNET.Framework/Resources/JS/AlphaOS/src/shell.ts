@@ -1,7 +1,7 @@
 /// <reference path="kernel/kernel.d.ts" />
 
 // Globals
-const PROMPT = "> ";
+const PROMPT = ">";
 const VERSION = 1.0;
 
 var running = true;
@@ -14,9 +14,10 @@ function shell() {
 }
 
 function Start() {
-    while(running) {
+    while (running) {
+        let path = `${Filesystem.GetAbsolutePathByFilesystemObject(Global.CurrentPath)} ${PROMPT}`;
         // Set the CurrentPath every loop
-        Terminal.Write(PROMPT);
+        Terminal.Write(path);
         let input = Terminal.ReadLine();
         // check if the command is a built in util
         if(!BuiltInUtils(input))

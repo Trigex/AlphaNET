@@ -125,42 +125,57 @@ namespace AlphaNET.Server
             var stream = new MemoryStream(dataList.ToArray());
             var formatter = new BinaryFormatter();
 
-            switch (data[0]) // First byte should always be the PacketTypeCode
+            try
             {
-                case PacketType.REQUEST_SOCKET_STATUS: // Client is requesting packet SocketStatus of the given address
-                    var requestSocketStatus = (RequestSocketStatus)formatter.Deserialize(stream);
-                    _logger.Info(string.Format("RequestSocketStatus: For address {0}", requestSocketStatus.requestedAddress.ToString()));
-                    var remoteClient = GetUserInConnectedListByVirtual(requestSocketStatus.requestedAddress.IpAddress);
-                    // Check if the client of the remote address is connected to this server
-                    if (remoteClient != null)
-                    {
-                        // Add this request to ongoingrequests
-                        _ongoingRequests.Add(new OngoingRequest(requestSocketStatus.requestingAddress, GetUserInConnectedList(ipPort), requestSocketStatus.requestedAddress, remoteClient, PacketType.SOCKET_STATUS));
-                        // Ask the client of the address for packet SocketStatus
-                        Send(requestSocketStatus, remoteClient.RealIp);
-                    }
-                    else
-                    {
-                        // Client not connected
-                    }
-                    break;
-                case PacketType.REQUEST_SOCKET_STATUS_RESPONSE:
-                    var requestSocketStatusResp = (RequestSocketStatusResponse)formatter.Deserialize(stream);
-                    _logger.Info(string.Format("RequestSocketStatusResponse: To address {0}", requestSocketStatusResp.RequestingAddress.ToString()));
-                    if() // Check if there's actually an ongoingrequest
-                    break;
-                case PacketType.REQUEST_SOCKET_CONNECTION:
-                    var requestSocketConn = (RequestSocketConnection)formatter.Deserialize(stream);
-                    Debug.WriteLine(requestSocketConn);
-                    _logger.Info(string.Format("RequestSocketConnection: Remote: {0}, Requesting: {1}", requestSocketConn.remoteAddress.ToString(), requestSocketConn.requestingAddress.ToString()));
-                    break;
-                case PacketType.SOCKET_CONNECTION_STATUS:
-                    var socketConnStatus = (SocketConnectionStatus)formatter.Deserialize(stream);
-                    _logger.Info(string.Format("SocketConnectionStatus: Connected: {0}", socketConnStatus.Connected));
-                    break;
-                default:
-                    _logger.Warn(string.Format("Unknown or incorrect context PacketType: {0}", data[0]));
-                    break;
+                switch (data[0]) // First byte should always be the PacketTypeCode
+                {
+                    case PacketType.REQUEST_SOCKET_STATUS: // Client is requesting packet SocketStatus of the given address
+                        var requestSocketStatus = (RequestSocketStatus)formatter.Deserialize(stream);
+                        _logger.Info(string.Format("RequestSocketStatus: For address {0}", requestSocketStatus.requestedAddress.ToString()));
+                        var remoteClient = GetUserInConnectedListByVirtual(requestSocketStatus.requestedAddress.IpAddress);
+                        // Check if the client of the remote address is connected to this server
+                        if (remoteClient != null)
+                        {
+                            // Add this request to ongoingrequests
+                            _ongoingRequests.Add(new OngoingRequest(requestSocketStatus.requestingAddress, GetUserInConnectedList(ipPort), requestSocketStatus.requestedAddress, remoteClient, PacketType.SOCKET_STATUS));
+                            // Ask the client of the address for packet SocketStatus
+                            Send(requestSocketStatus, remoteClient.RealIp);
+                        }
+                        else
+                        {
+                            _logger.Info(string.Format("The requested address isn't connected..."));
+                            // Client not connected
+                        }
+                        break;
+                    case PacketType.REQUEST_SOCKET_STATUS_RESPONSE:
+                        var requestSocketStatusResp = (RequestSocketStatusResponse)formatter.Deserialize(stream);
+                        var ongoingRequest = _ongoingRequests.Where(r => r.requestedUser == GetUserInConnectedList(ipPort) && r.RequestedPacketType == PacketType.SOCKET_STATUS).SingleOrDefault();
+                        _logger.Info(string.Format("RequestSocketStatusResponse: To address {0}", requestSocketStatusResp.RequestingAddress.ToString()));
+                        if(ongoingRequest != null) // Check if there's actually an ongoingrequest
+                        {
+                            // send to the original requesting client
+                            Send(requestSocketStatusResp.SocketStatus, ongoingRequest.requestingUser.RealIp);
+                            // remove from ongoing
+                            _ongoingRequests.Remove(ongoingRequest);
+                        }
+                        break;
+                    case PacketType.REQUEST_SOCKET_CONNECTION:
+                        var requestSocketConn = (RequestSocketConnection)formatter.Deserialize(stream);
+                        Debug.WriteLine(requestSocketConn);
+                        _logger.Info(string.Format("RequestSocketConnection: Remote: {0}, Requesting: {1}", requestSocketConn.remoteAddress.ToString(), requestSocketConn.requestingAddress.ToString()));
+                        break;
+                    case PacketType.SOCKET_CONNECTION_STATUS:
+                        var socketConnStatus = (SocketConnectionStatus)formatter.Deserialize(stream);
+                        _logger.Info(string.Format("SocketConnectionStatus: Connected: {0}", socketConnStatus.Connected));
+                        break;
+                    default:
+                        _logger.Warn(string.Format("Unknown or incorrect context PacketType: {0}", data[0]));
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e.ToString());
             }
 
             stream.Close();
