@@ -20,9 +20,11 @@ namespace AlphaNET.Server
             {
                 log.Fatal("Tcp Server unsuccessfully initialized, exiting...");
                 return;
-            }  
+            }
             else
+            {
                 running = true;
+            }
 
             log.Info("Entering main loop...");
             while (running)

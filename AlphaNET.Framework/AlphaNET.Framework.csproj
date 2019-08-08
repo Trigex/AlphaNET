@@ -18,4 +18,8 @@
     <EmbeddedResource Include="Resources/JS/AlphaOS/src/**/*"></EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Tests\" />
+  </ItemGroup>
+
 </Project>

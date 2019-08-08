@@ -1,7 +1,4 @@
-﻿using AlphaNET.Framework.Net.Packets;
-using System.Collections.Generic;
-
-namespace AlphaNET.Framework.Net
+﻿namespace AlphaNET.Framework.Net
 {
     public class SocketManager
     {
@@ -17,7 +14,7 @@ namespace AlphaNET.Framework.Net
             Address endpoint = socket.EndpointAddress;
             Address client = socket.Address;
             // Send RequestSocketStatus to server
-            _tcpClient.Send(new RequestSocketConnection(endpoint, client));
+
         }
     }
 }

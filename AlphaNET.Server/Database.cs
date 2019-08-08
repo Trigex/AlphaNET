@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NLog;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace AlphaNET.Server
 {
@@ -15,6 +16,34 @@ namespace AlphaNET.Server
 
             optionsBuilder.UseSqlServer(
                 @"Server=(localdb)\mssqllocaldb;Database=AlphaNET;Integrated Security=True");
+        }
+    }
+
+    public static class QueryUserContext
+    {
+        public static User GetUser(string realIp)
+        {
+            using (var db = new UserContext())
+            {
+                return db.Users.Where(u => u.RealIp == realIp).FirstOrDefault();
+            }
+        }
+
+        public static int GetVirtualIPCount(string virtualIp)
+        {
+            using (var db = new UserContext())
+            {
+                return db.Users.Where(u => u.VirtualIp == virtualIp).ToList().Count;
+            }
+        }
+
+        public static void AddUser(User user)
+        {
+            using (var db = new UserContext())
+            {
+                db.Users.Add(user);
+                db.SaveChanges();
+            }
         }
     }
 

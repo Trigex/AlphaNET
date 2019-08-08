@@ -1,7 +1,10 @@
-﻿namespace AlphaNET.Framework.Net.Packets
+﻿using System;
+
+namespace AlphaNET.Framework.Net.Packets
 {
+    [Serializable]
     public abstract class Packet
     {
-        public abstract byte[] ToBytes();
+        public byte Type { get; protected set; }
     }
 }

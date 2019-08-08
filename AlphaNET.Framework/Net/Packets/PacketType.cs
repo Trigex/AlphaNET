@@ -8,5 +8,6 @@
         public const byte SOCKET_CONNECTION_STATUS = 4;
         public const byte ARBITRARY_DATA = 5;
         public const byte VIRTUAL_IP = 6;
+        public const byte REQUEST_SOCKET_STATUS_RESPONSE = 7;
     }
 }

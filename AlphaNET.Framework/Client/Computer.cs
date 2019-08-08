@@ -16,13 +16,22 @@ namespace AlphaNET.Framework.Client
 
         public Computer(Filesystem filesystem, bool offlineMode, string ip = null, int port = 0)
         {
-            _filesystem = filesystem;
+            if (filesystem == null) // If no filesystem was specified in cli args
+            {
+                _filesystem = BootstrapFilesystem();
+            }
+            else
+            {
+                _filesystem = filesystem;
+            }
+
             _console = new Console();
-            if(!offlineMode && ip != null && port != 0) // Not in offline mode
+
+            if (!offlineMode && ip != null && port != 0) // Not in offline mode
             {
                 _TcpClient = new TcpClient(ip, port);
 
-                _console.WriteLine("Attempting server connection...");
+                _console.WriteLine("Connecting to server...");
                 try
                 {
                     _TcpClient.Start();
@@ -33,7 +42,11 @@ namespace AlphaNET.Framework.Client
                     _console.WriteLine("Error: " + e.Message + "\n\nUnable to establish connection with server; To retry a connection, issue \"server reconnect\" to the shell...");
                 }
             }
-                
+            else
+            {
+                _console.WriteLine("NOTICE: In Offline Mode");
+            }
+
             _interpreter = new JSInterpreter(_filesystem, _console, _socketManager);
             _console.WriteLine("Compiling kernel...");
             _interpreter.InitAPI(_interpreter.CompilerProxy.CompileTypescript(new string[] { IOUtils.ReadManifestData<Computer>("kernel.ts"), IOUtils.ReadManifestData<Computer>("minimist.js") }));
@@ -43,7 +56,7 @@ namespace AlphaNET.Framework.Client
         public void Start()
         {
             _console.WriteLine("Running Init script...");
-            var init = (File)_filesystem.GetFilesystemObjectsByTitle("init.js")[0];
+            var init = (File)_filesystem.GetFilesystemObjectByAbsolutePath("/bin/init.js");
             _interpreter.ExecuteScript(Encoding.UTF8.GetString(init.Contents), false);
         }
 
@@ -59,7 +72,7 @@ namespace AlphaNET.Framework.Client
             var catProgram = IOUtils.ReadManifestData<Computer>("cat.ts");
             var cdProgram = IOUtils.ReadManifestData<Computer>("cd.ts");
 
-            var bin = (Directory)_filesystem.GetFilesystemObjectsByTitle("bin")[0];
+            var bin = (Directory)_filesystem.GetFilesystemObjectByAbsolutePath("/bin/");
             _filesystem.AddFilesystemObject(new File("kernel.js", bin, IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes(_interpreter.CompilerProxy.CompileTypescript(IOUtils.ReadManifestData<Computer>("kernel.ts")))), bin);
             _filesystem.AddFilesystemObject(new File("init.js", bin, IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes(_interpreter.CompilerProxy.CompileTypescript(initProgram))), bin);
             _filesystem.AddFilesystemObject(new File("shell.js", bin, IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes(_interpreter.CompilerProxy.CompileTypescript(shellProgram))), bin);
@@ -69,6 +82,29 @@ namespace AlphaNET.Framework.Client
 
             BinaryManager.WriteBinaryToFile("debug.fs", BinaryManager.CreateBinaryFromFilesystem(_filesystem));
             BinaryManager.ReloadFilesystemFromBinary(_filesystem, System.IO.File.ReadAllBytes("debug.fs"));
+        }
+
+        private Filesystem BootstrapFilesystem()
+        {
+            System.Console.WriteLine("Bootstraping filesystem...");
+            Filesystem fs = new Filesystem();
+            var root = new Directory("root", IOUtils.GenerateID());
+            root.Owner = root;
+            var bin = new Directory("bin", IOUtils.GenerateID());
+            var sub = new Directory("sub", IOUtils.GenerateID());
+            var lib = new Directory("lib", IOUtils.GenerateID());
+            var hello = new File("hello.txt", sub, IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes("Hello, World!"));
+            var src = new Directory("src", IOUtils.GenerateID());
+
+            fs.AddFilesystemObject(root);
+            fs.AddFilesystemObject(bin, root);
+            fs.AddFilesystemObject(sub, bin);
+            fs.AddFilesystemObject(hello, sub);
+            fs.AddFilesystemObject(lib, root);
+            fs.AddFilesystemObject(src, root);
+
+            BinaryManager.WriteBinaryToFile("debug.fs", BinaryManager.CreateBinaryFromFilesystem(fs));
+            return BinaryManager.CreateFilesystemFromBinary(BinaryManager.CreateBinaryFromFilesystem(fs));
         }
     }
 }
