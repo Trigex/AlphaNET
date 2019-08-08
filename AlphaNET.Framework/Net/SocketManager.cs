@@ -44,5 +44,10 @@ namespace AlphaNET.Framework.Net
                 }
             }
         }
+
+        public void OnSocketStatusRetrieved(SocketStatus socketStatus)
+        {
+            Console.WriteLine(string.Format("SocketStatus: Open: {0}, Listening: {1}", socketStatus.Open, socketStatus.Listening));
+        }
     }
 }

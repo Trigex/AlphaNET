@@ -147,7 +147,7 @@ namespace AlphaNET.Server
                             // Client not connected
                         }
                         break;
-                    case PacketType.REQUEST_SOCKET_STATUS_RESPONSE:
+                    case PacketType.REQUEST_SOCKET_STATUS_RESPONSE: // A client is responding to a socket status request
                         var requestSocketStatusResp = (RequestSocketStatusResponse)formatter.Deserialize(stream);
                         var ongoingRequest = _ongoingRequests.Where(r => r.requestedUser == GetUserInConnectedList(ipPort) && r.RequestedPacketType == PacketType.SOCKET_STATUS).SingleOrDefault();
                         _logger.Info(string.Format("RequestSocketStatusResponse: To address {0}", requestSocketStatusResp.RequestingAddress.ToString()));

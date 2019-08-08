@@ -83,6 +83,10 @@ namespace AlphaNET.Framework.Net
                         var resSocketStatus = _socketManager.OnSocketStatusRequested(reqSocketStatus);
                         Send(resSocketStatus);
                         break;
+                    case PacketType.REQUEST_SOCKET_STATUS_RESPONSE:
+                        var sockstatusres = (RequestSocketStatusResponse)formatter.Deserialize(stream);
+                        _socketManager.OnSocketStatusRetrieved(sockstatusres.SocketStatus);
+                        break;
                     default:
                         Console.WriteLine(string.Format("Unknown or incorrect context PacketType: {0}", data[0]));
                         break;
