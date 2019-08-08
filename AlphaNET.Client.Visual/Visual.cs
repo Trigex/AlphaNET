@@ -29,8 +29,6 @@ namespace AlphaNET.Client.Visual
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-            computer = new Computer(BootstrapFilesystem());
 
             base.Initialize();
         }

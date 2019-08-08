@@ -14,12 +14,16 @@ namespace AlphaNET.Framework.Net
         private SocketManager _socketManager;
         public VirtualIP virtualIp { get; private set; }
 
-        public TcpClient(string ip, int port, SocketManager socketManager)
+        public TcpClient(string ip, int port)
         {
             _client = new WatsonTcpClient(ip, port);
             _client.ServerConnected = ServerConnected;
             _client.ServerDisconnected = ServerDisconnected;
             _client.MessageReceived = MessageRecieved;
+        }
+
+        public void AddSocketManager(SocketManager socketManager)
+        {
             _socketManager = socketManager;
         }
 

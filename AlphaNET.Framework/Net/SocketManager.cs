@@ -37,7 +37,8 @@ namespace AlphaNET.Framework.Net
                 return new RequestSocketStatusResponse(new SocketStatus(true, true), reqSocketStatus.requestingAddress);
             } else
             {
-                Console.WriteLine("A local socket matching the requested socket doesn't exist")
+                Console.WriteLine("A local socket matching the requested socket doesn't exist");
+
                 {
                     return new RequestSocketStatusResponse(new SocketStatus(false, false), reqSocketStatus.requestingAddress);
                 }

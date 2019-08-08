@@ -34,8 +34,9 @@ namespace AlphaNET.Framework.Client
                 _console.WriteLine("Connecting to server...");
                 try
                 {
-                    _TcpClient.Start();
                     _socketManager = new SocketManager(_TcpClient);
+                    _TcpClient.AddSocketManager(_socketManager);
+                    _TcpClient.Start();
                 }
                 catch (Exception e)
                 {
