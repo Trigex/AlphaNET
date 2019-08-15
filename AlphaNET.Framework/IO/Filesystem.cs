@@ -29,6 +29,7 @@ namespace AlphaNET.Framework.IO
             return StatusCode.ObjectAdded;
         }
 
+
         public StatusCode AddFilesystemObject(FilesystemObject obj)
         {
             // Add to FilesystemObjects list
@@ -200,6 +201,20 @@ namespace AlphaNET.Framework.IO
         public File[] GetAllFiles()
         {
             return FilesystemObjects.OfType<File>().ToArray();
+        }
+
+        public uint GenerateFilesystemObjectID()
+        {
+            var id = IOUtils.GenerateID();
+            // Check for ID collision
+            var objList = FilesystemObjects.Where(obj => obj.ID == id);
+            if (objList.Count() > 0)
+            {
+                // generate another
+                id = GenerateFilesystemObjectID();
+            }
+
+            return id;
         }
     }
 }

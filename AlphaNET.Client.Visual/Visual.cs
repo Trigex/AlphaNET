@@ -66,7 +66,7 @@ namespace AlphaNET.Client.Visual
             var bin = new Directory("bin", IOUtils.GenerateID());
             var sub = new Directory("sub", IOUtils.GenerateID());
             var lib = new Directory("lib", IOUtils.GenerateID());
-            var hello = new File("hello.txt", sub, IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes("Hello, World!"));
+            var hello = new File("hello.txt", IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes("Hello, World!"));
             var src = new Directory("src", IOUtils.GenerateID());
 
             fs.AddFilesystemObject(root);

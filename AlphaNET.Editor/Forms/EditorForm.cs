@@ -184,7 +184,7 @@ namespace AlphaNET.Editor.Forms
                         plaintext = false;
                     }
 
-                    var file = new File(bin.Key, importDirectory, IOUtils.GenerateID(), plaintext, bin.Value);
+                    var file = new File(bin.Key, IOUtils.GenerateID(), plaintext, bin.Value);
                     var fileItem = new FileGridItem(file.ID, file.Title, file.IsPlaintext, file);
                     fs.AddFilesystemObject(file, importDirectory);
 

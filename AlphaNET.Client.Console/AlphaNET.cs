@@ -19,32 +19,20 @@ namespace AlphaNET.Client.Console
                 int port = DEFAULT_PORT;
 
                 if (o.Host != null)
-                {
                     ip = o.Host;
-                }
 
                 if (o.Port != 0)
-                {
                     port = o.Port;
-                }
 
                 if (o.FilesystemPath != null)
-                {
                     fs = BinaryManager.CreateFilesystemFromBinary(BinaryManager.ReadBinaryFromFile(o.FilesystemPath));
-                }
                 else
-                {
                     fs = null;
-                }
 
                 if (o.Offline)
-                {
                     Init(new Computer(fs, true));
-                }
                 else
-                {
                     Init(new Computer(fs, false, ip, port));
-                }
             });
         }
 

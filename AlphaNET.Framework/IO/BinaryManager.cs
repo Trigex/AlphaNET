@@ -1,4 +1,5 @@
 ﻿using AlphaNET.Framework.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -240,18 +241,12 @@ namespace AlphaNET.Framework.IO
         /// <param name="filesystem">The <c>Filesystem</c> to modify based off what's read</param>
         private static void ReadFiles(BinaryReader reader, Filesystem filesystem)
         {
-            var listEnd = false;
+            var listEnd = false; // flag to stop loop at end of list
             while (!listEnd)
             {
-                var fileStart = reader.ReadByte();
-                var fileMeta = ReadGenericObjectMeta(reader);
-                var filePlaintext = reader.ReadByte();
-                var plaintext = false;
-
-                if (filePlaintext == 1)
-                {
-                    plaintext = true;
-                }
+                var fileStart = reader.ReadByte(); // file start flag
+                var fileMeta = ReadGenericObjectMeta(reader); // generic meta properties
+                var plaintext = Convert.ToBoolean(reader.ReadByte()); // Plaintext?
 
                 var fileContentsLength = reader.ReadUInt32();
                 var fileContents = reader.ReadBytes((int)fileContentsLength);
@@ -263,7 +258,7 @@ namespace AlphaNET.Framework.IO
                     // Error!
                 }
 
-                var newFile = new File(Encoding.UTF8.GetString(fileMeta.Title), fileOwner, fileMeta.ID, plaintext, fileContents);
+                var newFile = new File(Encoding.UTF8.GetString(fileMeta.Title), fileMeta.ID, plaintext, fileContents);
                 filesystem.AddFilesystemObject(newFile, fileOwner);
 
                 if (reader.ReadByte() == FILE_LIST_END)
@@ -280,7 +275,7 @@ namespace AlphaNET.Framework.IO
     }
 
     /// <summary>
-    /// <c>GenericObjectMeta</c> is an internal class representing the data common between File and Directory objects
+    /// <c>GenericObjectMeta</c> is an internal class representing the properties common between File and Directory objects
     /// </summary>
     internal class GenericObjectMeta
     {

@@ -22,7 +22,7 @@
         /// <param name="id">The ID of the <c>File</c></param>
         /// <param name="isPlaintext">Is the <c>contents</c> argument a UTF8 encoded string?</param>
         /// <param name="contents">Arbitrary byte array for the <c>File</c> to hold</param>
-        public File(string title, Directory owner, uint id, bool isPlaintext, byte[] contents) : base(title, owner, id)
+        public File(string title, uint id, bool isPlaintext, byte[] contents) : base(title, null, id)
         {
             IsPlaintext = isPlaintext;
             Contents = contents;

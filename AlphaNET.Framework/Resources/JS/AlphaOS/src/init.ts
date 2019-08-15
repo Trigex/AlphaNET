@@ -1,10 +1,10 @@
-/// <reference path="kernel/kernel.d.ts" />
-// Retrieve shell
-const DEV_MODE = true; 
+/// <reference path="kernel/types/os.d.ts" />
+/// <reference path="kernel/system.ts" />
 
-if(!DEV_MODE)
-    Terminal.Clear();
-    
-Terminal.WriteLine("AlphaOS Init");
-let _shell = Filesystem.GetFileByTitle("shell.js");
-CreateProcess(_shell, []);
+function Main() {
+    Terminal.WriteLine("AlphaOS Init");
+    let shellProcess = fork();
+    let shell = Filesystem.GetFilesystemObjectByAbsolutePath("/bin/shell.js") as FILE;
+    JSInterpreter.ExecuteScript(UTF8.GetString(shell.Contents), false, null);
+    return 0;
+}

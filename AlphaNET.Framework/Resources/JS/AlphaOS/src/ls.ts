@@ -1,11 +1,12 @@
-/// <reference path="kernel/kernel.d.ts" />
-function ls() {
+/// <reference path="kernel/types/os.d.ts" />
+function Main(args: string[]) {
+    Terminal.WriteLine("ls called");
     var dir;
 
-    if(Global.ProcessArguments[1]) {
-        dir = Filesystem.GetFilesystemObjectByAbsolutePath(Global.ProcessArguments[1]);
+    if(args[1]) {
+        dir = Filesystem.GetFilesystemObjectByAbsolutePath(args[1]);
     } else {
-        dir = Global.CurrentPath as FSDirectory;
+        dir = Global.CurrentPath as DIRECTORY;
     }
 
     let children = dir.Children.ToArray();
@@ -17,5 +18,3 @@ function ls() {
 
     return 0;
 }
-
-ls();

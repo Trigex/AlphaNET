@@ -11,9 +11,9 @@ namespace AlphaNET.Framework.Proxies
             _interpreter = interpreter;
         }
 
-        public void ExecuteScript(string script, bool isTypescript)
+        public int ExecuteScript(string script, bool isTypescript, string[] args)
         {
-            _interpreter.ExecuteScript(script, isTypescript);
+            return _interpreter.ExecuteScript(script, isTypescript, args);
         }
     }
 }

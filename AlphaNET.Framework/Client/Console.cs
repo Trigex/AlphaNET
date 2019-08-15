@@ -2,9 +2,10 @@
 {
     public class Console
     {
-        public Std stdout { get; set; }
-        public Std stdin { get; set; }
-        public Std stderr { get; set; }
+        public Std Stdout { get; set; }
+        public Std Stdin { get; set; }
+        public Std Stderr { get; set; }
+
         public enum Std
         {
             Console,

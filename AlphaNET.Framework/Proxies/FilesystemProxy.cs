@@ -62,5 +62,20 @@ namespace AlphaNET.Framework.Proxies
         {
             return _filesystem.GetAbsolutePathByFilesystemObject(fsObj);
         }
+
+        public uint GenerateFilesystemObjectID()
+        {
+            return _filesystem.GenerateFilesystemObjectID();
+        }
+
+        public StatusCode AddFilesystemObject(FilesystemObject fsObj, Directory dir)
+        {
+            return _filesystem.AddFilesystemObject(fsObj, dir);
+        }
+
+        public StatusCode DeleteFilesystemObject(FilesystemObject fsObj)
+        {
+            return _filesystem.DeleteFilesystemObject(fsObj);
+        }
     }
 }

@@ -1,21 +1,14 @@
-﻿/// <reference path="kernel/kernel.d.ts" />
-function net() {
+﻿/// <reference path="kernel/types/os.d.ts" />
+function Main() {
+    var socket;
     if(Global.ProcessArguments[1]) {
         switch(Global.ProcessArguments[1]) {
             case "client":
-                // open a socket
-                let socket = new Socket(new Address(SocketManager._tcpClient.virtualIp.ip, 8020));
-                socket.EndpointAddress = new Address("11.1", 80);
-                SocketManager.ConnectSocketToEndpoint(socket);
                 break;
             case "server":
-                let socket = new Socket(new Address(SocketManager._tcpClient.virtualIp.ip, 8020));
-                SocketManager.ListenOnSocket(socket);
                 break;
         }
     } else {
 
     }
 }
-
-net();

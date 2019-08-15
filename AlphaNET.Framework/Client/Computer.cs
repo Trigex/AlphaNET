@@ -50,38 +50,44 @@ namespace AlphaNET.Framework.Client
 
             _interpreter = new JSInterpreter(_filesystem, _console, _socketManager);
             _console.WriteLine("Compiling kernel...");
-            _interpreter.InitAPI(_interpreter.CompilerProxy.CompileTypescript(new string[] { IOUtils.ReadManifestData<Computer>("kernel.ts"), IOUtils.ReadManifestData<Computer>("minimist.js") }));
-            InstallOS();
+            string system = _interpreter.CompilerProxy.CompileTypescript(new string[] { IOUtils.ReadManifestData<Computer>("system.ts") });
+            // append third party libs
+            system += "\n" + IOUtils.ReadManifestData<Computer>("minimist.js") + "\n" + IOUtils.ReadManifestData<Computer>("lodash.min.js");
+            _interpreter.InitAPI(system);
+            InstallOS(system);
         }
 
         public void Start()
         {
             _console.WriteLine("Running Init script...");
-            var init = (File)_filesystem.GetFilesystemObjectByAbsolutePath("/bin/init.js");
-            _interpreter.ExecuteScript(Encoding.UTF8.GetString(init.Contents), false);
+            var init = (File)_filesystem.GetFilesystemObjectByAbsolutePath("/bin/shell.js");
+            _interpreter.ExecuteScript(Encoding.UTF8.GetString(init.Contents), false, null);
+        }
+
+        public Filesystem GetFilesystem()
+        {
+            return _filesystem;
         }
 
         /// <summary>
         /// Very temporary /dev/ method to build and install the OS every run
         /// </summary>
-        private void InstallOS()
+        private void InstallOS(string system)
         {
             _console.WriteLine("Compiling and installing OS files...");
             var initProgram = IOUtils.ReadManifestData<Computer>("init.ts");
             var shellProgram = IOUtils.ReadManifestData<Computer>("shell.ts");
             var lsProgram = IOUtils.ReadManifestData<Computer>("ls.ts");
             var catProgram = IOUtils.ReadManifestData<Computer>("cat.ts");
-            var cdProgram = IOUtils.ReadManifestData<Computer>("cd.ts");
             var netProgram = IOUtils.ReadManifestData<Computer>("net.ts");
 
             var bin = (Directory)_filesystem.GetFilesystemObjectByAbsolutePath("/bin/");
-            _filesystem.AddFilesystemObject(new File("kernel.js", bin, IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes(_interpreter.CompilerProxy.CompileTypescript(IOUtils.ReadManifestData<Computer>("kernel.ts")))), bin);
-            _filesystem.AddFilesystemObject(new File("init.js", bin, IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes(_interpreter.CompilerProxy.CompileTypescript(initProgram))), bin);
-            _filesystem.AddFilesystemObject(new File("shell.js", bin, IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes(_interpreter.CompilerProxy.CompileTypescript(shellProgram))), bin);
-            _filesystem.AddFilesystemObject(new File("ls.js", bin, IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes(_interpreter.CompilerProxy.CompileTypescript(lsProgram))), bin);
-            _filesystem.AddFilesystemObject(new File("cat.js", bin, IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes(_interpreter.CompilerProxy.CompileTypescript(catProgram))), bin);
-            _filesystem.AddFilesystemObject(new File("cd.js", bin, IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes(_interpreter.CompilerProxy.CompileTypescript(cdProgram))), bin);
-            _filesystem.AddFilesystemObject(new File("net.js", bin, IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes(_interpreter.CompilerProxy.CompileTypescript(netProgram))), bin);
+            _filesystem.AddFilesystemObject(new File("system.js", IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes(system)), bin);
+            _filesystem.AddFilesystemObject(new File("init.js", IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes(_interpreter.CompilerProxy.CompileTypescript(initProgram))), bin);
+            _filesystem.AddFilesystemObject(new File("shell.js", IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes(_interpreter.CompilerProxy.CompileTypescript(shellProgram))), bin);
+            _filesystem.AddFilesystemObject(new File("ls.js", IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes(_interpreter.CompilerProxy.CompileTypescript(lsProgram))), bin);
+            _filesystem.AddFilesystemObject(new File("cat.js", IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes(_interpreter.CompilerProxy.CompileTypescript(catProgram))), bin);
+            _filesystem.AddFilesystemObject(new File("net.js", IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes(_interpreter.CompilerProxy.CompileTypescript(netProgram))), bin);
 
             BinaryManager.WriteBinaryToFile("debug.fs", BinaryManager.CreateBinaryFromFilesystem(_filesystem));
             BinaryManager.ReloadFilesystemFromBinary(_filesystem, System.IO.File.ReadAllBytes("debug.fs"));
@@ -96,7 +102,7 @@ namespace AlphaNET.Framework.Client
             var bin = new Directory("bin", IOUtils.GenerateID());
             var sub = new Directory("sub", IOUtils.GenerateID());
             var lib = new Directory("lib", IOUtils.GenerateID());
-            var hello = new File("hello.txt", sub, IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes("Hello, World!"));
+            var hello = new File("hello.txt", IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes("Hello, World!"));
             var src = new Directory("src", IOUtils.GenerateID());
 
             fs.AddFilesystemObject(root);
