@@ -41,9 +41,6 @@ const IO = {
 
 // Net
 const Net = {
-    ConnectSocketToEndpoint: (socket: Socket) => {
-
-    }
 }
 
 // Wrapper around a CLR FILE, makes working with them a bit nicer
@@ -70,10 +67,6 @@ class _File {
         }
 
         this._internalFile = new FILE(title, Filesystem.GenerateFilesystemObjectID(), this.IsPlaintext, this.Contents);
-    }
-
-    constructor(file: FILE) {
-        
     }
 }
 

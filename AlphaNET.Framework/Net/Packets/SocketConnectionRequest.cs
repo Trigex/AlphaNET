@@ -5,13 +5,13 @@ namespace AlphaNET.Framework.Net.Packets
     [Serializable]
     public class SocketConnectionRequest : Packet
     {
-        public Address remoteAddress { get; private set; }
-        public Address requestingAddress { get; private set; }
+        public Address SourceAddress { get; private set; }
+        public Address DestinationAddress { get; private set; }
 
-        public SocketConnectionRequest(Address remoteAddress, Address requestingAddress)
+        public SocketConnectionRequest(Address sourceAddress, Address destinationAddress)
         {
-            this.remoteAddress = remoteAddress;
-            this.requestingAddress = requestingAddress;
+            this.SourceAddress = sourceAddress;
+            this.DestinationAddress = destinationAddress;
             Type = PacketType.SOCKET_CONNECTION_REQUEST;
         }
     }

@@ -24,8 +24,8 @@ namespace AlphaNET.Framework.JS
         private JsValue _global;
         private FilesystemProxy _filesystemProxy;
         private IConsole _console;
-        private SocketManager _socketManager;
         private List<Thread> _threadList;
+        private SocketManagerProxy _socketManagerProxy;
         private ManualResetEvent _mre;
 
         public Stack<Process> ProcessStack;
@@ -35,7 +35,7 @@ namespace AlphaNET.Framework.JS
             _systemScript = systemScript;
             _console = console;
             _filesystemProxy = new FilesystemProxy(fs);
-            _socketManager = socketManager;
+            _socketManagerProxy = new SocketManagerProxy(socketManager);
             ProcessStack = new Stack<Process>();
             _threadList = new List<Thread>();
             _global = new Engine().Execute("var Global = {}").GetValue("Global");
@@ -85,7 +85,8 @@ namespace AlphaNET.Framework.JS
             // Directory
             engine.SetValue("DIRECTORY", TypeReference.CreateTypeReference(engine, typeof(Directory)));
             // StatusCodes
-            engine.SetValue("StatusCode", TypeReference.CreateTypeReference(engine, typeof(StatusCode)));
+            engine.SetValue("IOStatusCode", TypeReference.CreateTypeReference(engine, typeof(IOStatusCode)));
+            engine.SetValue("NetStatusCode", TypeReference.CreateTypeReference(engine, typeof(NetStatusCode)));
             // FilesystemProxy
             engine.SetValue("Filesystem", _filesystemProxy);
             // List, pretty ghetto way to offer "generic" lists to JavaScript, since it'll just accept anything, but oh well!
@@ -95,7 +96,7 @@ namespace AlphaNET.Framework.JS
             // UTF8 encoding
             engine.SetValue("UTF8", Encoding.UTF8);
             // NET
-            engine.SetValue("SocketManager", _socketManager);
+            engine.SetValue("SocketManager", _socketManagerProxy);
             engine.SetValue("Socket", TypeReference.CreateTypeReference(engine, typeof(Socket)));
             engine.SetValue("Address", TypeReference.CreateTypeReference(engine, typeof(Address)));
             // Shared global object

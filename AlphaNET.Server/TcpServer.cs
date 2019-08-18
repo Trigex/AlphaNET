@@ -111,43 +111,59 @@ namespace AlphaNET.Server
             {
                 switch (packet) // First byte should always be the PacketTypeCode
                 {
-                    case SocketStatusRequest rss: // Client is requesting packet SocketStatus of the given address
+                    case SocketStatusRequest rss: // Source is requesting packet SocketStatus of the Destination
                         var SocketStatusRequest = (SocketStatusRequest)packet;
-                        _logger.Info(string.Format("SocketStatusRequest: For address {0}", SocketStatusRequest.requestedAddress.ToString()));
-                        var remoteClient = GetConnectedUserByVirtual(SocketStatusRequest.requestedAddress.IpAddress);
+                        _logger.Info(string.Format("SocketStatusRequest: For address {0}", SocketStatusRequest.SourceAddress.ToString()));
+                        var destinationUser = GetConnectedUserByVirtual(SocketStatusRequest.SourceAddress.IpAddress);
                         // Check if the client of the remote address is connected to this server
-                        if (remoteClient != null)
+                        if (destinationUser != null)
                         {
                             // Add this request to ongoingrequests
-                            _ongoingRequests.Add(new OngoingRequest(SocketStatusRequest.requestingAddress, GetConnectedUserByReal(ipPort), SocketStatusRequest.requestedAddress, remoteClient, PacketType.SOCKET_STATUS));
-                            // Ask the client of the address for packet SocketStatus
-                            Send(SocketStatusRequest, remoteClient.RealIp);
+                            _ongoingRequests.Add(new OngoingRequest(SocketStatusRequest.DestinationAddress, GetConnectedUserByReal(ipPort), SocketStatusRequest.SourceAddress, destinationUser, PacketType.SOCKET_STATUS));
+                            // Ask the destination for packet SocketStatus
+                            Send(SocketStatusRequest, destinationUser.RealIp);
                         }
                         else
                         {
-                            // Client not connected, send our own SocketStatusResponse to the requesting client
+                            // destination not connected, send our own SocketStatusResponse to the requesting client
                             _logger.Info(string.Format("The requested address isn't connected..."));
                             Send(new SocketStatusResponse(new SocketStatus(false, false), null), ipPort);
                         }
                         break;
-                    case SocketStatusResponse rssr: // A client is responding to a SocketStatusRequest
+                    case SocketStatusResponse rssr: // destination is responding to a SocketStatusRequest
                         var SocketStatusRequestResp = (SocketStatusResponse)packet;
-                        var ongoingRequest = _ongoingRequests.Where(r => r.requestedUser == GetConnectedUserByReal(ipPort) && r.RequestedPacketType == PacketType.SOCKET_STATUS).SingleOrDefault();
-                        _logger.Info(string.Format("SocketStatusResponse: To address {0}", SocketStatusRequestResp.RequestingAddress.ToString()));
+                        var ongoingRequest = _ongoingRequests.Where(r => r.DestinationUser == GetConnectedUserByReal(ipPort) && r.RequestedPacketType == PacketType.SOCKET_STATUS).SingleOrDefault();
+                        _logger.Info(string.Format("SocketStatusResponse: To address {0}", SocketStatusRequestResp.DestinationAddress.ToString()));
                         if(ongoingRequest != null) // Check if there's actually an ongoingrequest
                         {
-                            // send to the original requesting client
-                            Send(SocketStatusRequestResp.SocketStatus, ongoingRequest.requestingUser.RealIp);
+                            // send to the original request user
+                            Send(SocketStatusRequestResp.SocketStatus, ongoingRequest.SourceUser.RealIp);
                             // remove from ongoing
                             _ongoingRequests.Remove(ongoingRequest);
                         }
                         break;
-                    case SocketConnectionRequest rsc:
+                    case SocketConnectionRequest rsc: // source is requesting connection to destination
                         var requestSocketConn = (SocketConnectionRequest)packet;
-                        Debug.WriteLine(requestSocketConn);
-                        _logger.Info(string.Format("SocketConnectionRequest: Remote: {0}, Requesting: {1}", requestSocketConn.remoteAddress.ToString(), requestSocketConn.requestingAddress.ToString()));
+                        _logger.Info(string.Format("SocketConnectionRequest: Remote: {0}, Requesting: {1}", requestSocketConn.SourceAddress.ToString(), requestSocketConn.DestinationAddress.ToString()));
+                        if(GetConnectedUserByVirtual(requestSocketConn.DestinationAddress.IpAddress) != null)
+                        {
+                            var destUser = GetConnectedUserByVirtual(requestSocketConn.DestinationAddress.IpAddress);
+                            // Add ongoing request
+                            _ongoingRequests.Add(new OngoingRequest(requestSocketConn.SourceAddress, 
+                                GetConnectedUserByReal(ipPort), 
+                                requestSocketConn.DestinationAddress, 
+                                GetConnectedUserByVirtual(requestSocketConn.DestinationAddress.IpAddress), 
+                                PacketType.SOCKET_CONNECTION_STATUS));
+
+                            Send(requestSocketConn, destUser.RealIp);
+
+                        }
+                        else // Destination client isn't connected
+                        {
+                            Send(new SocketConnectionStatus(false), ipPort); // send our own response indicating false
+                        }
                         break;
-                    case SocketConnectionStatus scs:
+                    case SocketConnectionStatus scs: // destination is responding to connection request
                         var socketConnStatus = (SocketConnectionStatus)packet;
                         _logger.Info(string.Format("SocketConnectionStatus: Connected: {0}", socketConnStatus.Connected));
                         break;
@@ -193,19 +209,19 @@ namespace AlphaNET.Server
 
     public class OngoingRequest
     {
-        public Address requestingAddress;
-        public User requestingUser;
-        public Address requestedAddress;
-        public User requestedUser;
-        public byte RequestedPacketType; // The packet type the chain wants to send to requesting as the end goal
+        public Address SourceAddress;
+        public User SourceUser;
+        public Address DestinationAddress;
+        public User DestinationUser;
+        public byte RequestedPacketType; // The packet type the chain wants to send to source as the end goal
 
-        public OngoingRequest(Address requestingAddress, User requestingUser, Address requestedAddress, User requestedUser, byte requestedPacketType)
+        public OngoingRequest(Address sourceAddress, User sourceUser, Address destinationAddress, User destinationUser, byte requestedPacketType)
         {
-            this.requestingAddress = requestingAddress;
-            this.requestingUser = requestingUser;
-            this.requestedAddress = requestedAddress;
-            this.requestedUser = requestedUser;
-            this.RequestedPacketType = requestedPacketType;
+            SourceAddress = sourceAddress;
+            SourceUser = sourceUser;
+            DestinationAddress = destinationAddress;
+            DestinationUser = destinationUser;
+            RequestedPacketType = requestedPacketType;
         }
     }
 }

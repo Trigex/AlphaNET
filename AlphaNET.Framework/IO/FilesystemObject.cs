@@ -35,16 +35,16 @@
         /// Modify the name of this <c>FilesystemObject</c>
         /// </summary>
         /// <param name="title">The title to rename this <c>FilesystemObject</c> to</param>
-        /// <returns>A <c>StatusCode</c> representing the success of this renaming operation</returns>
-        public StatusCode Rename(string title)
+        /// <returns>A <c>IOStatusCode</c> representing the success of this renaming operation</returns>
+        public IOStatusCode Rename(string title)
         {
             if (string.IsNullOrEmpty(title) || string.IsNullOrWhiteSpace(title))
             {
-                return StatusCode.ObjectNotRenamed;
+                return IOStatusCode.ObjectNotRenamed;
             }
 
             Title = title;
-            return StatusCode.ObjectRenamed;
+            return IOStatusCode.ObjectRenamed;
         }
     }
 }

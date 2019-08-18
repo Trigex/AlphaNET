@@ -37,7 +37,7 @@ declare interface UTF8 {
  *
  */
 
-declare enum StatusCode {
+declare enum IOStatusCode {
     ObjectNotFound,
     ObjectFound,
     ObjectAlreadyPresent,
@@ -48,6 +48,14 @@ declare enum StatusCode {
     ObjectNotRenamed,
     ObjectAdded,
     FileModified
+}
+
+declare enum NetStatusCode {
+    AddressInUse,
+    InvalidAddress,
+    SocketBinded,
+    SocketConnected,
+    SocketDisconnected
 }
 
 declare interface Terminal {
@@ -67,13 +75,13 @@ declare interface FilesystemObject {
     Title: string;
     Owner: DIRECTORY;
     ID: Number;
-    Rename(title: string): StatusCode;
+    Rename(title: string): IOStatusCode;
 }
 
 declare interface FILE extends FilesystemObject {
     Contents: Uint8Array;
     IsPlaintext: boolean;
-    ModifyContents(newContents: Uint8Array, IsPlaintext: boolean): StatusCode;
+    ModifyContents(newContents: Uint8Array, IsPlaintext: boolean): IOStatusCode;
 }
 declare interface FileConstructor {
     new(title: string, id: number, isPlaintext: boolean, contents: Uint8Array)
@@ -85,7 +93,7 @@ declare interface DIRECTORY extends FilesystemObject {
     GetChildrenByTitle(title: string): List<FilesystemObject>;
     GetChildByTitle(title: string): List<FilesystemObject>;
     GetChildByID(id: number): FilesystemObject;
-    RemoveChildByID(id: number): StatusCode;
+    RemoveChildByID(id: number): IOStatusCode;
 }
 declare interface DirectoryConstructor {
     new(title: string, id: number)
@@ -122,12 +130,15 @@ declare interface Socket {
     Listening: boolean;
 }
 declare interface SocketConstructor {
-    new(address: Address)
+    new()
 }
 
 declare interface SocketManager {
-    ConnectSocketToEndpoint(socket: Socket);
-    ListenOnSocket(socket: Socket);
+    BindSocket(socket: Socket, address: Address): NetStatusCode;
+    ListenOnSocket(socket: Socket): NetStatusCode;
+    AcceptOnSocket(socket: Socket): NetStatusCode;
+    ConnectSocket(socket: Socket, destinationAddress: Address, localPort?: number): NetStatusCode;
+    GetIpAddress(): string;
 }
 
 // Flesh this out a bit more later

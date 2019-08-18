@@ -2,11 +2,13 @@
 {
     public enum NetStatusCode
     {
-        // Socket and Address statuses
         AddressInUse,
-        BindedAddress,
-        AddedSocket,
+        InvalidAddress,
+        SocketBinded,
+        SocketNotBinded,
+        SocketListening,
+        SocketNotListening,
         SocketConnected,
-        NoSocketManager,
+        SocketDisconnected
     };
 }

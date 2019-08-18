@@ -34,11 +34,11 @@
         /// <param name="newContents">The new byte array to set</param>
         /// <param name="isPlaintext">Is the <c>newContents</c> argument a UTF8 encoded string?</param>
         /// <returns></returns>
-        public StatusCode ModifyContents(byte[] newContents, bool isPlaintext)
+        public IOStatusCode ModifyContents(byte[] newContents, bool isPlaintext)
         {
             IsPlaintext = isPlaintext;
             Contents = newContents;
-            return StatusCode.FileModified;
+            return IOStatusCode.FileModified;
         }
     }
 }

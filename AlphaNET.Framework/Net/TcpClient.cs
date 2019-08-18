@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading.Tasks;
 using WatsonTcp;
 
 namespace AlphaNET.Framework.Net
@@ -12,7 +13,12 @@ namespace AlphaNET.Framework.Net
     {
         private WatsonTcpClient _client;
         private SocketManager _socketManager;
-        public VirtualIP virtualIp { get; private set; }
+        public VirtualIP VirtualIP { get; private set; }
+
+        public delegate void RecieveSocketStatus(SocketStatus socketStatus);
+        public event RecieveSocketStatus SocketStatusRecieved;
+        public delegate void RecieveSocketConnectionStatus(SocketConnectionStatus socketConnectionStatus);
+        public event RecieveSocketConnectionStatus SocketConnectionStatusRecieved;
 
         public TcpClient(string ip, int port)
         {
@@ -59,19 +65,19 @@ namespace AlphaNET.Framework.Net
                 switch (packet)
                 {
                     case VirtualIP vip: // We recieved our Virtual IP from the server, set it
-                        virtualIp = (VirtualIP)packet;
-                        Console.WriteLine(string.Format("VirtualIP: {0}", virtualIp.ip));
+                        VirtualIP = (VirtualIP)packet;
+                        Console.WriteLine(string.Format("VirtualIP: {0}", VirtualIP.ip));
                         break;
                     case SocketStatusRequest rss: // Recieved SocketStatusRequest from the server. Send a response!
                         var reqSocketStatus = (SocketStatusRequest)packet;
                         // pass to SocketManager
-                        Console.WriteLine(string.Format("SocketStatusRequest: {0}", reqSocketStatus.requestedAddress.ToString()));
+                        Console.WriteLine(string.Format("SocketStatusRequest: {0}", reqSocketStatus.SourceAddress.ToString()));
                         var resSocketStatus = _socketManager.OnSocketStatusRequested(reqSocketStatus);
                         Send(resSocketStatus);
                         break;
-                    case SocketStatusResponse rssr:
-                        var sockstatusres = (SocketStatusResponse)packet;
-                        _socketManager.OnSocketStatusRetrieved(sockstatusres.SocketStatus);
+                    case SocketStatus ss:
+                        var socketStatus = (SocketStatus)packet;
+                        SocketStatusRecieved(socketStatus);
                         break;
                     default:
                         Console.WriteLine(string.Format("Unknown or incorrect context PacketType: {0}", data[0]));

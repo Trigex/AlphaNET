@@ -8,12 +8,12 @@ namespace AlphaNET.Framework.Net.Packets
     public class SocketStatusResponse : Packet
     {
         public SocketStatus SocketStatus { get; private set; }
-        public Address RequestingAddress { get; private set; }
+        public Address DestinationAddress { get; private set; }
 
-        public SocketStatusResponse(SocketStatus socketStatus, Address requestingAddress)
+        public SocketStatusResponse(SocketStatus socketStatus, Address destinationAddress)
         {
             SocketStatus = socketStatus;
-            RequestingAddress = requestingAddress;
+            DestinationAddress = destinationAddress;
             Type = PacketType.SOCKET_STATUS_RESPONSE;
         }
     }

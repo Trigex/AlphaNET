@@ -68,12 +68,12 @@ namespace AlphaNET.Framework.Proxies
             return _filesystem.GenerateFilesystemObjectID();
         }
 
-        public StatusCode AddObject(FilesystemObject fsObj, Directory dir)
+        public IOStatusCode AddObject(FilesystemObject fsObj, Directory dir)
         {
             return _filesystem.AddObject(fsObj, dir);
         }
 
-        public StatusCode DeleteObject(FilesystemObject fsObj)
+        public IOStatusCode DeleteObject(FilesystemObject fsObj)
         {
             return _filesystem.DeleteObject(fsObj);
         }

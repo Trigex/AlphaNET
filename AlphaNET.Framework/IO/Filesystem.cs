@@ -12,12 +12,12 @@ namespace AlphaNET.Framework.IO
             FilesystemObjects = new List<FilesystemObject>();
         }
 
-        public StatusCode AddObject(FilesystemObject obj, Directory dir)
+        public IOStatusCode AddObject(FilesystemObject obj, Directory dir)
         {
             // Check if the directory the object is being added to exists
             if (GetObjectByID(dir.ID) == null)
             {
-                return StatusCode.ObjectNotFound;
+                return IOStatusCode.ObjectNotFound;
             }
 
             // Add to directory children
@@ -26,38 +26,38 @@ namespace AlphaNET.Framework.IO
             // Add to FilesystemObjects list
             FilesystemObjects.Add(obj);
 
-            return StatusCode.ObjectAdded;
+            return IOStatusCode.ObjectAdded;
         }
 
 
-        public StatusCode AddObject(FilesystemObject obj)
+        public IOStatusCode AddObject(FilesystemObject obj)
         {
             // Add to FilesystemObjects list
             FilesystemObjects.Add(obj);
-            return StatusCode.ObjectAdded;
+            return IOStatusCode.ObjectAdded;
         }
 
-        public StatusCode MoveObject(FilesystemObject obj, Directory dir)
+        public IOStatusCode MoveObject(FilesystemObject obj, Directory dir)
         {
             // Check if the new directory's children list already has an object of obj's ID
             if (dir.GetChildByID(obj.ID) != null)
             {
-                return StatusCode.ObjectAlreadyPresent;
+                return IOStatusCode.ObjectAlreadyPresent;
             }
 
             // Set FilesystemObject's Owner to the new directory
             obj.Owner = dir;
             // Add FilesystemObject to new directory's children
             dir.Children.Add(obj);
-            return StatusCode.ObjectMoved;
+            return IOStatusCode.ObjectMoved;
         }
 
-        public StatusCode DeleteObject(FilesystemObject obj)
+        public IOStatusCode DeleteObject(FilesystemObject obj)
         {
             // Check if FilesystemObject is actually present in the Filesystem
             if (GetObjectByID(obj.ID) == null)
             {
-                return StatusCode.ObjectNotFound;
+                return IOStatusCode.ObjectNotFound;
             }
 
             // If it's a directory, delete all it's children
@@ -79,7 +79,7 @@ namespace AlphaNET.Framework.IO
             // Remove from Filesystem object list
             FilesystemObjects.Remove(GetObjectByID(obj.ID));
 
-            return StatusCode.ObjectDeleted;
+            return IOStatusCode.ObjectDeleted;
         }
 
         public FilesystemObject GetObjectByID(uint id)

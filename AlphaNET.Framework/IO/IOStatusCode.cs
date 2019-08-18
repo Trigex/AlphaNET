@@ -3,7 +3,7 @@
     /// <summary>
     /// Enum containing various possible statuses for the results of IO operations
     /// </summary>
-    public enum StatusCode
+    public enum IOStatusCode
     {
         ObjectNotFound,
         ObjectFound,

@@ -42,17 +42,17 @@ namespace AlphaNET.Framework.IO
         /// Removes the first child <c>FilesystemObject</c> with the given ID
         /// </summary>
         /// <param name="id">The ID to query the <c>Directory</c>'s children with</param>
-        /// <returns>The <c>StatusCode</c> representing the success status of the operation</returns>
-        public StatusCode RemoveChildByID(uint id)
+        /// <returns>The <c>IOStatusCode</c> representing the success status of the operation</returns>
+        public IOStatusCode RemoveChildByID(uint id)
         {
             // attempt to remove the object of the given ID
             if (Children.Remove(GetChildByID(id)))
             {
-                return StatusCode.ObjectDeleted;
+                return IOStatusCode.ObjectDeleted;
             }
             else
             {
-                return StatusCode.ObjectNotDeleted;
+                return IOStatusCode.ObjectNotDeleted;
             }
         }
 
