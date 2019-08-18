@@ -1,4 +1,6 @@
-﻿namespace AlphaNET.Framework.Client
+﻿using System;
+
+namespace AlphaNET.Framework.Client
 {
     public interface IConsole
     {
@@ -8,46 +10,42 @@
         string ReadLine();
         void Clear();
     }
+
     public class Terminal : IConsole
     {
-        public Std Stdout { get; set; }
-        public Std Stdin { get; set; }
-        public Std Stderr { get; set; }
-
         public enum Std
         {
             Console,
             File
         }
 
-        public Terminal()
-        {
-
-        }
+        public Std Stdout { get; set; }
+        public Std Stdin { get; set; }
+        public Std Stderr { get; set; }
 
         public void Write(string text)
         {
-            System.Console.Write(text);
+            Console.Write(text);
         }
 
         public void WriteLine(string text)
         {
-            System.Console.WriteLine(text);
+            Console.WriteLine(text);
         }
 
         public int Read()
         {
-            return System.Console.Read();
+            return Console.Read();
         }
 
         public string ReadLine()
         {
-            return System.Console.ReadLine();
+            return Console.ReadLine();
         }
 
         public void Clear()
         {
-            System.Console.Clear();
+            Console.Clear();
         }
     }
 }

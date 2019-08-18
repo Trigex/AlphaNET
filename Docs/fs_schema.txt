@@ -3,7 +3,6 @@ FS Version (byte) The FS Version of this file
 00001001- (byte, 9 in decimal) FS File header end flag
 
 00000001 - (byte, 1 in decimal) Directory list start flag
-
 <Directory object schema>
 00000101 - (byte, 5 in decimal) Directory start flag
 ID (uint, 4 bytes) A randomly generated ID, checked for collisions, used to identify this directory
@@ -15,7 +14,6 @@ Title (next 1-65535 bytes, UTF-8 encoded) Title of the directory
 
 
 00000011 - (byte, 3 in decimal) File list start flag
-
 <File object schema>
 00000111 - (byte, 7 in decimal) File start flag
 ID (uint, 4 bytes) A randomly generated ID, checked for collisions, used to identify this file
@@ -26,5 +24,4 @@ Plaintext? (1 byte) Is this a plain text file? (0 = false, 1 = true)
 Contents length (uint, 4 bytes) Length of the file contents in bytes
 Contents (next 1-4294967295 bytes (4 gigs!)) The file contents, either as raw bytes, or UTF-8 encoded bytes, if plaintext was true
 00001000 - (byte, 8 in decimal) File end flag
-
 00000100 - (byte, 4 in decimal) File list end flag

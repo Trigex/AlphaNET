@@ -15,9 +15,7 @@ namespace AlphaNET.Framework.Client
         private SocketManager _socketManager;
         private TypescriptCompiler _compiler;
 
-        public Computer()
-        {   
-        }
+        private const string FsPath = "debug.fs";
 
         public void Init(Filesystem filesystem, bool offlineMode, string ip = null, int port = 0, IConsole console = null)
         {
@@ -42,7 +40,7 @@ namespace AlphaNET.Framework.Client
                 }
             }
             _compiler = new TypescriptCompiler();
-            var system = _compiler.Compile(new string[] { IOUtils.ReadManifestData<Computer>("system.ts") });
+            var system = _compiler.Compile(new[] { IOUtils.ReadManifestData<Computer>("system.ts") });
             // append third party libs
             system += "\n" + IOUtils.ReadManifestData<Computer>("minimist.js") + "\n" + IOUtils.ReadManifestData<Computer>("lodash.min.js");
 
@@ -56,11 +54,6 @@ namespace AlphaNET.Framework.Client
             _console.WriteLine("Running Init script...");
             var init = (File)_fs.GetObjectByAbsolutePath("/bin/init.js");
             _interpreter.Execute(new Process(Encoding.UTF8.GetString(init.Contents), new string[1]), true);
-        }
-
-        public Filesystem GetFilesystem()
-        {
-            return _fs;
         }
 
         /// <summary>
@@ -84,9 +77,6 @@ namespace AlphaNET.Framework.Client
             _fs.AddObject(new File("cat.js", _fs.GenerateFilesystemObjectId(), true, Encoding.UTF8.GetBytes(_compiler.Compile(catProgram))), bin);
             _fs.AddObject(new File("net.js", _fs.GenerateFilesystemObjectId(), true, Encoding.UTF8.GetBytes(_compiler.Compile(netProgram))), bin);
             _fs.AddObject(new File("cd.js", _fs.GenerateFilesystemObjectId(), true, Encoding.UTF8.GetBytes(_compiler.Compile(cdProgram))), bin);
-
-            BinaryManager.WriteBinaryToFile("debug.fs", BinaryManager.CreateBinaryFromFilesystem(_fs));
-            BinaryManager.ReloadFilesystemFromBinary(_fs, System.IO.File.ReadAllBytes("debug.fs"));
         }
 
         /// <summary>
@@ -95,8 +85,11 @@ namespace AlphaNET.Framework.Client
         /// <returns>The generated <c>Filesystem</c></returns>
         private static Filesystem BootstrapFilesystem()
         {
-            System.Console.WriteLine("Bootstrapping filesystem...");
-            var fs = new Filesystem();
+            Console.WriteLine("Bootstrapping filesystem...");
+            var fs = new Filesystem(FsPath);
+            // run create binary to get basic layout setup
+            BinaryManager.WriteBinaryToFile(FsPath, BinaryManager.CreateBinaryFromFilesystem(fs));
+            //BinaryManager.PrintFilesystem(BinaryManager.ReadBinaryFromFile(FsPath));
             var root = new Directory("root", fs.GenerateFilesystemObjectId());
             root.Owner = root;
             var bin = new Directory("bin", fs.GenerateFilesystemObjectId());
@@ -104,13 +97,14 @@ namespace AlphaNET.Framework.Client
             var hello = new File("hello.txt", fs.GenerateFilesystemObjectId(), true, Encoding.UTF8.GetBytes("Hello, World!"));
             var src = new Directory("src", fs.GenerateFilesystemObjectId());
 
+            // Adding fs objects will automatically append to the fs binary
             fs.AddObject(root);
             fs.AddObject(bin, root);
             fs.AddObject(hello, root);
             fs.AddObject(lib, root);
             fs.AddObject(src, root);
 
-            BinaryManager.WriteBinaryToFile("debug.fs", BinaryManager.CreateBinaryFromFilesystem(fs));
+            //BinaryManager.WriteBinaryToFile("debug.fs", BinaryManager.CreateBinaryFromFilesystem(fs));
             return fs;
         }
     }

@@ -7,8 +7,11 @@ namespace AlphaNET.Framework.IO
     public class Filesystem
     {
         public List<FilesystemObject> FilesystemObjects { get; }
-        public Filesystem()
+        private readonly string _fsPath;
+
+        public Filesystem(string fsPath)
         {
+            _fsPath = fsPath;
             FilesystemObjects = new List<FilesystemObject>();
         }
 
@@ -26,6 +29,9 @@ namespace AlphaNET.Framework.IO
             // Add to FilesystemObjects list
             FilesystemObjects.Add(obj);
 
+            // Append to bin
+            WriteObject(obj);
+
             return IoStatusCode.ObjectAdded;
         }
 
@@ -34,6 +40,7 @@ namespace AlphaNET.Framework.IO
         {
             // Add to FilesystemObjects list
             FilesystemObjects.Add(obj);
+            WriteObject(obj);
             return IoStatusCode.ObjectAdded;
         }
 
@@ -204,6 +211,18 @@ namespace AlphaNET.Framework.IO
             }
 
             return id;
+        }
+
+        private void WriteObject(FilesystemObject obj)
+        {
+            if (obj.GetType() == typeof(File))
+            {
+                BinaryManager.AppendFilesystemObjectToBinary((File)obj, _fsPath);
+            } else if (obj.GetType() == typeof(Directory))
+            {
+                BinaryManager.AppendFilesystemObjectToBinary((Directory)obj, _fsPath);
+            }
+            //BinaryManager.PrintFilesystem(BinaryManager.ReadBinaryFromFile(_fsPath));
         }
     }
 }

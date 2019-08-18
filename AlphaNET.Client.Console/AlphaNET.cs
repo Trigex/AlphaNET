@@ -15,7 +15,6 @@ namespace AlphaNET.Client.Console
 
             CliArgs.Parse(args).WithParsed(o =>
             {
-                Filesystem fs;
                 var ip = DefaultIp;
                 var port = DefaultPort;
 
@@ -25,7 +24,7 @@ namespace AlphaNET.Client.Console
                 if (o.Port != 0)
                     port = o.Port;
 
-                fs = o.FilesystemPath != null ? BinaryManager.CreateFilesystemFromBinary(BinaryManager.ReadBinaryFromFile(o.FilesystemPath)) : null;
+                var fs = o.FilesystemPath != null ? BinaryManager.CreateFilesystemFromBinary(BinaryManager.ReadBinaryFromFile(o.FilesystemPath)) : null;
 
                 if (o.Offline)
                     computer.Init(fs, true);
