@@ -10,13 +10,13 @@ namespace AlphaNET.Framework.Proxies
         public FilesystemProxy(Filesystem filesystem)
         {
             _filesystem = filesystem;
-            Root = (Directory)_filesystem.GetFilesystemObjectsByTitle("root")[0];
+            Root = (Directory)_filesystem.GetObjectsByTitle("root")[0];
         }
 
         public File GetFileByTitle(string title)
         {
-            var files = _filesystem.GetFilesystemObjectsByTitle(title);
-            if (files != null && files.Length > 0)
+            var files = _filesystem.GetObjectsByTitle(title);
+            if (files != null && files.Count > 0)
             {
                 if (files[0].GetType() == typeof(File))
                 {
@@ -35,8 +35,8 @@ namespace AlphaNET.Framework.Proxies
 
         public Directory GetDirectoryByTitle(string title)
         {
-            var dirs = _filesystem.GetFilesystemObjectsByTitle(title);
-            if (dirs != null && dirs.Length > 0)
+            var dirs = _filesystem.GetObjectsByTitle(title);
+            if (dirs != null && dirs.Count > 0)
             {
                 if (dirs[0].GetType() == typeof(Directory))
                 {
@@ -53,14 +53,14 @@ namespace AlphaNET.Framework.Proxies
             }
         }
 
-        public FilesystemObject GetFilesystemObjectByAbsolutePath(string path)
+        public FilesystemObject GetObjectByAbsolutePath(string path)
         {
-            return _filesystem.GetFilesystemObjectByAbsolutePath(path);
+            return _filesystem.GetObjectByAbsolutePath(path);
         }
 
-        public string GetAbsolutePathByFilesystemObject(FilesystemObject fsObj)
+        public string GetAbsolutePathByObject(FilesystemObject fsObj)
         {
-            return _filesystem.GetAbsolutePathByFilesystemObject(fsObj);
+            return _filesystem.GetAbsolutePathByObject(fsObj);
         }
 
         public uint GenerateFilesystemObjectID()
@@ -68,14 +68,14 @@ namespace AlphaNET.Framework.Proxies
             return _filesystem.GenerateFilesystemObjectID();
         }
 
-        public StatusCode AddFilesystemObject(FilesystemObject fsObj, Directory dir)
+        public StatusCode AddObject(FilesystemObject fsObj, Directory dir)
         {
-            return _filesystem.AddFilesystemObject(fsObj, dir);
+            return _filesystem.AddObject(fsObj, dir);
         }
 
-        public StatusCode DeleteFilesystemObject(FilesystemObject fsObj)
+        public StatusCode DeleteObject(FilesystemObject fsObj)
         {
-            return _filesystem.DeleteFilesystemObject(fsObj);
+            return _filesystem.DeleteObject(fsObj);
         }
     }
 }

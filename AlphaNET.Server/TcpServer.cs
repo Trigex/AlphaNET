@@ -18,13 +18,12 @@ namespace AlphaNET.Server
         private Logger _logger;
         private List<OngoingRequest> _ongoingRequests;
 
-        public TcpServer()
-        {
-            _logger = LogManager.GetCurrentClassLogger();
-        }
+        public TcpServer() { }
 
         public bool Init(string ip, int port)
         {
+            _logger = LogManager.GetCurrentClassLogger();
+
             try
             {
                 _server = new WatsonTcpServer(ip, port);
@@ -48,16 +47,16 @@ namespace AlphaNET.Server
 
         private bool ClientConnected(string ipPort)
         {
-            _logger.Info("Client connected: " + ipPort);
+            // When a client initally connects, generate or find a virtual ip for their real ip address, and send it to them
+
+            _logger.Info(string.Format("User Connected, IP {0}", ipPort));
 
             string virtualIp; // Virtual IP we will eventually send back to client
             string ip = Utils.StripIpPort(ipPort); // ipPort, but with the port stripped
 
-            // TODO: Move all DB query stuff into methods on UserContext
-
             // 1 client at a time per ip ;) At some point I'll implement a system to allow a realIp to own more than one VirtualIP.
             // But gotta find a way to regulate that, maybe a client is given X number of allowed virtual IPs?
-            if (GetUserInConnectedList(ipPort) != null)
+            if (GetConnectedUserByReal(ipPort) != null)
             {
                 _server.DisconnectClient(ipPort);
             }
@@ -66,13 +65,11 @@ namespace AlphaNET.Server
 
             if (userDbEntry != null) // User exists
             {
-                _logger.Info("Client is an existing user!");
                 virtualIp = userDbEntry.VirtualIp;
-                _logger.Info(string.Format("Client's existing Virtual IP is: {0}", virtualIp));
+                _logger.Info(string.Format("User's existing Virtual IP is: {0}", virtualIp));
             }
             else // New user, create entry
             {
-                _logger.Info("Client is a new user!");
                 virtualIp = Utils.GenerateIpAddress();
                 if (QueryUserContext.GetVirtualIPCount(virtualIp) > 0) // Make sure this IP isn't a duplicate
                 {
@@ -80,92 +77,78 @@ namespace AlphaNET.Server
                     ClientConnected(ipPort); // Rerun this method, generate another
                 }
 
-                var user = new User { RealIp = ip, VirtualIp = virtualIp };
-                QueryUserContext.AddUser(user);
-                _logger.Info(string.Format("Generated new Virtual IP for client: {0}", virtualIp));
+                QueryUserContext.AddUser(new User { RealIp = ip, VirtualIp = virtualIp });
+                _logger.Info(string.Format("Generated a Virtual IP for a new user: {0}", virtualIp));
             }
 
             // Send client their virtual IP
             VirtualIP virtualIpPacket = new VirtualIP(virtualIp);
             Send(virtualIpPacket, ipPort);
             // Add them to connectedUsers list
-            _connectedUsers.Add(new User { RealIp = ipPort, VirtualIp = virtualIp });
-            _logger.Info("Sent client their Virtual IP, and added them to the Connected Users list");
+            AddUserToConnected(new User { RealIp = ipPort, VirtualIp = virtualIp });
             return true;
         }
 
         private bool ClientDisconnected(string ipPort)
         {
-            RemoveUserFromConnectedList(Utils.StripIpPort(ipPort));
-            _logger.Info("Client disconnected: " + ipPort);
+            RemoveConnectedUser(ipPort);
+            _logger.Info("User disconnected: " + ipPort);
             return true;
         }
 
-        private void Send(Packet packet, string ipPort) // Just copied from TcpClient lol
+        private void Send(Packet packet, string ipPort)
         {
-            byte[] packetData; // final buffer which will hold the data to send
-            // Serialize packet, store in MemoryStream
-            var stream = new MemoryStream();
-            var formatter = new BinaryFormatter();
-            formatter.Serialize(stream, packet);
-            // create list from stream
-            var dataList = new List<byte>(stream.ToArray());
-            stream.Close(); // close
-            dataList.Insert(0, packet.Type); // set first byte to packet type
-            packetData = dataList.ToArray(); // set final buffer to list array contents
-            _server.Send(ipPort, packetData); // send
-            Debug.WriteLine("Sent: " + packet.GetType());
+            var bytes = PacketUtils.Serialize(packet);
+            _server.Send(ipPort, bytes); // send
+            _logger.Info("Sent packet \"{0}\", to {1}, {2} bytes", packet.GetType(), ipPort, bytes.Length);
         }
 
         private bool MessageReceived(string ipPort, byte[] data)
         {
-            // strip packet type byte before inserting into memory stream
-            var dataList = new List<byte>(data);
-            dataList.RemoveAt(0);
-            var stream = new MemoryStream(dataList.ToArray());
-            var formatter = new BinaryFormatter();
+            Packet packet = PacketUtils.Deserialize(data);
 
             try
             {
-                switch (data[0]) // First byte should always be the PacketTypeCode
+                switch (packet) // First byte should always be the PacketTypeCode
                 {
-                    case PacketType.REQUEST_SOCKET_STATUS: // Client is requesting packet SocketStatus of the given address
-                        var requestSocketStatus = (RequestSocketStatus)formatter.Deserialize(stream);
-                        _logger.Info(string.Format("RequestSocketStatus: For address {0}", requestSocketStatus.requestedAddress.ToString()));
-                        var remoteClient = GetUserInConnectedListByVirtual(requestSocketStatus.requestedAddress.IpAddress);
+                    case SocketStatusRequest rss: // Client is requesting packet SocketStatus of the given address
+                        var SocketStatusRequest = (SocketStatusRequest)packet;
+                        _logger.Info(string.Format("SocketStatusRequest: For address {0}", SocketStatusRequest.requestedAddress.ToString()));
+                        var remoteClient = GetConnectedUserByVirtual(SocketStatusRequest.requestedAddress.IpAddress);
                         // Check if the client of the remote address is connected to this server
                         if (remoteClient != null)
                         {
                             // Add this request to ongoingrequests
-                            _ongoingRequests.Add(new OngoingRequest(requestSocketStatus.requestingAddress, GetUserInConnectedList(ipPort), requestSocketStatus.requestedAddress, remoteClient, PacketType.SOCKET_STATUS));
+                            _ongoingRequests.Add(new OngoingRequest(SocketStatusRequest.requestingAddress, GetConnectedUserByReal(ipPort), SocketStatusRequest.requestedAddress, remoteClient, PacketType.SOCKET_STATUS));
                             // Ask the client of the address for packet SocketStatus
-                            Send(requestSocketStatus, remoteClient.RealIp);
+                            Send(SocketStatusRequest, remoteClient.RealIp);
                         }
                         else
                         {
+                            // Client not connected, send our own SocketStatusResponse to the requesting client
                             _logger.Info(string.Format("The requested address isn't connected..."));
-                            // Client not connected
+                            Send(new SocketStatusResponse(new SocketStatus(false, false), null), ipPort);
                         }
                         break;
-                    case PacketType.REQUEST_SOCKET_STATUS_RESPONSE: // A client is responding to a socket status request
-                        var requestSocketStatusResp = (RequestSocketStatusResponse)formatter.Deserialize(stream);
-                        var ongoingRequest = _ongoingRequests.Where(r => r.requestedUser == GetUserInConnectedList(ipPort) && r.RequestedPacketType == PacketType.SOCKET_STATUS).SingleOrDefault();
-                        _logger.Info(string.Format("RequestSocketStatusResponse: To address {0}", requestSocketStatusResp.RequestingAddress.ToString()));
+                    case SocketStatusResponse rssr: // A client is responding to a SocketStatusRequest
+                        var SocketStatusRequestResp = (SocketStatusResponse)packet;
+                        var ongoingRequest = _ongoingRequests.Where(r => r.requestedUser == GetConnectedUserByReal(ipPort) && r.RequestedPacketType == PacketType.SOCKET_STATUS).SingleOrDefault();
+                        _logger.Info(string.Format("SocketStatusResponse: To address {0}", SocketStatusRequestResp.RequestingAddress.ToString()));
                         if(ongoingRequest != null) // Check if there's actually an ongoingrequest
                         {
                             // send to the original requesting client
-                            Send(requestSocketStatusResp.SocketStatus, ongoingRequest.requestingUser.RealIp);
+                            Send(SocketStatusRequestResp.SocketStatus, ongoingRequest.requestingUser.RealIp);
                             // remove from ongoing
                             _ongoingRequests.Remove(ongoingRequest);
                         }
                         break;
-                    case PacketType.REQUEST_SOCKET_CONNECTION:
-                        var requestSocketConn = (RequestSocketConnection)formatter.Deserialize(stream);
+                    case SocketConnectionRequest rsc:
+                        var requestSocketConn = (SocketConnectionRequest)packet;
                         Debug.WriteLine(requestSocketConn);
-                        _logger.Info(string.Format("RequestSocketConnection: Remote: {0}, Requesting: {1}", requestSocketConn.remoteAddress.ToString(), requestSocketConn.requestingAddress.ToString()));
+                        _logger.Info(string.Format("SocketConnectionRequest: Remote: {0}, Requesting: {1}", requestSocketConn.remoteAddress.ToString(), requestSocketConn.requestingAddress.ToString()));
                         break;
-                    case PacketType.SOCKET_CONNECTION_STATUS:
-                        var socketConnStatus = (SocketConnectionStatus)formatter.Deserialize(stream);
+                    case SocketConnectionStatus scs:
+                        var socketConnStatus = (SocketConnectionStatus)packet;
                         _logger.Info(string.Format("SocketConnectionStatus: Connected: {0}", socketConnStatus.Connected));
                         break;
                     default:
@@ -178,24 +161,33 @@ namespace AlphaNET.Server
                 _logger.Error(e.ToString());
             }
 
-            stream.Close();
             return true;
         }
 
-        private User GetUserInConnectedList(string realIp)
+        private User GetConnectedUserByReal(string realIp)
         {
             return _connectedUsers.Where(u => u.RealIp == realIp).SingleOrDefault();
         }
 
-        private User GetUserInConnectedListByVirtual(string virtualIp)
+        private User GetConnectedUserByVirtual(string virtualIp)
         {
             return _connectedUsers.Where(u => u.VirtualIp == virtualIp).SingleOrDefault();
         }
 
-        private void RemoveUserFromConnectedList(string realIp)
+        private void RemoveConnectedUser(string realIp)
         {
             var index = _connectedUsers.FindIndex(u => u.RealIp == realIp);
-            _connectedUsers.RemoveAt(index);
+            if(index >= 0)
+            {
+                _connectedUsers.RemoveAt(index);
+                _logger.Info(String.Format("Removed user {0} from connected users list", realIp));
+            }
+        }
+
+        private void AddUserToConnected(User user)
+        {
+            _logger.Info(String.Format("Added user {0} to connected users list", user.RealIp));
+            _connectedUsers.Add(user);
         }
     }
 

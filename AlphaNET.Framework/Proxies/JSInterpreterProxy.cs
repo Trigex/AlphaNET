@@ -1,4 +1,5 @@
 ﻿using AlphaNET.Framework.JS;
+using System.Threading.Tasks;
 
 namespace AlphaNET.Framework.Proxies
 {
@@ -11,9 +12,14 @@ namespace AlphaNET.Framework.Proxies
             _interpreter = interpreter;
         }
 
-        public int ExecuteScript(string script, bool isTypescript, string[] args)
+        public void Execute(string script, string[] args, bool blocking)
         {
-            return _interpreter.ExecuteScript(script, isTypescript, args);
+            _interpreter.Execute(new Process(script, args), blocking);
+        }
+
+        public void Execute(Process process, bool blocking)
+        {
+            _interpreter.Execute(process, blocking);
         }
     }
 }

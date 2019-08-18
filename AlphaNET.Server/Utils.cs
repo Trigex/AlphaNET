@@ -17,7 +17,7 @@ namespace AlphaNET.Server
         }
 
         /// <summary>
-        /// Strip a <c>ipPort</c> string of it's port
+        /// Strip an <c>ipPort</c> string of it's port
         /// </summary>
         /// <param name="ipPort"></param>
         /// <returns></returns>

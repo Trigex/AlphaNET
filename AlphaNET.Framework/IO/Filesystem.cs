@@ -12,10 +12,10 @@ namespace AlphaNET.Framework.IO
             FilesystemObjects = new List<FilesystemObject>();
         }
 
-        public StatusCode AddFilesystemObject(FilesystemObject obj, Directory dir)
+        public StatusCode AddObject(FilesystemObject obj, Directory dir)
         {
             // Check if the directory the object is being added to exists
-            if (GetFilesystemObjectByID(dir.ID) == null)
+            if (GetObjectByID(dir.ID) == null)
             {
                 return StatusCode.ObjectNotFound;
             }
@@ -30,17 +30,17 @@ namespace AlphaNET.Framework.IO
         }
 
 
-        public StatusCode AddFilesystemObject(FilesystemObject obj)
+        public StatusCode AddObject(FilesystemObject obj)
         {
             // Add to FilesystemObjects list
             FilesystemObjects.Add(obj);
             return StatusCode.ObjectAdded;
         }
 
-        public StatusCode MoveFilesystemObject(FilesystemObject obj, Directory dir)
+        public StatusCode MoveObject(FilesystemObject obj, Directory dir)
         {
             // Check if the new directory's children list already has an object of obj's ID
-            if (dir.GetChildFilesystemObjectByID(obj.ID) != null)
+            if (dir.GetChildByID(obj.ID) != null)
             {
                 return StatusCode.ObjectAlreadyPresent;
             }
@@ -52,10 +52,10 @@ namespace AlphaNET.Framework.IO
             return StatusCode.ObjectMoved;
         }
 
-        public StatusCode DeleteFilesystemObject(FilesystemObject obj)
+        public StatusCode DeleteObject(FilesystemObject obj)
         {
             // Check if FilesystemObject is actually present in the Filesystem
-            if (GetFilesystemObjectByID(obj.ID) == null)
+            if (GetObjectByID(obj.ID) == null)
             {
                 return StatusCode.ObjectNotFound;
             }
@@ -70,39 +70,31 @@ namespace AlphaNET.Framework.IO
                 foreach (var subObj in dirObj.Children.ToList())
                 {
                     // Recurrsion!!! This'll probably work, I hope
-                    DeleteFilesystemObject(subObj);
+                    DeleteObject(subObj);
                 }
             }
 
             // Remove from Owner's object list
-            obj.Owner.RemoveChildFilesystemObjectByID(obj.ID);
+            obj.Owner.RemoveChildByID(obj.ID);
             // Remove from Filesystem object list
-            FilesystemObjects.Remove(GetFilesystemObjectByID(obj.ID));
+            FilesystemObjects.Remove(GetObjectByID(obj.ID));
 
             return StatusCode.ObjectDeleted;
         }
 
-        public FilesystemObject GetFilesystemObjectByID(uint id)
+        public FilesystemObject GetObjectByID(uint id)
         {
-            var objects = FilesystemObjects.Where(obj => obj.ID == id).ToArray();
-
-            if (objects == null || objects.Length == 0)
-            {
-                return null;
-            }
-
-            return objects[0];
+            return FilesystemObjects.Where(obj => obj.ID == id).SingleOrDefault();
         }
 
-        public FilesystemObject[] GetFilesystemObjectsByTitle(string title)
+        public List<FilesystemObject> GetObjectsByTitle(string title)
         {
-            var objects = FilesystemObjects.Where(obj => obj.Title == title).ToArray();
-            if (objects == null || objects.Length == 0)
-            {
-                return null;
-            }
+            return FilesystemObjects.Where(obj => obj.Title == title).ToList();
+        }
 
-            return objects;
+        public FilesystemObject GetObjectByTitle(string title)
+        {
+            return FilesystemObjects.Where(obj => obj.Title == title).SingleOrDefault();
         }
 
         /// <summary>
@@ -110,7 +102,7 @@ namespace AlphaNET.Framework.IO
         /// </summary>
         /// <param name="path">Absolute path locating the <c>FilesystemObject</c></param>
         /// <returns><c>FilesystemObject</c> found at the absolute path</returns>
-        public FilesystemObject GetFilesystemObjectByAbsolutePath(string path)
+        public FilesystemObject GetObjectByAbsolutePath(string path)
         {
             // /bin/ls.js
             FilesystemObject returnObject = null;
@@ -127,11 +119,11 @@ namespace AlphaNET.Framework.IO
             resources = resourceList.ToArray();
 
             // it's an absolute path, so start at root
-            Directory dir = (Directory)GetFilesystemObjectsByTitle("root")[0];
+            Directory dir = (Directory)GetObjectByTitle("root");
             foreach (string resource in resources)
             {
                 FilesystemObject child = null;
-                child = dir.GetChildFilesystemObjectByTitle(resource);
+                child = dir.GetChildByTitle(resource);
 
                 if (child != null)
                 {
@@ -156,7 +148,7 @@ namespace AlphaNET.Framework.IO
         /// </summary>
         /// <param name="fsObj"><c>FilesystemObject</c> to build the absolute path to</param>
         /// <returns>Absolute path to the <c>FilesystemObject</c></returns>
-        public string GetAbsolutePathByFilesystemObject(FilesystemObject fsObj)
+        public string GetAbsolutePathByObject(FilesystemObject fsObj)
         {
             string returnPath = "";
             // traverse fsObj parents until root is hit

@@ -1,15 +1,20 @@
 /// <reference path="kernel/types/os.d.ts" />
-function Main() {
-    var file: FILE;
+/// <reference path="kernel/types/thirdparty.d.ts" />
+/// <reference path="kernel/system.ts" />
+var file: FILE;
 
-    if(Global.ProcessArguments[1]) {
-        file = Filesystem.GetFilesystemObjectByAbsolutePath(Global.ProcessArguments[1]) as FILE;
+function cat(args: string[]) {
+    if(args[0]) {
+        file = Filesystem.GetObjectByAbsolutePath(args[0]) as FILE;
+        if(file.IsPlaintext)
+        {
+            Terminal.WriteLine(UTF8.GetString(file.Contents));
+            return;
+        }
     } else {
-        Terminal.WriteLine("No file was supplied!");
-        return 1;
+        Terminal.WriteLine("No file path argument was provided");
+        return;
     }
-
-    Terminal.WriteLine(UTF8.GetString(file.Contents));
-
-    return 0;
 }
+
+cat(args);

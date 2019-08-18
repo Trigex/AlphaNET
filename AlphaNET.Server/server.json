@@ -1,0 +1,9 @@
+﻿{
+  "tcp": {
+    "ip": "127.0.0.1",
+    "port": 1337
+  },
+  "db": {
+    "connectionString": "Server=(localdb)\\mssqllocaldb;Database=AlphaNET;Integrated Security=True"
+  }
+}

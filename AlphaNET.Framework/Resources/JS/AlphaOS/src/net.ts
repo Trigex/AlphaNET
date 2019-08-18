@@ -1,14 +1,11 @@
 ﻿/// <reference path="kernel/types/os.d.ts" />
-function Main() {
-    var socket;
-    if(Global.ProcessArguments[1]) {
-        switch(Global.ProcessArguments[1]) {
-            case "client":
-                break;
-            case "server":
-                break;
-        }
-    } else {
+/// <reference path="kernel/system.ts" />
+function net(args: string[]) {
+    switch(args[0]) {
+        case "test":
 
+            break;
     }
 }
+
+net(args);

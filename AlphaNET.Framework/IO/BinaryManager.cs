@@ -114,7 +114,7 @@ namespace AlphaNET.Framework.IO
 
             ReadDirectories(reader, fs);
 
-            // The ReadDirectories functions consumes DIR_LIST_END, in order to know when to stop, so it's not present here
+            // The ReadDirectories method consumes DIR_LIST_END, in order to know when to stop, so it's not present here
             var fileListStart = reader.ReadByte();
             if (fileListStart != FILE_LIST_START)// File List Start
             {
@@ -123,7 +123,7 @@ namespace AlphaNET.Framework.IO
 
             ReadFiles(reader, fs);
 
-            // The ReadFiles functions consumes FILE_LIST_END, in order to know when to stop, so it's not present here
+            // The ReadFiles method consumes FILE_LIST_END, in order to know when to stop, so it's not present here
             // Filesystem should be complete!
 
             reader.Close();
@@ -209,18 +209,18 @@ namespace AlphaNET.Framework.IO
                 if (newDir.Title == "root")
                 {
                     newDir.Owner = newDir;
-                    filesystem.AddFilesystemObject(newDir);
+                    filesystem.AddObject(newDir);
                 }
                 else
                 {
-                    var dirOwner = (Directory)filesystem.GetFilesystemObjectByID(dirMeta.OwnerID);
+                    var dirOwner = (Directory)filesystem.GetObjectByID(dirMeta.OwnerID);
 
                     if (dirOwner == null | dirOwner.GetType() != typeof(Directory))
                     {
                         // Error!
                     }
 
-                    filesystem.AddFilesystemObject(newDir, dirOwner);
+                    filesystem.AddObject(newDir, dirOwner);
                 }
 
                 if (reader.ReadByte() == DIR_LIST_END)
@@ -252,14 +252,14 @@ namespace AlphaNET.Framework.IO
                 var fileContents = reader.ReadBytes((int)fileContentsLength);
                 var fileEnd = reader.ReadByte();
 
-                var fileOwner = (Directory)filesystem.GetFilesystemObjectByID(fileMeta.OwnerID);
+                var fileOwner = (Directory)filesystem.GetObjectByID(fileMeta.OwnerID);
                 if (fileOwner == null)
                 {
                     // Error!
                 }
 
                 var newFile = new File(Encoding.UTF8.GetString(fileMeta.Title), fileMeta.ID, plaintext, fileContents);
-                filesystem.AddFilesystemObject(newFile, fileOwner);
+                filesystem.AddObject(newFile, fileOwner);
 
                 if (reader.ReadByte() == FILE_LIST_END)
                 {

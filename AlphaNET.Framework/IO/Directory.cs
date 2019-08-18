@@ -28,7 +28,7 @@ namespace AlphaNET.Framework.IO
         /// </summary>
         /// <param name="id">The ID to query the <c>Directory</c>'s children with</param>
         /// <returns>The first result of the query; null if no matching child was found</returns>
-        public FilesystemObject GetChildFilesystemObjectByID(uint id)
+        public FilesystemObject GetChildByID(uint id)
         {
             if (Children.Count < 1)
             {
@@ -39,11 +39,29 @@ namespace AlphaNET.Framework.IO
         }
 
         /// <summary>
+        /// Removes the first child <c>FilesystemObject</c> with the given ID
+        /// </summary>
+        /// <param name="id">The ID to query the <c>Directory</c>'s children with</param>
+        /// <returns>The <c>StatusCode</c> representing the success status of the operation</returns>
+        public StatusCode RemoveChildByID(uint id)
+        {
+            // attempt to remove the object of the given ID
+            if (Children.Remove(GetChildByID(id)))
+            {
+                return StatusCode.ObjectDeleted;
+            }
+            else
+            {
+                return StatusCode.ObjectNotDeleted;
+            }
+        }
+
+        /// <summary>
         /// Returns the first child <c>FilesystemObject</c> with the given title
         /// </summary>
         /// <param name="title">The title to query the <c>Directory</c>'s children with</param>
         /// <returns>The first result of the query; null if no matching child was found</returns>
-        public FilesystemObject GetChildFilesystemObjectByTitle(string title)
+        public FilesystemObject GetChildByTitle(string title)
         {
             if (Children.Count < 1)
             {
@@ -59,25 +77,17 @@ namespace AlphaNET.Framework.IO
             return objects[0];
         }
 
-        /// <summary>
-        /// Removes the first child <c>FilesystemObject</c> with the given ID
-        /// </summary>
-        /// <param name="id">The ID to query the <c>Directory</c>'s children with</param>
-        /// <returns>The <c>StatusCode</c> representing the success status of the operation</returns>
-        public StatusCode RemoveChildFilesystemObjectByID(uint id)
+        public List<FilesystemObject> GetChildrenByTitle(string title)
         {
-            // attempt to remove the object of the given ID
-            if (Children.Remove(GetChildFilesystemObjectByID(id)))
+            if (Children.Count < 1)
             {
-                return StatusCode.ObjectDeleted;
+                return null;
             }
-            else
-            {
-                return StatusCode.ObjectNotDeleted;
-            }
+
+            return Children.Where(obj => obj.Title == title).ToList();
         }
 
-        public List<FilesystemObject> GetChildrenFilesystemObjects()
+        public List<FilesystemObject> GetChildren()
         {
             return Children;
         }

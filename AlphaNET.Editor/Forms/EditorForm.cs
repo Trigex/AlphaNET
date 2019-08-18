@@ -186,7 +186,7 @@ namespace AlphaNET.Editor.Forms
 
                     var file = new File(bin.Key, IOUtils.GenerateID(), plaintext, bin.Value);
                     var fileItem = new FileGridItem(file.ID, file.Title, file.IsPlaintext, file);
-                    fs.AddFilesystemObject(file, importDirectory);
+                    fs.AddObject(file, importDirectory);
 
                     selectedItem.Children.Add(fileItem);
                 }
@@ -234,7 +234,7 @@ namespace AlphaNET.Editor.Forms
                 {
                     parent.Children.Remove(selectedItem);
                     // remove from filesystem
-                    fs.DeleteFilesystemObject(fsObj);
+                    fs.DeleteObject(fsObj);
                     // reload
                     fsView.ReloadData();
                 }

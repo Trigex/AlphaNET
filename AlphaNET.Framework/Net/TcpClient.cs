@@ -34,17 +34,7 @@ namespace AlphaNET.Framework.Net
 
         public void Send(Packet packet)
         {
-            byte[] packetData; // final buffer which will hold the data to send
-            // Serialize packet, store in MemoryStream
-            var stream = new MemoryStream();
-            var formatter = new BinaryFormatter();
-            formatter.Serialize(stream, packet);
-            // create list from stream
-            var dataList = new List<byte>(stream.ToArray());
-            stream.Close(); // close
-            dataList.Insert(0, packet.Type); // set first byte to packet type
-            packetData = dataList.ToArray(); // set final buffer to list array contents
-            _client.Send(packetData); // send
+            _client.Send(PacketUtils.Serialize(packet)); // send
             Console.WriteLine("Sent: " + packet.GetType());
         }
 
@@ -56,35 +46,31 @@ namespace AlphaNET.Framework.Net
 
         private bool ServerDisconnected()
         {
-            Console.WriteLine("Server disconnected");
+            Console.WriteLine("Disconnected from server");
             return true;
         }
 
         private bool MessageRecieved(byte[] data)
         {
-            // strip packet type byte before inserting into memory stream
-            var dataList = new List<byte>(data);
-            dataList.RemoveAt(0);
-            var stream = new MemoryStream(dataList.ToArray());
-            var formatter = new BinaryFormatter();
-            Console.WriteLine("Recieved: " + data.ToString());
+            Packet packet = PacketUtils.Deserialize(data);
+            Console.WriteLine("Recieved: " + packet.GetType());
             try
             {
-                switch (data[0])
+                switch (packet)
                 {
-                    case PacketType.VIRTUAL_IP: // We recieved our Virtual IP from the server, set it
-                        virtualIp = (VirtualIP)formatter.Deserialize(stream);
+                    case VirtualIP vip: // We recieved our Virtual IP from the server, set it
+                        virtualIp = (VirtualIP)packet;
                         Console.WriteLine(string.Format("VirtualIP: {0}", virtualIp.ip));
                         break;
-                    case PacketType.REQUEST_SOCKET_STATUS: // Recieved RequestSocketStatus from the server. Send a response!
-                        var reqSocketStatus = (RequestSocketStatus)formatter.Deserialize(stream);
+                    case SocketStatusRequest rss: // Recieved SocketStatusRequest from the server. Send a response!
+                        var reqSocketStatus = (SocketStatusRequest)packet;
                         // pass to SocketManager
-                        Console.WriteLine(string.Format("RequestSocketStatus: {0}", reqSocketStatus.requestedAddress.ToString()));
+                        Console.WriteLine(string.Format("SocketStatusRequest: {0}", reqSocketStatus.requestedAddress.ToString()));
                         var resSocketStatus = _socketManager.OnSocketStatusRequested(reqSocketStatus);
                         Send(resSocketStatus);
                         break;
-                    case PacketType.REQUEST_SOCKET_STATUS_RESPONSE:
-                        var sockstatusres = (RequestSocketStatusResponse)formatter.Deserialize(stream);
+                    case SocketStatusResponse rssr:
+                        var sockstatusres = (SocketStatusResponse)packet;
                         _socketManager.OnSocketStatusRetrieved(sockstatusres.SocketStatus);
                         break;
                     default:
@@ -96,7 +82,6 @@ namespace AlphaNET.Framework.Net
             {
                 Console.WriteLine(e.ToString());
             }
-            stream.Close();
             return true;
         }
     }

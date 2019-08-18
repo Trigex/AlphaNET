@@ -106,10 +106,10 @@ namespace AlphaNET.Editor.Controls
                 treeViewItems.Clear();
             }
 
-            var root = (Directory)fs.GetFilesystemObjectsByTitle("root")[0];
+            var root = (Directory)fs.GetObjectsByTitle("root")[0];
             var rootItem = new DirectoryGridItem(root.ID, root.Title, root);
             FilesystemTraverse(root, rootItem);
-            rootItem.Size = rootItem.GetDirectorySize((Directory)fs.GetFilesystemObjectByID(root.ID), 0);
+            rootItem.Size = rootItem.GetDirectorySize((Directory)fs.GetObjectByID(root.ID), 0);
             treeViewItems.Add(rootItem);
             DataStore = treeViewItems;
         }

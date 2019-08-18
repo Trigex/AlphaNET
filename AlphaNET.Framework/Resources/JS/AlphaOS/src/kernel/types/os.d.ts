@@ -18,7 +18,9 @@ declare interface List<T> {
     Count: number;
     Add(entry: any): void;
     Remove(entry: any): void;
-    ToArray(): Array <any>;
+    RemoveAt(index: number): void;
+    ToArray(): Array<T>;
+    CopyTo(array: Array<T>)
 }
 declare interface ListConstructor {
     new<T>(): List<T>; // Empty list
@@ -28,10 +30,6 @@ declare interface ListConstructor {
 declare interface UTF8 {
     GetBytes(s: string): Uint8Array;
     GetString(bytes: Uint8Array): string;
-}
-
-declare interface String {
-    includes(substr: string): boolean;
 }
 
 /*
@@ -61,7 +59,8 @@ declare interface Terminal {
 }
 
 declare interface JSInterpreter {
-    ExecuteScript(script: string, isTypescript: boolean, args: string[]): number;
+    Execute(script: string, args: Array<string>, blocking: boolean): void;
+    Execute(process: Process, blocking: boolean): void;
 }
 
 declare interface FilesystemObject {
@@ -77,23 +76,29 @@ declare interface FILE extends FilesystemObject {
     ModifyContents(newContents: Uint8Array, IsPlaintext: boolean): StatusCode;
 }
 declare interface FileConstructor {
-    new(title: string, id: number, isPlaintext: boolean, cotents: Uint8Array)
+    new(title: string, id: number, isPlaintext: boolean, contents: Uint8Array)
 }
 
 declare interface DIRECTORY extends FilesystemObject {
     Children: List<FilesystemObject>;
-    GetChildrenFilesystemObjects(): List<FilesystemObject>;
+    GetChildren(): List<FilesystemObject>;
+    GetChildrenByTitle(title: string): List<FilesystemObject>;
+    GetChildByTitle(title: string): List<FilesystemObject>;
+    GetChildByID(id: number): FilesystemObject;
+    RemoveChildByID(id: number): StatusCode;
 }
 declare interface DirectoryConstructor {
     new(title: string, id: number)
 }
 
 declare interface Filesystem {
-    GetFileByTitle(title: string): FILE
+    GetObjectByTitle(title: string): FilesystemObject;
+    GetObjectsByTitle(title: string): List<FilesystemObject>;
+    GetObjectById(id: number): FilesystemObject;
     GetDirectoryByTitle(title: string): DIRECTORY;
-    GetFilesystemObjectByAbsolutePath(path: string): FilesystemObject;
-    GetAbsolutePathByFilesystemObject(fsObj: FilesystemObject): string;
-    GenerateFilesystemObjectID(): number
+    GetObjectByAbsolutePath(path: string): FilesystemObject;
+    GetAbsolutePathByObject(fsObj: FilesystemObject): string;
+    GenerateFilesystemObjectID(): number;
 }
 
 declare interface TypescriptCompiler {
@@ -128,7 +133,7 @@ declare interface SocketManager {
 // Flesh this out a bit more later
 declare interface Process {
     Script: string;
-    Pid: number;
+    Args: Array<string>;
 }
 
 declare const Terminal: Terminal;
@@ -143,6 +148,7 @@ declare const Address: AddressConstructor;
 declare const Socket: SocketConstructor;
 declare const FILE: FileConstructor
 declare const DIRECTORY: DirectoryConstructor;
+declare const args: string[];
 
 /* EXTERNAL LIBRARY TYPE DEFINITIONS
  *

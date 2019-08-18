@@ -8,9 +8,9 @@ namespace AlphaNET.Framework.JS
     {
         private Engine _engine;
 
-        public TypescriptCompiler(Engine engine)
+        public TypescriptCompiler()
         {
-            _engine = engine;
+            _engine = new Engine();
 
             // get bootstrap and services files
             try

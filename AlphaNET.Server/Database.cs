@@ -15,7 +15,7 @@ namespace AlphaNET.Server
             _logger = LogManager.GetCurrentClassLogger();
 
             optionsBuilder.UseSqlServer(
-                @"Server=(localdb)\mssqllocaldb;Database=AlphaNET;Integrated Security=True");
+                AlphaServer.CONFIG.db.connectionString);
         }
     }
 

@@ -6,12 +6,13 @@ namespace AlphaNET.Client.Console
 {
     class AlphaNET
     {
-        static string FS_PATH = "debug.fs";
         static string DEFAULT_IP = "127.0.0.1";
         const int DEFAULT_PORT = 1337;
 
         static void Main(string[] args)
         {
+            Computer computer = new Computer();
+
             CliArgs.Parse(args).WithParsed(o =>
             {
                 Filesystem fs;
@@ -30,14 +31,11 @@ namespace AlphaNET.Client.Console
                     fs = null;
 
                 if (o.Offline)
-                    Init(new Computer(fs, true));
+                    computer.Init(fs, true);
                 else
-                    Init(new Computer(fs, false, ip, port));
+                    computer.Init(fs, false, ip, port);
             });
-        }
 
-        static void Init(Computer computer)
-        {
             computer.Start();
         }
     }

@@ -1,6 +1,14 @@
 ﻿namespace AlphaNET.Framework.Client
 {
-    public class Console
+    public interface IConsole
+    {
+        void Write(string text);
+        void WriteLine(string text);
+        int Read();
+        string ReadLine();
+        void Clear();
+    }
+    public class Terminal : IConsole
     {
         public Std Stdout { get; set; }
         public Std Stdin { get; set; }
@@ -12,7 +20,7 @@
             File
         }
 
-        public Console()
+        public Terminal()
         {
 
         }

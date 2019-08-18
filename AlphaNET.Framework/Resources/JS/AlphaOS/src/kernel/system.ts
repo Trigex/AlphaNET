@@ -6,42 +6,75 @@
  */
 /// <reference path="./types/os.d.ts" />
 
-var Processes = new List<Process>();
-
-// Create a new process, return new Process with PID
-function fork(): Process {
-    Terminal.WriteLine(`Fork called`);
-    let process = {Script: null, Pid: Processes.Count + 1};
-    Processes.Add(process);
-    return process;
+function CreateProcess(script: string, args: string[]): Process {
+    return {Script: script, Args: args};
 }
 
-/*
- *  Exec functions load a new program into the current process
- */
+const JS = {
+    ExecuteFromPath: (path: string, args: string[], blocking: boolean): void => {
+        // Get binary from path
+        let binary = Filesystem.GetObjectByAbsolutePath(path);
+        if((binary !== undefined || binary !== null) && binary instanceof FILE)
+        {
+            let file = binary as FILE;
+            JSInterpreter.Execute(UTF8.GetString(file.Contents), args, blocking);
+        }
+    },
 
-function exec(path: string, args: string[], process: Process): number {
-    Terminal.WriteLine(`exec called with path ${path}`);
-    let file = Filesystem.GetFilesystemObjectByAbsolutePath(path) as FILE;
-    Terminal.WriteLine(`${file.Title}`);
-    process.Script = UTF8.GetString(file.Contents);
-    return JSInterpreter.ExecuteScript(process.Script, false, args);
+    ExecuteFromFile: (binary: FILE, args: string[], blocking: boolean): void => {
+        if(binary instanceof FILE)
+        {
+            JSInterpreter.Execute(UTF8.GetString(binary.Contents), args, blocking);
+        }
+    },
+
+    ExecuteFromScript: (script: string, args: string[], blocking: boolean): void => {
+        JSInterpreter.Execute(script, args, blocking);
+    }
 }
 
-function wait() {
-    
+const IO = {
+    GetFileText: (file: FILE): string => {
+        return UTF8.GetString(file.Contents);
+    }
 }
 
-function GetFileText(file: FILE): string {
-    return UTF8.GetString(file.Contents);
+// Net
+const Net = {
+    ConnectSocketToEndpoint: (socket: Socket) => {
+
+    }
 }
 
-function GetFileBytes(file: FILE): Uint8Array {
-    return file.Contents;
-}
+// Wrapper around a CLR FILE, makes working with them a bit nicer
+class _File {
+    Title: string
+    Contents: Uint8Array;
+    IsPlaintext: boolean;
+    Text: string;
+    _internalFile: FILE;
 
-function GetDirectoryChildren(dir: DIRECTORY): List<FilesystemObject> {
-    return dir.Children;
+    constructor(title: string, text?: string, binary?: Uint8Array) {
+        this.Title = title;
+
+        if(text)
+        {
+            this.Text = text;
+            this.Contents = UTF8.GetBytes(text);
+            this.IsPlaintext = true;
+        } else if(binary)
+        {
+            this.Text = null;
+            this.Contents = binary;
+            this.IsPlaintext = false;
+        }
+
+        this._internalFile = new FILE(title, Filesystem.GenerateFilesystemObjectID(), this.IsPlaintext, this.Contents);
+    }
+
+    constructor(file: FILE) {
+        
+    }
 }
 
 // Console implementation, for compatability with non-AlphaNET
@@ -104,8 +137,6 @@ class CONSOLE implements Console {
     }
 }
 
-const console: CONSOLE;
-
-String.prototype.includes = function(substr: string): boolean {
-    if(this.toString())
-}
+// Globals
+const console: Console = new CONSOLE();
+const Sockets = new List<Socket>();

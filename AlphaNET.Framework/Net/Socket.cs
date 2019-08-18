@@ -48,7 +48,7 @@
             if (Connected == false && Listening == false && socketManager != null && endpointAddress != null)
             {
                 EndpointAddress = endpointAddress;
-                // SocketManager will send a RequestSocketConnect packet to AlphaNET.Server, and the AlphaNET server will send a RequestSocketStatus packet to the remote address.
+                // SocketManager will send a RequestSocketConnect packet to AlphaNET.Server, and the AlphaNET server will send a SocketStatusRequest packet to the remote address.
                 // AlphaNET server will relay the socket status to us, or send AddressNotFound if the remote address is not connected
                 return NetStatusCode.SocketConnected;
             }

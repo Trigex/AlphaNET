@@ -1,42 +1,74 @@
 ﻿using AlphaNET.Framework.Client;
 using AlphaNET.Framework.IO;
+using CommandLine;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Text;
+using System.Threading;
 
 namespace AlphaNET.Client.Visual
 {
     public class Visual : Game
     {
-        const string FS_PATH = "debug.fs";
         const int WIDTH = 1280;
         const int HEIGHT = 720;
+        const string FS_PATH = "debug.fs";
+        const string DEFAULT_IP = "127.0.0.1";
+        const int DEFAULT_PORT = 1337;
 
-        GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
-        private Computer computer;
+        private GraphicsDeviceManager _graphics;
+        private SpriteBatch _spriteBatch;
+        private Thread _computerThread;
+        private Computer _computer;
+        private Tty _tty;
 
-        public Visual()
+        public Visual(string[] args)
         {
-            graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferWidth = WIDTH;
-            graphics.PreferredBackBufferHeight = HEIGHT;
-            graphics.ApplyChanges();
+            _graphics = new GraphicsDeviceManager(this);
+            _graphics.PreferredBackBufferWidth = WIDTH;
+            _graphics.PreferredBackBufferHeight = HEIGHT;
+            _graphics.ApplyChanges();
 
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+
+            CliArgs.Parse(args).WithParsed(o =>
+            {
+                Filesystem fs;
+                string ip = DEFAULT_IP;
+                int port = DEFAULT_PORT;
+
+                if (o.Host != null)
+                    ip = o.Host;
+
+                if (o.Port != 0)
+                    port = o.Port;
+
+                if (o.FilesystemPath != null)
+                    fs = BinaryManager.CreateFilesystemFromBinary(BinaryManager.ReadBinaryFromFile(o.FilesystemPath));
+                else
+                    fs = null;
+
+                _tty = new Tty(Content.Load<SpriteFont>(@"tty"));
+
+                if (o.Offline)
+                    _computer = new Computer(fs, true, null, 0, _tty);
+                else
+                    _computer = new Computer(fs, false, ip, port, _tty);
+
+                _computerThread = new Thread(() => AlphaNET.ComputerThread(_computer));
+                _computerThread.Start();
+            });
         }
 
         protected override void Initialize()
         {
-
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            spriteBatch = new SpriteBatch(GraphicsDevice);
-
+            _spriteBatch = new SpriteBatch(GraphicsDevice);
             // TODO: use this.Content to load your game content here
         }
 
@@ -52,32 +84,9 @@ namespace AlphaNET.Client.Visual
             GraphicsDevice.Clear(Color.Black);
 
             // TODO: Add your drawing code here
+            _tty.Draw(gameTime, _spriteBatch);
 
             base.Draw(gameTime);
-        }
-
-        // Bootstrapper copied from Client.Console
-        static Filesystem BootstrapFilesystem()
-        {
-            System.Console.WriteLine("Bootstraping filesystem...");
-            Filesystem fs = new Filesystem();
-            var root = new Directory("root", IOUtils.GenerateID());
-            root.Owner = root;
-            var bin = new Directory("bin", IOUtils.GenerateID());
-            var sub = new Directory("sub", IOUtils.GenerateID());
-            var lib = new Directory("lib", IOUtils.GenerateID());
-            var hello = new File("hello.txt", IOUtils.GenerateID(), true, Encoding.UTF8.GetBytes("Hello, World!"));
-            var src = new Directory("src", IOUtils.GenerateID());
-
-            fs.AddFilesystemObject(root);
-            fs.AddFilesystemObject(bin, root);
-            fs.AddFilesystemObject(sub, bin);
-            fs.AddFilesystemObject(hello, sub);
-            fs.AddFilesystemObject(lib, root);
-            fs.AddFilesystemObject(src, root);
-
-            BinaryManager.WriteBinaryToFile(FS_PATH, BinaryManager.CreateBinaryFromFilesystem(fs));
-            return BinaryManager.CreateFilesystemFromBinary(BinaryManager.CreateBinaryFromFilesystem(fs));
         }
     }
 }

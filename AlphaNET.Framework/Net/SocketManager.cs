@@ -20,8 +20,8 @@ namespace AlphaNET.Framework.Net
         {
             Address endpoint = socket.EndpointAddress;
             Address client = socket.Address;
-            // Send RequestSocketStatus to server
-            _tcpClient.Send(new RequestSocketStatus(endpoint, client));
+            // Send SocketStatusRequest to server
+            _tcpClient.Send(new SocketStatusRequest(endpoint, client));
         }
 
         public void ListenOnSocket(Socket socket)
@@ -29,19 +29,16 @@ namespace AlphaNET.Framework.Net
             _socketList.Add(socket);
         }
 
-        public RequestSocketStatusResponse OnSocketStatusRequested(RequestSocketStatus reqSocketStatus)
+        public SocketStatusResponse OnSocketStatusRequested(SocketStatusRequest reqSocketStatus)
         {
             var sockQuery = _socketList.Where(s => s.Address.IpAddress == reqSocketStatus.requestedAddress.IpAddress && s.Address.Port == reqSocketStatus.requestedAddress.Port).SingleOrDefault();
             if (sockQuery != null)
             {
-                return new RequestSocketStatusResponse(new SocketStatus(true, true), reqSocketStatus.requestingAddress);
+                return new SocketStatusResponse(new SocketStatus(true, true), reqSocketStatus.requestingAddress);
             } else
             {
                 Console.WriteLine("A local socket matching the requested socket doesn't exist");
-
-                {
-                    return new RequestSocketStatusResponse(new SocketStatus(false, false), reqSocketStatus.requestingAddress);
-                }
+                return new SocketStatusResponse(new SocketStatus(false, false), reqSocketStatus.requestingAddress);
             }
         }
 

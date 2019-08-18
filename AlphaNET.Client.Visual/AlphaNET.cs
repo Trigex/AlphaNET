@@ -1,18 +1,23 @@
-﻿using System;
+﻿using AlphaNET.Framework.Client;
+using System;
 
 namespace AlphaNET.Client.Visual
 {
     public static class AlphaNET
     {
-        const string FS_PATH = "debug.fs";
-
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
-            using (var game = new Visual())
+            using (var game = new Visual(args))
             {
                 game.Run();
             }
+        }
+
+        public static void ComputerThread(Computer computer)
+        {
+            computer.Init();
+            computer.Start();
         }
     }
 }
