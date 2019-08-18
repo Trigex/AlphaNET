@@ -28,14 +28,14 @@ namespace AlphaNET.Framework.IO
         /// </summary>
         /// <param name="id">The ID to query the <c>Directory</c>'s children with</param>
         /// <returns>The first result of the query; null if no matching child was found</returns>
-        public FilesystemObject GetChildByID(uint id)
+        public FilesystemObject GetChildById(uint id)
         {
             if (Children.Count < 1)
             {
                 return null;
             }
 
-            return Children.Where(obj => obj.ID == id).ToArray()[0];
+            return Children.Where(obj => obj.Id == id).ToArray()[0];
         }
 
         /// <summary>
@@ -43,16 +43,16 @@ namespace AlphaNET.Framework.IO
         /// </summary>
         /// <param name="id">The ID to query the <c>Directory</c>'s children with</param>
         /// <returns>The <c>IOStatusCode</c> representing the success status of the operation</returns>
-        public IOStatusCode RemoveChildByID(uint id)
+        public IoStatusCode RemoveChildById(uint id)
         {
             // attempt to remove the object of the given ID
-            if (Children.Remove(GetChildByID(id)))
+            if (Children.Remove(GetChildById(id)))
             {
-                return IOStatusCode.ObjectDeleted;
+                return IoStatusCode.ObjectDeleted;
             }
             else
             {
-                return IOStatusCode.ObjectNotDeleted;
+                return IoStatusCode.ObjectNotDeleted;
             }
         }
 
@@ -69,12 +69,7 @@ namespace AlphaNET.Framework.IO
             }
 
             var objects = Children.Where(obj => obj.Title == title).ToArray();
-            if (objects == null || objects.Length == 0)
-            {
-                return null;
-            }
-
-            return objects[0];
+            return objects.Length == 0 ? null : objects[0];
         }
 
         public List<FilesystemObject> GetChildrenByTitle(string title)

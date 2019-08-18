@@ -15,7 +15,7 @@ namespace AlphaNET.Server
             _logger = LogManager.GetCurrentClassLogger();
 
             optionsBuilder.UseSqlServer(
-                AlphaServer.CONFIG.db.connectionString);
+                AlphaServer.Config.Db.ConnectionString);
         }
     }
 
@@ -25,11 +25,11 @@ namespace AlphaNET.Server
         {
             using (var db = new UserContext())
             {
-                return db.Users.Where(u => u.RealIp == realIp).FirstOrDefault();
+                return db.Users.FirstOrDefault(u => u.RealIp == realIp);
             }
         }
 
-        public static int GetVirtualIPCount(string virtualIp)
+        public static int GetVirtualIpCount(string virtualIp)
         {
             using (var db = new UserContext())
             {

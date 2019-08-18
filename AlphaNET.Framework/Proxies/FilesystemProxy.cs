@@ -65,15 +65,15 @@ namespace AlphaNET.Framework.Proxies
 
         public uint GenerateFilesystemObjectID()
         {
-            return _filesystem.GenerateFilesystemObjectID();
+            return _filesystem.GenerateFilesystemObjectId();
         }
 
-        public IOStatusCode AddObject(FilesystemObject fsObj, Directory dir)
+        public IoStatusCode AddObject(FilesystemObject fsObj, Directory dir)
         {
             return _filesystem.AddObject(fsObj, dir);
         }
 
-        public IOStatusCode DeleteObject(FilesystemObject fsObj)
+        public IoStatusCode DeleteObject(FilesystemObject fsObj)
         {
             return _filesystem.DeleteObject(fsObj);
         }

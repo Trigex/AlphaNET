@@ -3,11 +3,11 @@ using System.Threading.Tasks;
 
 namespace AlphaNET.Framework.Proxies
 {
-    class JSInterpreterProxy
+    class JsInterpreterProxy
     {
-        private JSInterpreter _interpreter;
+        private JsInterpreter _interpreter;
 
-        public JSInterpreterProxy(JSInterpreter interpreter)
+        public JsInterpreterProxy(JsInterpreter interpreter)
         {
             _interpreter = interpreter;
         }

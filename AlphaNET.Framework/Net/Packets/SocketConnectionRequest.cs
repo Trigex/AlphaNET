@@ -10,8 +10,8 @@ namespace AlphaNET.Framework.Net.Packets
 
         public SocketConnectionRequest(Address sourceAddress, Address destinationAddress)
         {
-            this.SourceAddress = sourceAddress;
-            this.DestinationAddress = destinationAddress;
+            SourceAddress = sourceAddress;
+            DestinationAddress = destinationAddress;
             Type = PacketType.SOCKET_CONNECTION_REQUEST;
         }
     }

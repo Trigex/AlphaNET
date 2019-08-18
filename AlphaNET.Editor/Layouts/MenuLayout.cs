@@ -8,7 +8,7 @@ namespace AlphaNET.Editor.Layouts
     {
         public static MenuLayout CreateInstance(Dictionary<string, Command[]> commands)
         {
-            Collection<MenuItem> menuItems = new Collection<MenuItem>();
+            var menuItems = new Collection<MenuItem>();
 
             foreach (var entry in commands)
             {

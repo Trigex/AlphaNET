@@ -1,6 +1,7 @@
 ﻿using AlphaNET.Framework.IO;
 using Jint;
 using System;
+using System.Linq;
 
 namespace AlphaNET.Framework.JS
 {
@@ -24,7 +25,7 @@ namespace AlphaNET.Framework.JS
             }
             catch (Exception e)
             {
-                Console.WriteLine(String.Format("Error while initalizing compiler: {0}", e.ToString()));
+                Console.WriteLine($"Error while initializing compiler: {e.ToString()}");
             }
         }
 
@@ -38,19 +39,14 @@ namespace AlphaNET.Framework.JS
             }
             catch (Exception e)
             {
-                Console.WriteLine(String.Format("Error while compiling TypeScript: {0}", e.ToString()));
+                Console.WriteLine($"Error while compiling TypeScript: {e.ToString()}");
             }
             return outputSource;
         }
 
         public string Compile(string[] scripts)
         {
-            string input = "";
-            // Create one single string input. Order matters!
-            foreach (string script in scripts)
-            {
-                input += script + "\n";
-            }
+            var input = scripts.Aggregate("", (current, script) => current + (script + "\n"));
 
             return Compile(input);
         }

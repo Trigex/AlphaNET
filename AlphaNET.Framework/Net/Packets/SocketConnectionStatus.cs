@@ -5,7 +5,7 @@ namespace AlphaNET.Framework.Net.Packets
     [Serializable]
     public class SocketConnectionStatus : Packet
     {
-        public bool Connected { get; private set; }
+        public bool Connected { get; }
 
         public SocketConnectionStatus(bool connected)
         {

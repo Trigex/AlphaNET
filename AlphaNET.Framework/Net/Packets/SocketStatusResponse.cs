@@ -7,8 +7,8 @@ namespace AlphaNET.Framework.Net.Packets
     [Serializable]
     public class SocketStatusResponse : Packet
     {
-        public SocketStatus SocketStatus { get; private set; }
-        public Address DestinationAddress { get; private set; }
+        public SocketStatus SocketStatus { get; }
+        public Address DestinationAddress { get; }
 
         public SocketStatusResponse(SocketStatus socketStatus, Address destinationAddress)
         {

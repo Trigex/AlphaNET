@@ -16,7 +16,7 @@
         /// <summary>
         /// The ID of this <c>FilesystemObject</c>
         /// </summary>
-        public uint ID { get; }
+        public uint Id { get; }
 
         /// <summary>
         /// Base constructor for classes extending this class to call
@@ -24,11 +24,11 @@
         /// <param name="title">The title of the <c>FilesystemObject</c></param>
         /// <param name="owner">The <c>Directory</c> owner of the <c>FilesystemObject</c></param>
         /// <param name="id">The ID of the <c>FilesystemObject</c></param>
-        public FilesystemObject(string title, Directory owner, uint id)
+        protected FilesystemObject(string title, Directory owner, uint id)
         {
             Title = title;
             Owner = owner;
-            ID = id;
+            Id = id;
         }
 
         /// <summary>
@@ -36,15 +36,15 @@
         /// </summary>
         /// <param name="title">The title to rename this <c>FilesystemObject</c> to</param>
         /// <returns>A <c>IOStatusCode</c> representing the success of this renaming operation</returns>
-        public IOStatusCode Rename(string title)
+        public IoStatusCode Rename(string title)
         {
             if (string.IsNullOrEmpty(title) || string.IsNullOrWhiteSpace(title))
             {
-                return IOStatusCode.ObjectNotRenamed;
+                return IoStatusCode.ObjectNotRenamed;
             }
 
             Title = title;
-            return IOStatusCode.ObjectRenamed;
+            return IoStatusCode.ObjectRenamed;
         }
     }
 }

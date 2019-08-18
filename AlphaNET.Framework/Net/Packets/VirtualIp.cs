@@ -5,7 +5,7 @@ namespace AlphaNET.Framework.Net.Packets
     [Serializable]
     public class VirtualIP : Packet
     {
-        public string ip { get; private set; }
+        public string ip { get; }
 
         public VirtualIP(string ip)
         {

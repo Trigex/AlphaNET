@@ -9,9 +9,9 @@ namespace AlphaNET.Framework.Client
     public class Computer
     {
         private Filesystem _fs;
-        private JSInterpreter _interpreter;
+        private JsInterpreter _interpreter;
         private IConsole _console;
-        private TcpClient _TcpClient;
+        private TcpClient _tcpClient;
         private SocketManager _socketManager;
         private TypescriptCompiler _compiler;
 
@@ -21,30 +21,20 @@ namespace AlphaNET.Framework.Client
 
         public void Init(Filesystem filesystem, bool offlineMode, string ip = null, int port = 0, IConsole console = null)
         {
-            if (console != null)
-                _console = console;
-            else
-                _console = new Terminal(); // By default, use a native terminal console implementation
+            _console = console ?? new Terminal();
 
-            if (filesystem != null) // If no filesystem was specified in cli args
-            {
-                _fs = filesystem;
-            }
-            else
-            {
-                _fs = BootstrapFilesystem();
-            }
+            _fs = filesystem ?? BootstrapFilesystem();
 
             if (!offlineMode && ip != null && port != 0) // Not in offline mode
             {
-                _TcpClient = new TcpClient(ip, port);
-                _socketManager = new SocketManager(_TcpClient);
-                _TcpClient.AddSocketManager(_socketManager);
+                _tcpClient = new TcpClient(ip, port);
+                _socketManager = new SocketManager(_tcpClient);
+                _tcpClient.AddSocketManager(_socketManager);
 
                 _console.WriteLine("Connecting to server...");
                 try
                 {
-                    _TcpClient.Start();
+                    _tcpClient.Start();
                 }
                 catch (Exception e)
                 {
@@ -52,13 +42,13 @@ namespace AlphaNET.Framework.Client
                 }
             }
             _compiler = new TypescriptCompiler();
-            string system = _compiler.Compile(new string[] { IOUtils.ReadManifestData<Computer>("system.ts") });
+            var system = _compiler.Compile(new string[] { IOUtils.ReadManifestData<Computer>("system.ts") });
             // append third party libs
             system += "\n" + IOUtils.ReadManifestData<Computer>("minimist.js") + "\n" + IOUtils.ReadManifestData<Computer>("lodash.min.js");
 
-            _interpreter = new JSInterpreter(_fs, _console, _socketManager, system);
+            _interpreter = new JsInterpreter(_fs, _console, _socketManager, system);
             _console.WriteLine("Compiling kernel...");
-            InstallOS(system);
+            InstallOs(system);
         }
 
         public void Start()
@@ -76,7 +66,7 @@ namespace AlphaNET.Framework.Client
         /// <summary>
         /// Very temporary /dev/ method to build and install the OS every run
         /// </summary>
-        private void InstallOS(string system)
+        private void InstallOs(string system)
         {
             _console.WriteLine("Compiling and installing OS files...");
             var initProgram = IOUtils.ReadManifestData<Computer>("init.ts");
@@ -87,13 +77,13 @@ namespace AlphaNET.Framework.Client
             var cdProgram = IOUtils.ReadManifestData<Computer>("cd.ts");
 
             var bin = (Directory)_fs.GetObjectByAbsolutePath("/bin/");
-            _fs.AddObject(new File("system.js", _fs.GenerateFilesystemObjectID(), true, Encoding.UTF8.GetBytes(system)), bin);
-            _fs.AddObject(new File("init.js", _fs.GenerateFilesystemObjectID(), true, Encoding.UTF8.GetBytes(_compiler.Compile(initProgram))), bin);
-            _fs.AddObject(new File("shell.js", _fs.GenerateFilesystemObjectID(), true, Encoding.UTF8.GetBytes(_compiler.Compile(shellProgram))), bin);
-            _fs.AddObject(new File("ls.js", _fs.GenerateFilesystemObjectID(), true, Encoding.UTF8.GetBytes(_compiler.Compile(lsProgram))), bin);
-            _fs.AddObject(new File("cat.js", _fs.GenerateFilesystemObjectID(), true, Encoding.UTF8.GetBytes(_compiler.Compile(catProgram))), bin);
-            _fs.AddObject(new File("net.js", _fs.GenerateFilesystemObjectID(), true, Encoding.UTF8.GetBytes(_compiler.Compile(netProgram))), bin);
-            _fs.AddObject(new File("cd.js", _fs.GenerateFilesystemObjectID(), true, Encoding.UTF8.GetBytes(_compiler.Compile(cdProgram))), bin);
+            _fs.AddObject(new File("system.js", _fs.GenerateFilesystemObjectId(), true, Encoding.UTF8.GetBytes(system)), bin);
+            _fs.AddObject(new File("init.js", _fs.GenerateFilesystemObjectId(), true, Encoding.UTF8.GetBytes(_compiler.Compile(initProgram))), bin);
+            _fs.AddObject(new File("shell.js", _fs.GenerateFilesystemObjectId(), true, Encoding.UTF8.GetBytes(_compiler.Compile(shellProgram))), bin);
+            _fs.AddObject(new File("ls.js", _fs.GenerateFilesystemObjectId(), true, Encoding.UTF8.GetBytes(_compiler.Compile(lsProgram))), bin);
+            _fs.AddObject(new File("cat.js", _fs.GenerateFilesystemObjectId(), true, Encoding.UTF8.GetBytes(_compiler.Compile(catProgram))), bin);
+            _fs.AddObject(new File("net.js", _fs.GenerateFilesystemObjectId(), true, Encoding.UTF8.GetBytes(_compiler.Compile(netProgram))), bin);
+            _fs.AddObject(new File("cd.js", _fs.GenerateFilesystemObjectId(), true, Encoding.UTF8.GetBytes(_compiler.Compile(cdProgram))), bin);
 
             BinaryManager.WriteBinaryToFile("debug.fs", BinaryManager.CreateBinaryFromFilesystem(_fs));
             BinaryManager.ReloadFilesystemFromBinary(_fs, System.IO.File.ReadAllBytes("debug.fs"));
@@ -103,16 +93,16 @@ namespace AlphaNET.Framework.Client
         /// Generates a new <c>Filesystem</c>, with base directories, and writes it to a Filesystem binary
         /// </summary>
         /// <returns>The generated <c>Filesystem</c></returns>
-        private Filesystem BootstrapFilesystem()
+        private static Filesystem BootstrapFilesystem()
         {
-            System.Console.WriteLine("Bootstraping filesystem...");
-            Filesystem fs = new Filesystem();
-            var root = new Directory("root", fs.GenerateFilesystemObjectID());
+            System.Console.WriteLine("Bootstrapping filesystem...");
+            var fs = new Filesystem();
+            var root = new Directory("root", fs.GenerateFilesystemObjectId());
             root.Owner = root;
-            var bin = new Directory("bin", fs.GenerateFilesystemObjectID());
-            var lib = new Directory("lib", fs.GenerateFilesystemObjectID());
-            var hello = new File("hello.txt", fs.GenerateFilesystemObjectID(), true, Encoding.UTF8.GetBytes("Hello, World!"));
-            var src = new Directory("src", fs.GenerateFilesystemObjectID());
+            var bin = new Directory("bin", fs.GenerateFilesystemObjectId());
+            var lib = new Directory("lib", fs.GenerateFilesystemObjectId());
+            var hello = new File("hello.txt", fs.GenerateFilesystemObjectId(), true, Encoding.UTF8.GetBytes("Hello, World!"));
+            var src = new Directory("src", fs.GenerateFilesystemObjectId());
 
             fs.AddObject(root);
             fs.AddObject(bin, root);

@@ -4,12 +4,15 @@ using System;
 
 namespace AlphaNET.Editor.Windows
 {
-    class Editor
+    internal class Editor
     {
         [STAThread]
-        static void Main(string[] args)
+        private static void Main()
         {
-            new Application(Eto.Platform.Detect).Run(new EditorForm());
+            using (var app = new Application(Eto.Platform.Detect))
+            {
+                app.Run(new EditorForm());
+            }
         }
     }
 }

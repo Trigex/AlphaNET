@@ -7,19 +7,19 @@ namespace AlphaNET.Server
 {
     public class Tcp
     {
-        public string ip { get; set; }
-        public int port { get; set; }
+        public string Ip { get; set; }
+        public int Port { get; set; }
     }
 
     public class Db
     {
-        public string connectionString { get; set; }
+        public string ConnectionString { get; set; }
     }
 
     public class Config
     {
-        public Tcp tcp { get; set; }
-        public Db db { get; set; }
+        public Tcp Tcp { get; set; }
+        public Db Db { get; set; }
 
         public static Config CreateConfig(string json)
         {

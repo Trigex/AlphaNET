@@ -4,20 +4,20 @@ using CommandLine;
 
 namespace AlphaNET.Client.Console
 {
-    class AlphaNET
+    internal class AlphaNET
     {
-        static string DEFAULT_IP = "127.0.0.1";
-        const int DEFAULT_PORT = 1337;
+        private const string DefaultIp = "127.0.0.1";
+        private const int DefaultPort = 1337;
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            Computer computer = new Computer();
+            var computer = new Computer();
 
             CliArgs.Parse(args).WithParsed(o =>
             {
                 Filesystem fs;
-                string ip = DEFAULT_IP;
-                int port = DEFAULT_PORT;
+                var ip = DefaultIp;
+                var port = DefaultPort;
 
                 if (o.Host != null)
                     ip = o.Host;
@@ -25,10 +25,7 @@ namespace AlphaNET.Client.Console
                 if (o.Port != 0)
                     port = o.Port;
 
-                if (o.FilesystemPath != null)
-                    fs = BinaryManager.CreateFilesystemFromBinary(BinaryManager.ReadBinaryFromFile(o.FilesystemPath));
-                else
-                    fs = null;
+                fs = o.FilesystemPath != null ? BinaryManager.CreateFilesystemFromBinary(BinaryManager.ReadBinaryFromFile(o.FilesystemPath)) : null;
 
                 if (o.Offline)
                     computer.Init(fs, true);

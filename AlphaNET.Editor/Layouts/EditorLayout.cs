@@ -8,9 +8,11 @@ namespace AlphaNET.Editor.Layouts
     {
         public static EditorLayout CreateInstance(FilesystemView fsView, TextArea textArea)
         {
-            Collection<TableRow> rowLayout = new Collection<TableRow>();
-            rowLayout.Add(new TableRow { ScaleHeight = true, Cells = { fsView } });
-            rowLayout.Add(new TableRow { ScaleHeight = true, Cells = { textArea } });
+            var rowLayout = new Collection<TableRow>
+            {
+                new TableRow {ScaleHeight = true, Cells = {fsView}},
+                new TableRow {ScaleHeight = true, Cells = {textArea}}
+            };
             return new EditorLayout(rowLayout);
         }
 

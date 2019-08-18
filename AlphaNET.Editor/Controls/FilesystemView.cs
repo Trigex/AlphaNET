@@ -1,4 +1,5 @@
-﻿using AlphaNET.Editor.GridItems;
+﻿using System;
+using AlphaNET.Editor.GridItems;
 using AlphaNET.Framework.IO;
 using Eto.Drawing;
 using Eto.Forms;
@@ -22,9 +23,13 @@ namespace AlphaNET.Editor.Controls
                 {
                     CreateCell = r =>
                     {
-                        var item = r.Item as FilesystemObjectGridItem;
-                        var label = new Label() { Text = item.Title };
-                        return label;
+                        if (r.Item is FilesystemObjectGridItem item)
+                        {
+                            var label = new Label() { Text = item.Title };
+                            return label;
+                        }
+
+                        return new Label();
                     }
                 }
             });
@@ -38,13 +43,13 @@ namespace AlphaNET.Editor.Controls
                     CreateCell = r =>
                     {
                         var item = r.Item as FilesystemObjectGridItem;
-                        Label label = new Label();
+                        var label = new Label();
 
-                        if (item.GetType() == typeof(DirectoryGridItem))
+                        if (item != null && item.GetType() == typeof(DirectoryGridItem))
                         {
                             label.Text = "Directory";
                         }
-                        else if (item.GetType() == typeof(FileGridItem))
+                        else if (item != null && item.GetType() == typeof(FileGridItem))
                         {
                             label.Text = "File";
                         }
@@ -62,20 +67,11 @@ namespace AlphaNET.Editor.Controls
                     CreateCell = r =>
                     {
                         var item = r.Item as FilesystemObjectGridItem;
-                        Label label = new Label();
+                        var label = new Label();
                         // only apply to file items
-                        if (item.GetType() == typeof(FileGridItem))
-                        {
-                            var fgi = (FileGridItem)item;
-                            if (fgi.IsPlaintext)
-                            {
-                                label.Text = "Text";
-                            }
-                            else
-                            {
-                                label.Text = "Binary";
-                            }
-                        }
+                        if (item != null && item.GetType() != typeof(FileGridItem)) return label;
+                        var fgi = (FileGridItem)item;
+                        label.Text = fgi != null && fgi.IsPlaintext ? "Text" : "Binary";
 
                         return label;
                     }
@@ -89,10 +85,8 @@ namespace AlphaNET.Editor.Controls
                 {
                     CreateCell = r =>
                     {
-                        var item = r.Item as FilesystemObjectGridItem;
-                        Label label = new Label { Text = item.Size.ToString() };
-
-                        return label;
+                        if (!(r.Item is FilesystemObjectGridItem item)) return new Label();
+                        return new Label { Text = item.Size.ToString() };
                     }
                 }
             });
@@ -101,39 +95,38 @@ namespace AlphaNET.Editor.Controls
         public void LoadFilesystem(Filesystem fs)
         {
             // if attempting to load from an already active session
-            if (DataStore != null && treeViewItems != null)
+            if (DataStore != null)
             {
-                treeViewItems.Clear();
+                treeViewItems?.Clear();
             }
 
             var root = (Directory)fs.GetObjectsByTitle("root")[0];
-            var rootItem = new DirectoryGridItem(root.ID, root.Title, root);
+            var rootItem = new DirectoryGridItem(root.Id, root.Title, root);
             FilesystemTraverse(root, rootItem);
-            rootItem.Size = rootItem.GetDirectorySize((Directory)fs.GetObjectByID(root.ID), 0);
+            rootItem.Size = rootItem.GetDirectorySize((Directory)fs.GetObjectById(root.Id), 0);
             treeViewItems.Add(rootItem);
             DataStore = treeViewItems;
         }
 
         private void FilesystemTraverse(Directory dir, FilesystemObjectGridItem lastItem)
         {
-            foreach (FilesystemObject child in dir.Children)
+            if (lastItem == null) throw new ArgumentNullException(nameof(lastItem));
+            foreach (var child in dir.Children)
             {
                 if (child.GetType() == typeof(File))
                 {
-                    File childFile = (File)child;
-                    FileGridItem fileItem = new FileGridItem(childFile.ID, childFile.Title, childFile.IsPlaintext, childFile);
+                    var childFile = (File)child;
+                    var fileItem = new FileGridItem(childFile.Id, childFile.Title, childFile.IsPlaintext, childFile);
                     lastItem.Children.Add(fileItem);
                 }
 
-                if (child.GetType() == typeof(Directory))
-                {
-                    Directory childDir = (Directory)child;
+                if (child.GetType() != typeof(Directory)) continue;
+                var childDir = (Directory)child;
 
-                    DirectoryGridItem dirItem = new DirectoryGridItem(childDir.ID, childDir.Title, childDir);
-                    lastItem.Children.Add(dirItem);
+                var dirItem = new DirectoryGridItem(childDir.Id, childDir.Title, childDir);
+                lastItem.Children.Add(dirItem);
 
-                    FilesystemTraverse((Directory)child, dirItem);
-                }
+                FilesystemTraverse((Directory)child, dirItem);
             }
         }
     }

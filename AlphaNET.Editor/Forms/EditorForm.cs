@@ -6,27 +6,28 @@ using AlphaNET.Framework.IO;
 using Eto.Forms;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace AlphaNET.Editor.Forms
 {
     public class EditorForm : Form
     {
-        private Filesystem fs;
-        private FileFilter _fsFilter;
-        private Uri initalDirectory;
-        private const string baseTitle = "AlphaNET Editor";
+        private Filesystem _fs;
+        private readonly FileFilter _fsFilter;
+        private readonly Uri _initalDirectory;
+        private const string BaseTitle = "AlphaNET Editor";
 
-        private ContextMenu ctxMenu;
-        private FilesystemView fsView;
-        private TextArea textArea;
-        private string currentlyEditedPath;
-        private File currentlyEditedFile;
-        private Command openFs, saveFs, saveAs, createFile, importAst, deleteObj;
+        private ContextMenu _ctxMenu;
+        private FilesystemView _fsView;
+        private TextArea _textArea;
+        private string _currentlyEditedPath;
+        private File _currentlyEditedFile;
+        private Command _openFs, _saveFs, _saveAs, _createFile, _importAst, _deleteObj;
 
         public EditorForm()
         {
-            initalDirectory = new Uri(System.IO.Directory.GetCurrentDirectory());
+            _initalDirectory = new Uri(System.IO.Directory.GetCurrentDirectory());
 
             _fsFilter = new FileFilter("Filesystem (*.fs)", new[] { ".fs" });
             InitCommands();
@@ -38,44 +39,46 @@ namespace AlphaNET.Editor.Forms
 
         private void InitCommands()
         {
-            openFs = new OpenFilesystem();
-            saveFs = new SaveFilesystem();
-            importAst = new ImportAsset();
-            deleteObj = new DeleteObject();
-            saveAs = new SaveAsFilesystem();
-            createFile = new CreateFile();
+            _openFs = new OpenFilesystem();
+            _saveFs = new SaveFilesystem();
+            _importAst = new ImportAsset();
+            _deleteObj = new DeleteObject();
+            _saveAs = new SaveAsFilesystem();
+            _createFile = new CreateFile();
 
-            openFs.Executed += OpenFilesystem;
-            saveFs.Executed += SaveFilesystem;
-            importAst.Executed += ImportAsset;
-            deleteObj.Executed += DeleteObject;
-            saveAs.Executed += SaveAs;
-            createFile.Executed += CreateFile;
+            _openFs.Executed += OpenFilesystem;
+            _saveFs.Executed += SaveFilesystem;
+            _importAst.Executed += ImportAsset;
+            _deleteObj.Executed += DeleteObject;
+            _saveAs.Executed += SaveAs;
+            _createFile.Executed += CreateFile;
 
-            ctxMenu = new ContextMenu { Items = { deleteObj, createFile } };
+            _ctxMenu = new ContextMenu { Items = { _deleteObj, _createFile } };
         }
 
         private void InitControls()
         {
-            fsView = new FilesystemView();
-            fsView.Activated += FsViewItemActivated;
-            fsView.MouseDown += FsViewMouseDown;
+            _fsView = new FilesystemView();
+            _fsView.Activated += FsViewItemActivated;
+            _fsView.MouseDown += FsViewMouseDown;
 
-            textArea = new TextArea();
-            textArea.TextChanged += TextChanged;
+            _textArea = new TextArea();
+            _textArea.TextChanged += TextChanged;
         }
 
         private void InitInterface()
         {
-            Title = baseTitle;
+            Title = BaseTitle;
             ClientSize = new Eto.Drawing.Size(800, 600);
             // FORM CONTENTS
-            Content = EditorLayout.CreateInstance(fsView, textArea);
+            Content = EditorLayout.CreateInstance(_fsView, _textArea);
 
             // MENUBAR
-            Dictionary<string, Command[]> items = new Dictionary<string, Command[]>();
-            items.Add("File", new Command[] { openFs, saveFs, saveAs });
-            items.Add("Edit", new Command[] { importAst, createFile, deleteObj });
+            var items = new Dictionary<string, Command[]>
+            {
+                {"File", new[] {_openFs, _saveFs, _saveAs}},
+                {"Edit", new[] {_importAst, _createFile, _deleteObj}}
+            };
 
             Menu = MenuLayout.CreateInstance(items);
         }
@@ -88,7 +91,7 @@ namespace AlphaNET.Editor.Forms
             openFile.Filters.Add(_fsFilter);
             openFile.CurrentFilter = _fsFilter;
             openFile.MultiSelect = false;
-            openFile.Directory = initalDirectory;
+            openFile.Directory = _initalDirectory;
 
             if (!(openFile.ShowDialog(this) == DialogResult.Ok && openFile.FileName.Contains(".fs")))
             {
@@ -97,147 +100,131 @@ namespace AlphaNET.Editor.Forms
             }
 
             // Load fs
-            fs = BinaryManager.CreateFilesystemFromBinary(BinaryManager.ReadBinaryFromFile(openFile.FileName));
-            currentlyEditedPath = openFile.FileName;
-            fsView.LoadFilesystem(fs);
-            Title = baseTitle + " - " + System.IO.Path.GetFileName(currentlyEditedPath);
-            textArea.Text = "";
+            _fs = BinaryManager.CreateFilesystemFromBinary(BinaryManager.ReadBinaryFromFile(openFile.FileName));
+            _currentlyEditedPath = openFile.FileName;
+            _fsView.LoadFilesystem(_fs);
+            Title = BaseTitle + " - " + System.IO.Path.GetFileName(_currentlyEditedPath);
+            _textArea.Text = "";
         }
 
         private void SaveFilesystem(object sender, EventArgs e)
         {
-            if (currentlyEditedPath != null)
+            if (_currentlyEditedPath != null)
             {
-                BinaryManager.WriteBinaryToFile(currentlyEditedPath, BinaryManager.CreateBinaryFromFilesystem(fs));
+                BinaryManager.WriteBinaryToFile(_currentlyEditedPath, BinaryManager.CreateBinaryFromFilesystem(_fs));
             }
         }
 
         private void SaveAs(object sender, EventArgs e)
         {
-            if (fs != null)
-            {
-                var saveFile = new SaveFileDialog();
-                saveFile.Filters.Add(_fsFilter);
-                saveFile.CurrentFilter = _fsFilter;
-                saveFile.Directory = new Uri(currentlyEditedPath);
-                var result = saveFile.ShowDialog(this);
+            if (_fs == null) return;
+            var saveFile = new SaveFileDialog();
+            saveFile.Filters.Add(_fsFilter);
+            saveFile.CurrentFilter = _fsFilter;
+            saveFile.Directory = new Uri(_currentlyEditedPath);
+            var result = saveFile.ShowDialog(this);
 
-                if (result == DialogResult.Ok)
-                {
-                    BinaryManager.WriteBinaryToFile(saveFile.FileName, BinaryManager.CreateBinaryFromFilesystem(fs));
-                }
-                else if (result != DialogResult.Cancel)
-                {
-                    MessageBox.Show("Unable to save.", MessageBoxType.Error);
-                    return;
-                }
+            if (result == DialogResult.Ok)
+            {
+                BinaryManager.WriteBinaryToFile(saveFile.FileName, BinaryManager.CreateBinaryFromFilesystem(_fs));
+            }
+            else if (result != DialogResult.Cancel)
+            {
+                MessageBox.Show("Unable to save.", MessageBoxType.Error);
+                return;
             }
         }
 
         private void ImportAsset(object sender, EventArgs e)
         {
-            if (fs != null)
+            if (_fs == null) return;
+            FilesystemObjectGridItem selectedItem = (FilesystemObjectGridItem)_fsView.SelectedItem;
+            Directory importDirectory;
+            // if the selected item isn't a directory, set selected to the item's parent (the directory whom holds it)
+            if (selectedItem.GetType() != typeof(DirectoryGridItem))
             {
-                FilesystemObjectGridItem selectedItem = (FilesystemObjectGridItem)fsView.SelectedItem;
-                Directory importDirectory;
-                // if the selected item isn't a directory, set selected to the item's parent (the directory whom holds it)
-                if (selectedItem.GetType() != typeof(DirectoryGridItem))
-                {
-                    var parentDir = (DirectoryGridItem)selectedItem.Parent;
-                    importDirectory = (Directory)parentDir.FilesystemObject;
-                    selectedItem = (FilesystemObjectGridItem)selectedItem.Parent;
-                }
-                else // the selected item is a directory
-                {
-                    importDirectory = (Directory)selectedItem.FilesystemObject;
-                }
-
-                var openFile = new OpenFileDialog();
-                openFile.MultiSelect = true;
-                openFile.Directory = initalDirectory;
-
-                if (!(openFile.ShowDialog(this) == DialogResult.Ok))
-                {
-                    MessageBox.Show("Unable to import asset.", MessageBoxType.Error);
-                    return;
-                }
-
-                Dictionary<string, byte[]> bins = new Dictionary<string, byte[]>();
-
-                // Load selected files
-                foreach (var path in openFile.Filenames)
-                {
-                    bins.Add(System.IO.Path.GetFileName(path), BinaryManager.ReadBinaryFromFile(path));
-                }
-
-                // Create fs files
-                foreach (var bin in bins)
-                {
-                    bool plaintext;
-                    // not the greatest check, but it'll work for now. determine if it's text or a binary
-                    if (bin.Key.Contains(".txt") || bin.Key.Contains(".ts") || bin.Key.Contains(".js"))
-                    {
-                        plaintext = true;
-                    }
-                    else
-                    {
-                        plaintext = false;
-                    }
-
-                    var file = new File(bin.Key, IOUtils.GenerateID(), plaintext, bin.Value);
-                    var fileItem = new FileGridItem(file.ID, file.Title, file.IsPlaintext, file);
-                    fs.AddObject(file, importDirectory);
-
-                    selectedItem.Children.Add(fileItem);
-                }
-
-                selectedItem.Expanded = true;
-                // refresh view
-                fsView.ReloadData();
+                var parentDir = (DirectoryGridItem)selectedItem.Parent;
+                importDirectory = (Directory)parentDir.FilesystemObject;
+                selectedItem = (FilesystemObjectGridItem)selectedItem.Parent;
             }
+            else // the selected item is a directory
+            {
+                importDirectory = (Directory)selectedItem.FilesystemObject;
+            }
+
+            var openFile = new OpenFileDialog {MultiSelect = true, Directory = _initalDirectory};
+
+            if (openFile.ShowDialog(this) != DialogResult.Ok)
+            {
+                MessageBox.Show("Unable to import asset.", MessageBoxType.Error);
+                return;
+            }
+
+            var bins = openFile.Filenames.ToDictionary(path => System.IO.Path.GetFileName(path) ?? throw new InvalidOperationException(), BinaryManager.ReadBinaryFromFile);
+
+            // Create fs files
+            foreach (var bin in bins)
+            {
+                bool plaintext;
+                // not the greatest check, but it'll work for now. determine if it's text or a binary
+                if (bin.Key.Contains(".txt") || bin.Key.Contains(".ts") || bin.Key.Contains(".js"))
+                {
+                    plaintext = true;
+                }
+                else
+                {
+                    plaintext = false;
+                }
+
+                var file = new File(bin.Key, IOUtils.GenerateId(), plaintext, bin.Value);
+                var fileItem = new FileGridItem(file.Id, file.Title, file.IsPlaintext, file);
+                _fs.AddObject(file, importDirectory);
+
+                selectedItem.Children.Add(fileItem);
+            }
+
+            selectedItem.Expanded = true;
+            // refresh view
+            _fsView.ReloadData();
         }
 
         private void CreateFile(object sender, EventArgs e)
         {
-            if (fs != null)
+            if (_fs == null) return;
+            FilesystemObjectGridItem selectedItem = (FilesystemObjectGridItem)_fsView.SelectedItem;
+            Directory createInDirectory;
+            // if the selected item isn't a directory, set selected to the item's parent (the directory whom holds it)
+            if (selectedItem.GetType() != typeof(DirectoryGridItem))
             {
-                FilesystemObjectGridItem selectedItem = (FilesystemObjectGridItem)fsView.SelectedItem;
-                Directory createInDirectory;
-                // if the selected item isn't a directory, set selected to the item's parent (the directory whom holds it)
-                if (selectedItem.GetType() != typeof(DirectoryGridItem))
-                {
-                    var parentDir = (DirectoryGridItem)selectedItem.Parent;
-                    createInDirectory = (Directory)parentDir.FilesystemObject;
-                    selectedItem = (FilesystemObjectGridItem)selectedItem.Parent;
-                }
-                else // the selected item is a directory
-                {
-                    createInDirectory = (Directory)selectedItem.FilesystemObject;
-                }
+                var parentDir = (DirectoryGridItem)selectedItem.Parent;
+                createInDirectory = (Directory)parentDir.FilesystemObject;
+                selectedItem = (FilesystemObjectGridItem)selectedItem.Parent;
+            }
+            else // the selected item is a directory
+            {
+                createInDirectory = (Directory)selectedItem.FilesystemObject;
             }
         }
 
         private void DeleteObject(object sender, EventArgs e)
         {
-            if (fs != null)
-            {
-                var selectedItem = (FilesystemObjectGridItem)fsView.SelectedItem;
-                var parent = (FilesystemObjectGridItem)selectedItem.Parent;
-                var fsObj = selectedItem.FilesystemObject;
+            if (_fs == null) return;
+            var selectedItem = (FilesystemObjectGridItem)_fsView.SelectedItem;
+            var parent = (FilesystemObjectGridItem)selectedItem.Parent;
+            var fsObj = selectedItem.FilesystemObject;
 
-                // remove from tree
-                if (selectedItem.Parent == null) // probably root
-                {
-                    MessageBox.Show("Filesystems are required to have a root directory", MessageBoxType.Error);
-                }
-                else
-                {
-                    parent.Children.Remove(selectedItem);
-                    // remove from filesystem
-                    fs.DeleteObject(fsObj);
-                    // reload
-                    fsView.ReloadData();
-                }
+            // remove from tree
+            if (selectedItem.Parent == null) // probably root
+            {
+                MessageBox.Show("Filesystems are required to have a root directory", MessageBoxType.Error);
+            }
+            else
+            {
+                parent.Children.Remove(selectedItem);
+                // remove from filesystem
+                _fs.DeleteObject(fsObj);
+                // reload
+                _fsView.ReloadData();
             }
         }
 
@@ -245,15 +232,13 @@ namespace AlphaNET.Editor.Forms
         private void FsViewItemActivated(object sender, EventArgs e)
         {
             // reset text area
-            currentlyEditedFile = null;
-            textArea.Text = "";
-            var selectedItem = (FilesystemObjectGridItem)fsView.SelectedItem;
-            if (selectedItem.GetType() == typeof(FileGridItem))
-            {
-                File file = (File)selectedItem.FilesystemObject;
-                currentlyEditedFile = file;
-                textArea.Text = Encoding.UTF8.GetString(file.Contents);
-            }
+            _currentlyEditedFile = null;
+            _textArea.Text = "";
+            var selectedItem = (FilesystemObjectGridItem)_fsView.SelectedItem;
+            if (selectedItem.GetType() != typeof(FileGridItem)) return;
+            var file = (File)selectedItem.FilesystemObject;
+            _currentlyEditedFile = file;
+            _textArea.Text = Encoding.UTF8.GetString(file.Contents);
         }
 
         private void FsViewMouseDown(object sender, MouseEventArgs e)
@@ -261,17 +246,14 @@ namespace AlphaNET.Editor.Forms
             if (e.Buttons == MouseButtons.Alternate)
             {
                 // open context menu
-                ctxMenu.Show(fsView);
+                _ctxMenu.Show(_fsView);
             }
         }
 
         private void TextChanged(object sender, EventArgs e)
         {
             // modify file contents
-            if (currentlyEditedFile != null)
-            {
-                currentlyEditedFile.ModifyContents(Encoding.UTF8.GetBytes(textArea.Text), true);
-            }
+            _currentlyEditedFile?.ModifyContents(Encoding.UTF8.GetBytes(_textArea.Text), true);
         }
     }
 }

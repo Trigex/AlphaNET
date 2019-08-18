@@ -9,9 +9,9 @@ namespace AlphaNET.Framework.Net
 {
     public class SocketManager
     {
-        private TcpClient _tcpClient;
-        private List<Socket> _socketList;
-        private ManualResetEvent _mre = new ManualResetEvent(false);
+        private readonly TcpClient _tcpClient;
+        private readonly List<Socket> _socketList;
+        private readonly ManualResetEvent _mre = new ManualResetEvent(false);
 
         public SocketManager(TcpClient tcpClient)
         {
@@ -63,16 +63,11 @@ namespace AlphaNET.Framework.Net
 
         public NetStatusCode ConnectSocket(Socket socket, Address destinationAddress, ushort localPort = 0)
         {
-            if (socket.LocalAddress == null || socket.LocalAddress.IpAddress == null || socket.LocalAddress.Port == 0) // Assosiate the socket with local address
+            if (socket.LocalAddress?.IpAddress == null || socket.LocalAddress.Port == 0) // Associate the socket with local address
             {
-                ushort port;
+                var port = localPort != 0 ? localPort : (ushort) 24;
 
-                if (localPort != 0)
-                    port = localPort;
-                else
-                    port = 24;
-
-                socket.LocalAddress = new Address(_tcpClient.VirtualIP.ip, port);
+                socket.LocalAddress = new Address(_tcpClient.VirtualIp.ip, port);
             }
 
             socket.EndpointAddress = destinationAddress;
@@ -121,12 +116,12 @@ namespace AlphaNET.Framework.Net
 
         public string GetIpAddress()
         {
-            return _tcpClient.VirtualIP.ip;
+            return _tcpClient.VirtualIp.ip;
         }
 
         private Socket FindSocketByBindedAddress(Address address)
         {
-            return _socketList.Where(s => s.LocalAddress.IpAddress == address.IpAddress && s.LocalAddress.Port == address.Port).SingleOrDefault();
+            return _socketList.SingleOrDefault(s => s.LocalAddress.IpAddress == address.IpAddress && s.LocalAddress.Port == address.Port);
         }
     }
 }

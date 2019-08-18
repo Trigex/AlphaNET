@@ -12,18 +12,18 @@ namespace AlphaNET.Framework.IO
     /// </summary>
     public static class BinaryManager
     {
-        private const byte FS_VERSION_TARGET = 1;
+        private const byte FsVersionTarget = 1;
         // Section flag magic numbers
-        private const byte FS_HEADER_START = 6;
-        private const byte FS_HEADER_END = 9;
-        private const byte DIR_LIST_START = 1;
-        private const byte DIR_LIST_END = 2;
-        private const byte FILE_LIST_START = 3;
-        private const byte FILE_LIST_END = 4;
-        private const byte DIR_START = 5;
-        private const byte DIR_END = 6;
-        private const byte FILE_START = 7;
-        private const byte FILE_END = 8;
+        private const byte FsHeaderStart = 6;
+        private const byte FsHeaderEnd = 9;
+        private const byte DirListStart = 1;
+        private const byte DirListEnd = 2;
+        private const byte FileListStart = 3;
+        private const byte FileListEnd = 4;
+        private const byte DirStart = 5;
+        private const byte DirEnd = 6;
+        private const byte FileStart = 7;
+        private const byte FileEnd = 8;
 
         /// <summary>
         /// Creates a binary encoded <c>Filesystem</c> from a <c>Filesystem</c> instance
@@ -32,8 +32,8 @@ namespace AlphaNET.Framework.IO
         /// <returns>A byte array representing the binary encoded <c>Filesystem</c></returns>
         public static byte[] CreateBinaryFromFilesystem(Filesystem filesystem)
         {
-            MemoryStream stream = new MemoryStream();
-            BinaryWriter writer = new BinaryWriter(stream);
+            var stream = new MemoryStream();
+            var writer = new BinaryWriter(stream);
             var directories = new List<Directory>();
             var files = new List<File>();
 
@@ -51,30 +51,30 @@ namespace AlphaNET.Framework.IO
                 }
             }
 
-            writer.Write(FS_HEADER_START); // FS Header start flag
-            writer.Write(FS_VERSION_TARGET); // FS Version
-            writer.Write(FS_HEADER_END); // FS Header end flag
+            writer.Write(FsHeaderStart); // FS Header start flag
+            writer.Write(FsVersionTarget); // FS Version
+            writer.Write(FsHeaderEnd); // FS Header end flag
 
-            writer.Write(DIR_LIST_START); // Dir list start flag
+            writer.Write(DirListStart); // Dir list start flag
             foreach (var dir in directories)
             {
-                writer.Write(DIR_START); // dir start flag
+                writer.Write(DirStart); // dir start flag
                 WriteGenericObjectMeta(writer, dir);
-                writer.Write(DIR_END); // dir end flag
+                writer.Write(DirEnd); // dir end flag
             }
-            writer.Write(DIR_LIST_END); // Dir list end flag
+            writer.Write(DirListEnd); // Dir list end flag
 
-            writer.Write(FILE_LIST_START);
+            writer.Write(FileListStart);
             foreach (var file in files)
             {
-                writer.Write(FILE_START); // file start flag
+                writer.Write(FileStart); // file start flag
                 WriteGenericObjectMeta(writer, file);
                 writer.Write(file.IsPlaintext); // Plaintext?
                 writer.Write((uint)file.Contents.Length); // Contents length
                 writer.Write(file.Contents); // Contents
-                writer.Write(FILE_END); // file end flag
+                writer.Write(FileEnd); // file end flag
             }
-            writer.Write(FILE_LIST_END);
+            writer.Write(FileListEnd);
             writer.Close();
             return stream.ToArray();
         }
@@ -86,12 +86,12 @@ namespace AlphaNET.Framework.IO
         /// <returns>An instance of <c>Filesystem</c> representing the binary encoded <c>Filesystem</c></returns>
         public static Filesystem CreateFilesystemFromBinary(byte[] bin)
         {
-            MemoryStream stream = new MemoryStream(bin);
-            BinaryReader reader = new BinaryReader(stream);
-            Filesystem fs = new Filesystem();
+            var stream = new MemoryStream(bin);
+            var reader = new BinaryReader(stream);
+            var fs = new Filesystem();
 
             var headerStart = reader.ReadByte();
-            if (headerStart != FS_HEADER_START) // FS File Header Start
+            if (headerStart != FsHeaderStart) // FS File Header Start
             {
                 throw new InvalidFilesystemHeaderException("Start", headerStart);
             }
@@ -99,13 +99,13 @@ namespace AlphaNET.Framework.IO
             byte fsVersion = reader.ReadByte(); // FS Version
 
             var headerEnd = reader.ReadByte();
-            if (headerEnd != FS_HEADER_END) // FS File Header End
+            if (headerEnd != FsHeaderEnd) // FS File Header End
             {
                 throw new InvalidFilesystemHeaderException("End", headerEnd);
             }
 
             var dirListStart = reader.ReadByte();
-            if (dirListStart != DIR_LIST_START)// Directory List Start
+            if (dirListStart != DirListStart)// Directory List Start
             {
                 throw new InvalidFilesystemHeaderException("Directory List Start", dirListStart);
             }
@@ -116,7 +116,7 @@ namespace AlphaNET.Framework.IO
 
             // The ReadDirectories method consumes DIR_LIST_END, in order to know when to stop, so it's not present here
             var fileListStart = reader.ReadByte();
-            if (fileListStart != FILE_LIST_START)// File List Start
+            if (fileListStart != FileListStart)// File List Start
             {
                 throw new InvalidFilesystemHeaderException("File List Start", fileListStart);
             }
@@ -138,6 +138,7 @@ namespace AlphaNET.Framework.IO
         /// <param name="bin">Binary encoded <c>Filesystem</c> byte array to load from</param>
         public static void ReloadFilesystemFromBinary(Filesystem filesystem, byte[] bin)
         {
+            if (filesystem == null) throw new ArgumentNullException(nameof(filesystem));
             filesystem = CreateFilesystemFromBinary(bin);
         }
 
@@ -168,8 +169,8 @@ namespace AlphaNET.Framework.IO
         /// <param name="fsObj">The <c>FilesystemObject</c> to write the generic data from</param>
         private static void WriteGenericObjectMeta(BinaryWriter writer, FilesystemObject fsObj)
         {
-            writer.Write(fsObj.ID); // ID
-            writer.Write(fsObj.Owner.ID); // OwnerID
+            writer.Write(fsObj.Id); // ID
+            writer.Write(fsObj.Owner.Id); // OwnerID
             writer.Write((ushort)Encoding.UTF8.GetByteCount(fsObj.Title)); // Title length
             writer.Write(Encoding.UTF8.GetBytes(fsObj.Title)); // title
         }
@@ -181,11 +182,11 @@ namespace AlphaNET.Framework.IO
         /// <returns></returns>
         private static GenericObjectMeta ReadGenericObjectMeta(BinaryReader reader)
         {
-            var genericObjectMeta = new GenericObjectMeta();
+            var genericObjectMeta = new GenericObjectMeta
+            {
+                Id = reader.ReadUInt32(), OwnerId = reader.ReadUInt32(), TitleLength = reader.ReadUInt16()
+            };
 
-            genericObjectMeta.ID = reader.ReadUInt32();
-            genericObjectMeta.OwnerID = reader.ReadUInt32();
-            genericObjectMeta.TitleLength = reader.ReadUInt16();
             genericObjectMeta.Title = reader.ReadBytes(genericObjectMeta.TitleLength);
 
             return genericObjectMeta;
@@ -201,11 +202,11 @@ namespace AlphaNET.Framework.IO
             var listEnd = false;
             while (!listEnd)
             {
-                var dirStart = reader.ReadByte();
+                var unused = reader.ReadByte();
                 var dirMeta = ReadGenericObjectMeta(reader);
                 var dirEnd = reader.ReadByte();
 
-                var newDir = new Directory(Encoding.UTF8.GetString(dirMeta.Title), dirMeta.ID);
+                var newDir = new Directory(Encoding.UTF8.GetString(dirMeta.Title), dirMeta.Id);
                 if (newDir.Title == "root")
                 {
                     newDir.Owner = newDir;
@@ -213,7 +214,7 @@ namespace AlphaNET.Framework.IO
                 }
                 else
                 {
-                    var dirOwner = (Directory)filesystem.GetObjectByID(dirMeta.OwnerID);
+                    var dirOwner = (Directory)filesystem.GetObjectById(dirMeta.OwnerId);
 
                     if (dirOwner == null | dirOwner.GetType() != typeof(Directory))
                     {
@@ -223,7 +224,7 @@ namespace AlphaNET.Framework.IO
                     filesystem.AddObject(newDir, dirOwner);
                 }
 
-                if (reader.ReadByte() == DIR_LIST_END)
+                if (reader.ReadByte() == DirListEnd)
                 {
                     listEnd = true;
                 }
@@ -252,16 +253,16 @@ namespace AlphaNET.Framework.IO
                 var fileContents = reader.ReadBytes((int)fileContentsLength);
                 var fileEnd = reader.ReadByte();
 
-                var fileOwner = (Directory)filesystem.GetObjectByID(fileMeta.OwnerID);
+                var fileOwner = (Directory)filesystem.GetObjectById(fileMeta.OwnerId);
                 if (fileOwner == null)
                 {
                     // Error!
                 }
 
-                var newFile = new File(Encoding.UTF8.GetString(fileMeta.Title), fileMeta.ID, plaintext, fileContents);
+                var newFile = new File(Encoding.UTF8.GetString(fileMeta.Title), fileMeta.Id, plaintext, fileContents);
                 filesystem.AddObject(newFile, fileOwner);
 
-                if (reader.ReadByte() == FILE_LIST_END)
+                if (reader.ReadByte() == FileListEnd)
                 {
                     listEnd = true;
                 }
@@ -279,8 +280,8 @@ namespace AlphaNET.Framework.IO
     /// </summary>
     internal class GenericObjectMeta
     {
-        public uint ID { get; set; }
-        public uint OwnerID { get; set; }
+        public uint Id { get; set; }
+        public uint OwnerId { get; set; }
         public ushort TitleLength { get; set; }
         public byte[] Title { get; set; }
     }

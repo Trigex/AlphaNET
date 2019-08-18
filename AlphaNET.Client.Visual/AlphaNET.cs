@@ -6,7 +6,7 @@ namespace AlphaNET.Client.Visual
     public static class AlphaNET
     {
         [STAThread]
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             using (var game = new Visual(args))
             {

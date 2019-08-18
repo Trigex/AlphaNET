@@ -14,7 +14,7 @@ namespace AlphaNET.Editor.GridItems
 
         public int GetDirectorySize(Directory dir, int size)
         {
-            foreach (FilesystemObject child in dir.Children)
+            foreach (var child in dir.Children)
             {
                 if (child.GetType() == typeof(File))
                 {
@@ -22,11 +22,9 @@ namespace AlphaNET.Editor.GridItems
                     size += file.Contents.Length;
                 }
 
-                if (child.GetType() == typeof(Directory))
-                {
-                    var childDir = (Directory)child;
-                    GetDirectorySize(childDir, size);
-                }
+                if (child.GetType() != typeof(Directory)) continue;
+                var childDir = (Directory)child;
+                GetDirectorySize(childDir, size);
             }
 
             return size;

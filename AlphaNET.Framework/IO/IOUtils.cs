@@ -14,11 +14,11 @@ namespace AlphaNET.Framework.IO
         /// Generates a random <c>uint32</c>, used to uniquely identify <c>FilesystemObject</c>s
         /// </summary>
         /// <returns></returns>
-        public static uint GenerateID()
+        public static uint GenerateId()
         {
-            Random random = new Random();
-            uint thirtyBits = (uint)random.Next(1 << 30);
-            uint twoBits = (uint)random.Next(1 << 2);
+            var random = new Random();
+            var thirtyBits = (uint)random.Next(1 << 30);
+            var twoBits = (uint)random.Next(1 << 2);
             return (thirtyBits << 2) | twoBits;
         }
 

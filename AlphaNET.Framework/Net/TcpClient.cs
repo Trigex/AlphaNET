@@ -11,9 +11,9 @@ namespace AlphaNET.Framework.Net
 {
     public class TcpClient
     {
-        private WatsonTcpClient _client;
+        private readonly WatsonTcpClient _client;
         private SocketManager _socketManager;
-        public VirtualIP VirtualIP { get; private set; }
+        public VirtualIP VirtualIp { get; private set; }
 
         public delegate void RecieveSocketStatus(SocketStatus socketStatus);
         public event RecieveSocketStatus SocketStatusRecieved;
@@ -22,10 +22,12 @@ namespace AlphaNET.Framework.Net
 
         public TcpClient(string ip, int port)
         {
-            _client = new WatsonTcpClient(ip, port);
-            _client.ServerConnected = ServerConnected;
-            _client.ServerDisconnected = ServerDisconnected;
-            _client.MessageReceived = MessageRecieved;
+            _client = new WatsonTcpClient(ip, port)
+            {
+                ServerConnected = ServerConnected,
+                ServerDisconnected = ServerDisconnected,
+                MessageReceived = MessageRecieved
+            };
         }
 
         public void AddSocketManager(SocketManager socketManager)
@@ -44,13 +46,13 @@ namespace AlphaNET.Framework.Net
             Console.WriteLine("Sent: " + packet.GetType());
         }
 
-        private bool ServerConnected()
+        private static bool ServerConnected()
         {
             Console.WriteLine("Connected to server");
             return true;
         }
 
-        private bool ServerDisconnected()
+        private static bool ServerDisconnected()
         {
             Console.WriteLine("Disconnected from server");
             return true;
@@ -65,22 +67,22 @@ namespace AlphaNET.Framework.Net
                 switch (packet)
                 {
                     case VirtualIP vip: // We recieved our Virtual IP from the server, set it
-                        VirtualIP = (VirtualIP)packet;
-                        Console.WriteLine(string.Format("VirtualIP: {0}", VirtualIP.ip));
+                        VirtualIp = vip;
+                        Console.WriteLine($"VirtualIP: {VirtualIp.ip}");
                         break;
                     case SocketStatusRequest rss: // Recieved SocketStatusRequest from the server. Send a response!
-                        var reqSocketStatus = (SocketStatusRequest)packet;
+                        var reqSocketStatus = rss;
                         // pass to SocketManager
-                        Console.WriteLine(string.Format("SocketStatusRequest: {0}", reqSocketStatus.SourceAddress.ToString()));
+                        Console.WriteLine($"SocketStatusRequest: {reqSocketStatus.SourceAddress.ToString()}");
                         var resSocketStatus = _socketManager.OnSocketStatusRequested(reqSocketStatus);
                         Send(resSocketStatus);
                         break;
                     case SocketStatus ss:
-                        var socketStatus = (SocketStatus)packet;
-                        SocketStatusRecieved(socketStatus);
+                        var socketStatus = ss;
+                        SocketStatusRecieved?.Invoke(socketStatus);
                         break;
                     default:
-                        Console.WriteLine(string.Format("Unknown or incorrect context PacketType: {0}", data[0]));
+                        Console.WriteLine($"Unknown or incorrect context PacketType: {data[0]}");
                         break;
                 }
             }

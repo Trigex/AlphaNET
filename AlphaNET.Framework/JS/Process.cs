@@ -7,7 +7,7 @@ namespace AlphaNET.Framework.JS
 {
     public class Process
     {
-        public Thread _thread { get; set; }
+        public Thread Thread { get; set; }
         public string Script { get; set; }
         public string[] Args { get; set; }
 
