@@ -100,7 +100,7 @@ namespace AlphaNET.Editor.Forms
             }
 
             // Load fs
-            _fs = BinaryManager.CreateFilesystemFromBinary(BinaryManager.ReadBinaryFromFile(openFile.FileName));
+            _fs = BinaryManager.CreateFilesystemFromBinary(BinaryManager.ReadBinaryFromFile(openFile.FileName), openFile.FileName);
             _currentlyEditedPath = openFile.FileName;
             _fsView.LoadFilesystem(_fs);
             Title = BaseTitle + " - " + System.IO.Path.GetFileName(_currentlyEditedPath);

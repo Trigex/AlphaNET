@@ -27,6 +27,13 @@ namespace AlphaNET.Framework.IO
         private const byte FileStart = 7;
         private const byte FileEnd = 8;
 
+        // Static sizes
+        private const byte FsHeaderSize = 3;
+
+        // Patterns
+        private static readonly byte[] DirListEndPattern = {2, 3};
+        private static readonly byte[] FileListEndPattern = {8, 4};
+
         /// <summary>
         /// Creates a binary encoded <c>Filesystem</c> from a <c>Filesystem</c> instance
         /// </summary>
@@ -156,28 +163,38 @@ namespace AlphaNET.Framework.IO
             var writer = new BinaryWriter(stream);
             // buffer to hold the encoded object to write
             byte[] encodedObj = null;
+            // buffer to hold bin in a list for ease of inserting
+            var buffer = new List<byte>(stream.ToArray());
+            var seekedPos = 0;
 
             if (obj.GetType() == typeof(Directory))
             {
-                // Set position to right after DirListStart
-                SeekFlag(reader, DirListStart);
+                // Set position to DirListEnd
+                seekedPos = SeekPattern(bin, DirListEndPattern);
                 // Encode as Directory
                 encodedObj = EncodeDirectory((Directory) obj);
             }
             else if (obj.GetType() == typeof(File))
             {
                 // Set position to right after FileListStart
-                SeekFlag(reader, FileListStart);
+                seekedPos = SeekPattern(bin, FileListEndPattern);
                 // Encode as File
                 encodedObj = EncodeFile((File) obj);
             }
-            // create list from stream for ease of inserting
-            var buffer = new List<byte>(stream.ToArray());
-            // insert into list from current position, which would be right before a ListEnd
-            buffer.InsertRange((int)stream.Position, encodedObj ?? throw new InvalidOperationException());
+
+            if (seekedPos == -1)
+                throw new Exception("Unable to find ListEndFlag, unable to insert FilesystemObject.");
+
+            if (encodedObj == null)
+                throw new Exception("The FilesystemObject was unable to be encoded");
+
+            //stream.Seek(seekedPos, SeekOrigin.Begin); // set position to the found index
+
+            // insert into list from seekedPos - 1, which should the last ObjectEnd flag of the given list
+            buffer.InsertRange(seekedPos, encodedObj);
             // save the new binary
             var modified = buffer.ToArray();
-            Console.WriteLine($"Added {obj.GetType()} at position {stream.Position}, of length {encodedObj.Length}");
+            Console.WriteLine($"Added {obj.GetType()} at position {seekedPos}, of length {encodedObj.Length}");
             reader.Close();
             writer.Close();
             return modified;
@@ -445,26 +462,20 @@ namespace AlphaNET.Framework.IO
             return encoded;
         }
 
-        private static void SeekFlag(BinaryReader reader, byte flag)
+        private static int SeekPattern(byte[] bin, byte[] pattern)
         {
-            if (flag == DirListStart)
+            var byteList = new List<byte>(bin);
+            var index = -1;
+
+            if (pattern.SequenceEqual(DirListEndPattern))
             {
-                reader.BaseStream.Seek(0, SeekOrigin.Begin); // start at begining
-                reader.BaseStream.Seek(3, SeekOrigin.Current); // Skip FS File header
-                //reader.BaseStream.Seek(1, SeekOrigin.Current); // skip dir list start
-                SkipDirectories(reader);
-                //reader.BaseStream.Position -= 1;  // go back 2, taking us to DirEnd of the last Dir in DirList
-                // reached dir list!
-            }
-            else if (flag == FileListStart)
+                index = IOUtils.GetIndex(byteList, pattern);
+            } else if(pattern.SequenceEqual(FileListEndPattern))
             {
-                reader.BaseStream.Seek(0, SeekOrigin.Begin);
-                reader.BaseStream.Seek(3, SeekOrigin.Current); // Skip FS File headers
-                SkipDirectories(reader); // skip the directories list
-                SkipFiles(reader); // skip file list
-                //reader.BaseStream.Position -= 1; // go back 2, so we're at the FileEnd of the last File in FileList 
-                // reached file list!
+                index = byteList.Count - 1; // set as second to last byte
             }
+
+            return index;
         }
 
         public static void PrintFilesystem(byte[] bin)

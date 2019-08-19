@@ -96,7 +96,7 @@ namespace AlphaNET.Framework.IO
 
         public FilesystemObject GetObjectById(uint id)
         {
-            return FilesystemObjects.SingleOrDefault(obj => obj.Id == id);
+            return FilesystemObjects.FirstOrDefault(obj => obj.Id == id);
         }
 
         public List<FilesystemObject> GetObjectsByTitle(string title)
