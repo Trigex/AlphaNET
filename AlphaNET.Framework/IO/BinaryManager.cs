@@ -81,11 +81,13 @@ namespace AlphaNET.Framework.IO
         /// </summary>
         /// <param name="bin">The binary encoded <c>Filesystem</c> byte array</param>
         /// <returns>An instance of <c>Filesystem</c> representing the binary encoded <c>Filesystem</c></returns>
-        public static Filesystem CreateFilesystemFromBinary(byte[] bin)
+        public static Filesystem CreateFilesystemFromBinary(byte[] bin, string fsPath)
         {
+            if (bin == null) throw new ArgumentNullException(nameof(bin));
+            if (fsPath == null) throw new ArgumentNullException(nameof(fsPath));
             var stream = new MemoryStream(bin);
             var reader = new BinaryReader(stream);
-            var fs = new Filesystem(null);
+            var fs = new Filesystem(fsPath);
 
             var headerStart = reader.ReadByte();
             if (headerStart != FsHeaderStart) // FS File Header Start
@@ -136,67 +138,48 @@ namespace AlphaNET.Framework.IO
         public static void ReloadFilesystemFromBinary(Filesystem filesystem, byte[] bin)
         {
             if (filesystem == null) throw new ArgumentNullException(nameof(filesystem));
-            filesystem = CreateFilesystemFromBinary(bin);
+            filesystem = CreateFilesystemFromBinary(bin, filesystem._fsPath);
         }
 
-        public static void AppendFilesystemObjectToBinary(File file, string path)
-        {
-
-            var bin = ReadBinaryFromFile(path);
-            Console.WriteLine(bin.Length);
-            bin = AppendFilesystemObjectToBinary(file, bin);
-            Console.WriteLine(bin.Length);
-            WriteBinaryToFile(path, bin);
-            PrintFilesystem(bin);
-        }
-
-        public static void AppendFilesystemObjectToBinary(Directory directory, string path)
+        public static void InsertFilesystemObjectIntoBinary(FilesystemObject obj, string path)
         {
             var bin = ReadBinaryFromFile(path);
-            Console.WriteLine(bin.Length);
-            bin = AppendFilesystemObjectToBinary(directory, bin);
-            Console.WriteLine(bin.Length);
+            bin = InsertFilesystemObjectIntoBinary(obj, bin);
             WriteBinaryToFile(path, bin);
-            PrintFilesystem(bin);
         }
 
-        public static byte[] AppendFilesystemObjectToBinary(File file, byte[] bin)
+        public static byte[] InsertFilesystemObjectIntoBinary(FilesystemObject obj, byte[] bin)
         {
-            var stream = new MemoryStream();
-            // copy bin into stream
-            stream.Write(bin, 0, bin.Length);
+            var stream = new MemoryStream(bin);
+            // create reader and writer from stream
             var reader = new BinaryReader(stream);
             var writer = new BinaryWriter(stream);
-            SeekFlag(reader, FileListStart);
-            var fileEncoded = EncodeFile(file);
+            // buffer to hold the encoded object to write
+            byte[] encodedObj = null;
+
+            if (obj.GetType() == typeof(Directory))
+            {
+                // Set position to right after DirListStart
+                SeekFlag(reader, DirListStart);
+                // Encode as Directory
+                encodedObj = EncodeDirectory((Directory) obj);
+            }
+            else if (obj.GetType() == typeof(File))
+            {
+                // Set position to right after FileListStart
+                SeekFlag(reader, FileListStart);
+                // Encode as File
+                encodedObj = EncodeFile((File) obj);
+            }
+            // create list from stream for ease of inserting
             var buffer = new List<byte>(stream.ToArray());
-            buffer.InsertRange((int)stream.Position, fileEncoded);
+            // insert into list from current position, which would be right before a ListEnd
+            buffer.InsertRange((int)stream.Position, encodedObj ?? throw new InvalidOperationException());
+            // save the new binary
             var modified = buffer.ToArray();
+            Console.WriteLine($"Added {obj.GetType()} at position {stream.Position}, of length {encodedObj.Length}");
             reader.Close();
             writer.Close();
-
-            return modified;
-        }
-
-        public static byte[] AppendFilesystemObjectToBinary(Directory directory, byte[] bin)
-        {
-            var stream = new MemoryStream();
-            // copy bin into stream
-            stream.Write(bin, 0, bin.Length);
-            var reader = new BinaryReader(stream);
-            var writer = new BinaryWriter(stream);
-            // should set us to right after dir list start
-            SeekFlag(reader, DirListStart);
-            var dirEncoded = EncodeDirectory(directory); 
-            // convert to list for ease of inserting
-            var buffer = new List<byte>(stream.ToArray());
-            // Insert right after DirListStart (which is where stream.Position should be)
-            buffer.InsertRange((int)stream.Position, dirEncoded);
-            // save into modified
-            var modified = buffer.ToArray();
-            reader.Close();
-            writer.Close();
-
             return modified;
         }
 
@@ -221,37 +204,6 @@ namespace AlphaNET.Framework.IO
         }
 
         /// <summary>
-        /// Writes generic FilesystemObject data to a given <c>BinaryWriter</c> based off the given <c>FilesystemObject</c>
-        /// </summary>
-        /// <param name="writer">The <c>BinaryWriter</c> to be used for writing</param>
-        /// <param name="fsObj">The <c>FilesystemObject</c> to write the generic data from</param>
-        private static void WriteGenericObjectMeta(BinaryWriter writer, FilesystemObject fsObj)
-        {
-            writer.Write(fsObj.Id); // ID
-            writer.Write(fsObj.Owner.Id); // OwnerID
-            writer.Write((ushort) Encoding.UTF8.GetByteCount(fsObj.Title)); // Title length
-            writer.Write(Encoding.UTF8.GetBytes(fsObj.Title)); // title
-        }
-
-        /// <summary>
-        /// Reads generic FilesystemObject data from a given <c>BinaryWriter</c>
-        /// </summary>
-        /// <param name="reader">The <c>BinaryReader</c> to read from</param>
-        /// <returns></returns>
-        private static GenericObjectMeta ReadGenericObjectMeta(BinaryReader reader)
-        {
-            Console.WriteLine("ReadGenericObjectMeta call");
-            var genericObjectMeta = new GenericObjectMeta
-            {
-                Id = reader.ReadUInt32(), OwnerId = reader.ReadUInt32(), TitleLength = reader.ReadUInt16()
-            };
-
-            genericObjectMeta.Title = reader.ReadBytes(genericObjectMeta.TitleLength);
-
-            return genericObjectMeta;
-        }
-
-        /// <summary>
         /// Loops through the DirectoriesList of a binary encoded <c>Filesystem</c>, modifying the <c>Filesystem</c> instance procedurely based off what it reads
         /// </summary>
         /// <param name="reader">The <c>BinaryReader</c> to read from</param>
@@ -266,6 +218,7 @@ namespace AlphaNET.Framework.IO
                 reader.ReadByte(); // dir end
 
                 var newDir = new Directory(Encoding.UTF8.GetString(dirMeta.Title), dirMeta.Id);
+                Console.WriteLine($"Title: {newDir.Title}, ID: {newDir.Id}, OwnerDir: {dirMeta.OwnerId}");
                 if (newDir.Title == "root")
                 {
                     newDir.Owner = newDir;
@@ -274,13 +227,15 @@ namespace AlphaNET.Framework.IO
                 else
                 {
                     var dirOwner = (Directory) filesystem.GetObjectById(dirMeta.OwnerId);
-
-                    if (dirOwner == null | dirOwner.GetType() != typeof(Directory))
+                    Console.WriteLine(dirOwner);
+                    if (dirOwner == null || dirOwner.GetType() != typeof(Directory))
                     {
                         // Error!
+                        throw new Exception($"Directory \"{newDir.Title}\"'s parent Directory could not be found!");
+                    } else
+                    {
+                        filesystem.AddObject(newDir, dirOwner);
                     }
-
-                    filesystem.AddObject(newDir, dirOwner);
                 }
 
                 if (reader.ReadByte() == DirListEnd)
@@ -297,8 +252,18 @@ namespace AlphaNET.Framework.IO
         private static void SkipDirectories(BinaryReader reader)
         {
             var listEnd = false;
-            if (reader.ReadByte() != DirListStart) return; // incorrect position, hmm
-            if (reader.ReadByte() != DirStart) return; // The directory list is empty, can return
+            if (reader.ReadByte() != DirListStart)
+            {
+                reader.BaseStream.Position -= 1;
+                return; // incorrect position, hmm
+            }
+
+            if (reader.ReadByte() != DirStart)
+            {
+                reader.BaseStream.Position -= 1;
+                return; // The directory list is empty, can return
+            }
+                
             reader.BaseStream.Position -= 1; // go back to first dir start
 
             while (!listEnd)
@@ -325,7 +290,45 @@ namespace AlphaNET.Framework.IO
         }
 
         /// <summary>
-        /// Loops through the FilesList of a binary encoded <c>Filesystem</c>, modifying the <c>Filesystem</c> instance procedurely based off what it reads
+        /// Takes the given BinaryReader to the end of the FileList
+        /// </summary>
+        /// <param name="reader">Reader to set the position of</param>
+        private static void SkipFiles(BinaryReader reader)
+        {
+            var listEnd = false;
+            if (reader.ReadByte() != FileListStart) return; // incorrect position, hmm
+            if (reader.ReadByte() != FileStart) return; // The directory list is empty, can return
+            reader.BaseStream.Position -= 1; // go back to first file start
+
+            while (!listEnd)
+            {
+                var fileStart = reader.ReadByte();
+
+                if (fileStart != FileStart) // file start
+                    Console.WriteLine($"What the fuck, {fileStart}");
+
+                ReadGenericObjectMeta(reader);
+                reader.ReadByte(); // plaintext?
+                var len = reader.ReadUInt16(); // contents length
+                // change this later to just skip
+                reader.ReadBytes(len); // contents
+                reader.ReadByte(); // file end
+
+                if (reader.ReadByte() == FileListEnd)
+                {
+                    listEnd = true;
+                }
+                else
+                {
+                    reader.BaseStream.Position -= 1; // go back a byte
+                }
+            }
+
+            reader.ReadByte(); // consume file list end
+        }
+
+        /// <summary>
+        /// Loops through the FilesList of a binary encoded <c>Filesystem</c>, modifying the <c>Filesystem</c> instance procedurally based off what it reads
         /// </summary>
         /// <param name="reader">The <c>BinaryReader</c> to read from</param>
         /// <param name="filesystem">The <c>Filesystem</c> to modify based off what's read</param>
@@ -372,6 +375,38 @@ namespace AlphaNET.Framework.IO
             writer.Write(EncodeDirectory(directory));
         }
 
+        /// <summary>
+        /// Writes generic FilesystemObject data to a given <c>BinaryWriter</c> based off the given <c>FilesystemObject</c>
+        /// </summary>
+        /// <param name="writer">The <c>BinaryWriter</c> to be used for writing</param>
+        /// <param name="fsObj">The <c>FilesystemObject</c> to write the generic data from</param>
+        private static void WriteGenericObjectMeta(BinaryWriter writer, FilesystemObject fsObj)
+        {
+            writer.Write(fsObj.Id); // ID
+            writer.Write(fsObj.Owner.Id); // OwnerID
+            writer.Write((ushort)Encoding.UTF8.GetByteCount(fsObj.Title)); // Title length
+            writer.Write(Encoding.UTF8.GetBytes(fsObj.Title)); // title
+        }
+
+        /// <summary>
+        /// Reads generic FilesystemObject data from a given <c>BinaryWriter</c>
+        /// </summary>
+        /// <param name="reader">The <c>BinaryReader</c> to read from</param>
+        /// <returns></returns>
+        private static GenericObjectMeta ReadGenericObjectMeta(BinaryReader reader)
+        {
+            var genericObjectMeta = new GenericObjectMeta
+            {
+                Id = reader.ReadUInt32(),
+                OwnerId = reader.ReadUInt32(),
+                TitleLength = reader.ReadUInt16()
+            };
+
+            genericObjectMeta.Title = reader.ReadBytes(genericObjectMeta.TitleLength);
+
+            return genericObjectMeta;
+        }
+
         private static byte[] EncodeFile(File file)
         {
             byte[] encoded;
@@ -414,9 +449,11 @@ namespace AlphaNET.Framework.IO
         {
             if (flag == DirListStart)
             {
-                reader.BaseStream.Seek(0, SeekOrigin.Begin);
-                reader.BaseStream.Seek(3, SeekOrigin.Current); // Skip FS File headers
-                reader.BaseStream.Seek(1, SeekOrigin.Current); // skip dir list start
+                reader.BaseStream.Seek(0, SeekOrigin.Begin); // start at begining
+                reader.BaseStream.Seek(3, SeekOrigin.Current); // Skip FS File header
+                //reader.BaseStream.Seek(1, SeekOrigin.Current); // skip dir list start
+                SkipDirectories(reader);
+                //reader.BaseStream.Position -= 1;  // go back 2, taking us to DirEnd of the last Dir in DirList
                 // reached dir list!
             }
             else if (flag == FileListStart)
@@ -424,7 +461,8 @@ namespace AlphaNET.Framework.IO
                 reader.BaseStream.Seek(0, SeekOrigin.Begin);
                 reader.BaseStream.Seek(3, SeekOrigin.Current); // Skip FS File headers
                 SkipDirectories(reader); // skip the directories list
-                reader.BaseStream.Seek(1, SeekOrigin.Current); // skip file list start
+                SkipFiles(reader); // skip file list
+                //reader.BaseStream.Position -= 1; // go back 2, so we're at the FileEnd of the last File in FileList 
                 // reached file list!
             }
         }

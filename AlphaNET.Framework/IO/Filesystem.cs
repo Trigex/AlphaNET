@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using static System.String;
 
@@ -7,7 +8,7 @@ namespace AlphaNET.Framework.IO
     public class Filesystem
     {
         public List<FilesystemObject> FilesystemObjects { get; }
-        private readonly string _fsPath;
+        public string _fsPath;
 
         public Filesystem(string fsPath)
         {
@@ -17,6 +18,8 @@ namespace AlphaNET.Framework.IO
 
         public IoStatusCode AddObject(FilesystemObject obj, Directory dir)
         {
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+            if (dir == null) throw new ArgumentNullException(nameof(dir));
             // Check if the directory the object is being added to exists
             if (GetObjectById(dir.Id) == null)
             {
@@ -31,6 +34,8 @@ namespace AlphaNET.Framework.IO
 
             // Append to bin
             WriteObject(obj);
+
+            //BinaryManager.PrintFilesystem(BinaryManager.CreateBinaryFromFilesystem(this));
 
             return IoStatusCode.ObjectAdded;
         }
@@ -215,14 +220,7 @@ namespace AlphaNET.Framework.IO
 
         private void WriteObject(FilesystemObject obj)
         {
-            if (obj.GetType() == typeof(File))
-            {
-                BinaryManager.AppendFilesystemObjectToBinary((File)obj, _fsPath);
-            } else if (obj.GetType() == typeof(Directory))
-            {
-                BinaryManager.AppendFilesystemObjectToBinary((Directory)obj, _fsPath);
-            }
-            //BinaryManager.PrintFilesystem(BinaryManager.ReadBinaryFromFile(_fsPath));
+            BinaryManager.InsertFilesystemObjectIntoBinary(obj, _fsPath);
         }
     }
 }

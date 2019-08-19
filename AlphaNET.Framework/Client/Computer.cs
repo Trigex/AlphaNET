@@ -89,7 +89,6 @@ namespace AlphaNET.Framework.Client
             var fs = new Filesystem(FsPath);
             // run create binary to get basic layout setup
             BinaryManager.WriteBinaryToFile(FsPath, BinaryManager.CreateBinaryFromFilesystem(fs));
-            //BinaryManager.PrintFilesystem(BinaryManager.ReadBinaryFromFile(FsPath));
             var root = new Directory("root", fs.GenerateFilesystemObjectId());
             root.Owner = root;
             var bin = new Directory("bin", fs.GenerateFilesystemObjectId());
