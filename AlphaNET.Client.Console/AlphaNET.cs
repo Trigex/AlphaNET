@@ -18,7 +18,7 @@ namespace AlphaNET.Client.Console
                 var ip = DefaultIp;
                 var port = DefaultPort;
 
-                //o.FilesystemPath = "debug.fs";
+                o.FilesystemPath = "debug.fs";
 
                 if (o.Host != null)
                     ip = o.Host;

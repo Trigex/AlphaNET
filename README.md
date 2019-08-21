@@ -30,7 +30,7 @@ A GUI editor to interact with an AlphaNET Filesystem, utilizing `Eto.Forms`. Giv
 
 Projects for platform specific builds of AlphaNET.Editor, including respective UI toolkit dependences
 
-### AlphaNET.Server
+### AlphaNET.Server (.NET Core 2.2)
 
 The primary TCP server implementation for AlphaNET, facilitates all networking components of the game (Mainly Virtual Sockets and Virtual IPs, allowing for communication between two AlphaNET clients). It's planned to offer paid services for AlphaNET as well, such as AlphaHosting (Service which allows a user to control a server-hosted AlphaNET client, sort of like a VPS. Great for people who want to run an in game persistent application, but don't have the resources to run a client 24/7 themselves.)
 
@@ -43,7 +43,7 @@ The primary TCP server implementation for AlphaNET, facilitates all networking c
 
 ### Windows
 
-For building an editing on Windows, it's recommended to use Visual Studio, with the default Build/Run functionallity. For building `AlphaNET.Clent.Console` for example, the primary client of this project, load `AlphaNET.sln` at the root of this project into Visual Studio, and set your startup project to `AlphaNET.Client.Console`, and click run.
+For building and editing on Windows, it's recommended to use Visual Studio, with the default Build/Run functionallity. For building `AlphaNET.Clent.Console` for example, the primary client of this project, load `AlphaNET.sln` at the root of this project into Visual Studio, and set your startup project to `AlphaNET.Client.Console`, and click run.
 
 ### Linux
 

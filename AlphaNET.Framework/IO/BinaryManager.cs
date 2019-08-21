@@ -404,7 +404,9 @@ namespace AlphaNET.Framework.IO
         private static int SeekFileListEnd(Filesystem fs)
         {
             var dirListSize = GetSize(fs.GetAllDirectories());
-            var fileListSize = GetSize(fs.GetAllFiles());
+            var fileList = fs.GetAllFiles().ToList();
+            fileList.RemoveAt(fileList.Count - 1);
+            var fileListSize = GetSize(fileList.ToArray());
             return FsHeaderSize
                    + dirListSize
                    + fileListSize - 1;
@@ -412,7 +414,9 @@ namespace AlphaNET.Framework.IO
 
         private static int SeekDirectoryListEnd(Filesystem fs)
         {
-            var dirListSize = GetSize(fs.GetAllDirectories());
+            var dirList = fs.GetAllDirectories().ToList();
+            dirList.RemoveAt(dirList.Count - 1); // remove 1 directory, since filesystem has a directory the binary doesn't
+            var dirListSize = GetSize(dirList.ToArray());
             return FsHeaderSize
                    + dirListSize - 1;
         }
@@ -490,7 +494,7 @@ namespace AlphaNET.Framework.IO
             int size = 0;
 
             if (dirs.Length < 1)
-                return 0;
+                return 2;
 
             foreach(var dir in dirs)
             {
@@ -503,7 +507,7 @@ namespace AlphaNET.Framework.IO
         private static int GetSize(File[] files)
         {
             if (files.Length < 1)
-                return 0;
+                return 2;
 
             var size = files.Sum(GetSize);
 
