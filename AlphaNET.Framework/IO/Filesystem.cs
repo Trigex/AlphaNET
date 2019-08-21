@@ -8,11 +8,11 @@ namespace AlphaNET.Framework.IO
     public class Filesystem
     {
         public List<FilesystemObject> FilesystemObjects { get; }
-        public string _fsPath;
+        public string FsPath;
 
         public Filesystem(string fsPath)
         {
-            _fsPath = fsPath;
+            FsPath = fsPath;
             FilesystemObjects = new List<FilesystemObject>();
         }
 
@@ -106,7 +106,7 @@ namespace AlphaNET.Framework.IO
 
         public FilesystemObject GetObjectByTitle(string title)
         {
-            return FilesystemObjects.SingleOrDefault(obj => obj.Title == title);
+            return FilesystemObjects.FirstOrDefault(obj => obj.Title == title);
         }
 
         /// <summary>
@@ -134,8 +134,7 @@ namespace AlphaNET.Framework.IO
             var dir = (Directory)GetObjectByTitle("root");
             foreach (var resource in resources)
             {
-                FilesystemObject child = null;
-                child = dir.GetChildByTitle(resource);
+                var child = dir.GetChildByTitle(resource);
 
                 if (child == null) continue;
                 // Are we on the final resource?
@@ -220,7 +219,7 @@ namespace AlphaNET.Framework.IO
 
         private void WriteObject(FilesystemObject obj)
         {
-            BinaryManager.InsertFilesystemObjectIntoBinary(obj, _fsPath);
+            BinaryManager.InsertFilesystemObjectIntoBinary(obj, FsPath, this);
         }
     }
 }

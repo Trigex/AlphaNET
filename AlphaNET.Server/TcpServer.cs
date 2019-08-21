@@ -15,8 +15,6 @@ namespace AlphaNET.Server
         private Logger _logger;
         private List<OngoingRequest> _ongoingRequests;
 
-        public TcpServer() { }
-
         public bool Init(string ip, int port)
         {
             _logger = LogManager.GetCurrentClassLogger();
@@ -110,7 +108,7 @@ namespace AlphaNET.Server
                 {
                     case SocketStatusRequest ssr: // Source is requesting packet SocketStatus of the Destination
                         var socketStatusRequest = ssr;
-                        _logger.Info(string.Format("SocketStatusRequest: For address {0}", socketStatusRequest.SourceAddress.ToString()));
+                        _logger.Info($"SocketStatusRequest: For address {socketStatusRequest.SourceAddress}");
                         var destinationUser = GetConnectedUserByVirtual(socketStatusRequest.SourceAddress.IpAddress);
                         // Check if the client of the remote address is connected to this server
                         if (destinationUser != null)
@@ -123,7 +121,7 @@ namespace AlphaNET.Server
                         else
                         {
                             // destination not connected, send our own SocketStatusResponse to the requesting client
-                            _logger.Info(string.Format("The requested address isn't connected..."));
+                            _logger.Info("The requested address isn't connected...");
                             Send(new SocketStatusResponse(new SocketStatus(false, false), null), ipPort);
                         }
                         break;
@@ -131,7 +129,7 @@ namespace AlphaNET.Server
                         var socketStatusRequestResp = ssr;
                         var ongoingRequest = _ongoingRequests.SingleOrDefault(r => r.DestinationUser == GetConnectedUserByReal(ipPort) && r.RequestedPacketType == PacketType.SOCKET_STATUS);
                         _logger.Info(
-                            $"SocketStatusResponse: To address {socketStatusRequestResp.DestinationAddress.ToString()}");
+                            $"SocketStatusResponse: To address {socketStatusRequestResp.DestinationAddress}");
                         if(ongoingRequest != null) // Check if there's actually an ongoingrequest
                         {
                             // send to the original request user
@@ -143,7 +141,7 @@ namespace AlphaNET.Server
                     case SocketConnectionRequest scr: // source is requesting connection to destination
                         var requestSocketConn = scr;
                         _logger.Info(
-                            $"SocketConnectionRequest: Remote: {requestSocketConn.SourceAddress.ToString()}, Requesting: {requestSocketConn.DestinationAddress.ToString()}");
+                            $"SocketConnectionRequest: Remote: {requestSocketConn.SourceAddress}, Requesting: {requestSocketConn.DestinationAddress}");
                         if(GetConnectedUserByVirtual(requestSocketConn.DestinationAddress.IpAddress) != null)
                         {
                             var destUser = GetConnectedUserByVirtual(requestSocketConn.DestinationAddress.IpAddress);
@@ -192,11 +190,9 @@ namespace AlphaNET.Server
         private void RemoveConnectedUser(string realIp)
         {
             var index = _connectedUsers.FindIndex(u => u.RealIp == realIp);
-            if(index >= 0)
-            {
-                _connectedUsers.RemoveAt(index);
-                _logger.Info($"Removed user {realIp} from connected users list");
-            }
+            if (index < 0) return;
+            _connectedUsers.RemoveAt(index);
+            _logger.Info($"Removed user {realIp} from connected users list");
         }
 
         private void AddUserToConnected(User user)

@@ -45,18 +45,15 @@ namespace AlphaNET.Client.Visual
                     port = o.Port;
 
                 if (o.FilesystemPath != null)
-                    fs = BinaryManager.CreateFilesystemFromBinary(BinaryManager.ReadBinaryFromFile(o.FilesystemPath));
+                    fs = BinaryManager.CreateFilesystemFromBinary(BinaryManager.ReadBinaryFromFile(o.FilesystemPath), o.FilesystemPath);
                 else
                     fs = null;
 
                 _tty = new Tty(Content.Load<SpriteFont>(@"tty"));
 
-                if (o.Offline)
-                    _computer = new Computer(fs, true, null, 0, _tty);
-                else
-                    _computer = new Computer(fs, false, ip, port, _tty);
+                _computer = new Computer();
 
-                _computerThread = new Thread(() => AlphaNET.ComputerThread(_computer));
+                _computerThread = new Thread(() => AlphaNET.ComputerThread(_computer, _tty));
                 _computerThread.Start();
             });
         }

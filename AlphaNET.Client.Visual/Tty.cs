@@ -10,15 +10,12 @@ namespace AlphaNET.Client.Visual
 {
     public class Tty : IConsole
     {
-        private SpriteFont _font;
-        private string _out;
-        private SadConsole.Console _console;
+        private readonly SpriteFont _font;
+        private string _out = "";
 
         public Tty(SpriteFont font)
         {
             _font = font;
-            _console = new SadConsole.Console(80, 20);
-            SadConsole.Global.CurrentScreen = _console;
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
@@ -40,8 +37,8 @@ namespace AlphaNET.Client.Visual
 
         public string ReadLine()
         {
-            string output = "";
-            bool enter = false;
+            var output = "";
+            var enter = false;
             while (!enter)
             {
                 if (Keyboard.GetState().IsKeyDown(Keys.Enter))

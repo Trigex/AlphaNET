@@ -14,9 +14,9 @@ namespace AlphaNET.Client.Visual
             }
         }
 
-        public static void ComputerThread(Computer computer)
+        public static void ComputerThread(Computer computer, Tty tty)
         {
-            computer.Init();
+            computer.Init(null, false, "127.0.0.1", 1337, tty);
             computer.Start();
         }
     }

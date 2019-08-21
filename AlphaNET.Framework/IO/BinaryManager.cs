@@ -145,17 +145,19 @@ namespace AlphaNET.Framework.IO
         public static void ReloadFilesystemFromBinary(Filesystem filesystem, byte[] bin)
         {
             if (filesystem == null) throw new ArgumentNullException(nameof(filesystem));
-            filesystem = CreateFilesystemFromBinary(bin, filesystem._fsPath);
+            filesystem = CreateFilesystemFromBinary(bin, filesystem.FsPath);
         }
 
-        public static void InsertFilesystemObjectIntoBinary(FilesystemObject obj, string path)
+        public static void InsertFilesystemObjectIntoBinary(FilesystemObject obj, string path, Filesystem fs)
         {
+            // Change this later to allow an actual FileStream, which was the whole point of allowing
+            // individual file insertion baka dayou
             var bin = ReadBinaryFromFile(path);
-            bin = InsertFilesystemObjectIntoBinary(obj, bin);
+            bin = InsertFilesystemObjectIntoBinary(obj, bin, fs);
             WriteBinaryToFile(path, bin);
         }
 
-        public static byte[] InsertFilesystemObjectIntoBinary(FilesystemObject obj, byte[] bin)
+        public static byte[] InsertFilesystemObjectIntoBinary(FilesystemObject obj, byte[] bin, Filesystem fs)
         {
             var stream = new MemoryStream(bin);
             // create reader and writer from stream
@@ -170,19 +172,19 @@ namespace AlphaNET.Framework.IO
             if (obj.GetType() == typeof(Directory))
             {
                 // Set position to DirListEnd
-                seekedPos = SeekPattern(bin, DirListEndPattern);
+                seekedPos = SeekDirectoryListEnd(fs);
                 // Encode as Directory
                 encodedObj = EncodeDirectory((Directory) obj);
             }
             else if (obj.GetType() == typeof(File))
             {
                 // Set position to right after FileListStart
-                seekedPos = SeekPattern(bin, FileListEndPattern);
+                seekedPos = SeekFileListEnd(fs);
                 // Encode as File
                 encodedObj = EncodeFile((File) obj);
             }
 
-            if (seekedPos == -1)
+            if (seekedPos == 0)
                 throw new Exception("Unable to find ListEndFlag, unable to insert FilesystemObject.");
 
             if (encodedObj == null)
@@ -194,7 +196,6 @@ namespace AlphaNET.Framework.IO
             buffer.InsertRange(seekedPos, encodedObj);
             // save the new binary
             var modified = buffer.ToArray();
-            Console.WriteLine($"Added {obj.GetType()} at position {seekedPos}, of length {encodedObj.Length}");
             reader.Close();
             writer.Close();
             return modified;
@@ -266,84 +267,6 @@ namespace AlphaNET.Framework.IO
             }
         }
 
-        private static void SkipDirectories(BinaryReader reader)
-        {
-            var listEnd = false;
-            if (reader.ReadByte() != DirListStart)
-            {
-                reader.BaseStream.Position -= 1;
-                return; // incorrect position, hmm
-            }
-
-            if (reader.ReadByte() != DirStart)
-            {
-                reader.BaseStream.Position -= 1;
-                return; // The directory list is empty, can return
-            }
-                
-            reader.BaseStream.Position -= 1; // go back to first dir start
-
-            while (!listEnd)
-            {
-                var dirStart = reader.ReadByte();
-
-                if (dirStart != DirStart) // dir start
-                    Console.WriteLine($"What the fuck, {dirStart}");
-
-                ReadGenericObjectMeta(reader);
-                reader.ReadByte(); // dir end
-
-                if (reader.ReadByte() == DirListEnd)
-                {
-                    listEnd = true;
-                }
-                else
-                {
-                    reader.BaseStream.Position -= 1; // go back a byte
-                }
-            }
-
-            reader.ReadByte(); // consume dir list end
-        }
-
-        /// <summary>
-        /// Takes the given BinaryReader to the end of the FileList
-        /// </summary>
-        /// <param name="reader">Reader to set the position of</param>
-        private static void SkipFiles(BinaryReader reader)
-        {
-            var listEnd = false;
-            if (reader.ReadByte() != FileListStart) return; // incorrect position, hmm
-            if (reader.ReadByte() != FileStart) return; // The directory list is empty, can return
-            reader.BaseStream.Position -= 1; // go back to first file start
-
-            while (!listEnd)
-            {
-                var fileStart = reader.ReadByte();
-
-                if (fileStart != FileStart) // file start
-                    Console.WriteLine($"What the fuck, {fileStart}");
-
-                ReadGenericObjectMeta(reader);
-                reader.ReadByte(); // plaintext?
-                var len = reader.ReadUInt16(); // contents length
-                // change this later to just skip
-                reader.ReadBytes(len); // contents
-                reader.ReadByte(); // file end
-
-                if (reader.ReadByte() == FileListEnd)
-                {
-                    listEnd = true;
-                }
-                else
-                {
-                    reader.BaseStream.Position -= 1; // go back a byte
-                }
-            }
-
-            reader.ReadByte(); // consume file list end
-        }
-
         /// <summary>
         /// Loops through the FilesList of a binary encoded <c>Filesystem</c>, modifying the <c>Filesystem</c> instance procedurally based off what it reads
         /// </summary>
@@ -354,13 +277,13 @@ namespace AlphaNET.Framework.IO
             var listEnd = false; // flag to stop loop at end of list
             while (!listEnd)
             {
-                var fileStart = reader.ReadByte(); // file start flag
+                reader.ReadByte(); // file start flag
                 var fileMeta = ReadGenericObjectMeta(reader); // generic meta properties
                 var plaintext = Convert.ToBoolean(reader.ReadByte()); // Plaintext?
 
                 var fileContentsLength = reader.ReadUInt32();
                 var fileContents = reader.ReadBytes((int) fileContentsLength);
-                var fileEnd = reader.ReadByte();
+                reader.ReadByte(); // File end flag
 
                 var fileOwner = (Directory) filesystem.GetObjectById(fileMeta.OwnerId);
                 if (fileOwner == null)
@@ -472,10 +395,26 @@ namespace AlphaNET.Framework.IO
                 index = IOUtils.GetIndex(byteList, pattern);
             } else if(pattern.SequenceEqual(FileListEndPattern))
             {
-                index = byteList.Count - 1; // set as second to last byte
+                index = byteList.Count - 1; // set as second to last byte, change this later to not be retarded
             }
 
             return index;
+        }
+
+        private static int SeekFileListEnd(Filesystem fs)
+        {
+            var dirListSize = GetSize(fs.GetAllDirectories());
+            var fileListSize = GetSize(fs.GetAllFiles());
+            return FsHeaderSize
+                   + dirListSize
+                   + fileListSize - 1;
+        }
+
+        private static int SeekDirectoryListEnd(Filesystem fs)
+        {
+            var dirListSize = GetSize(fs.GetAllDirectories());
+            return FsHeaderSize
+                   + dirListSize - 1;
         }
 
         public static void PrintFilesystem(byte[] bin)
@@ -548,19 +487,30 @@ namespace AlphaNET.Framework.IO
 
         private static int GetSize(Directory[] dirs)
         {
-            var size = dirs.Sum(GetSize);
+            int size = 0;
 
-            return size + (sizeof(byte) * 2); // list start and end flags
+            if (dirs.Length < 1)
+                return 0;
+
+            foreach(var dir in dirs)
+            {
+                size += GetSize(dir);
+            }
+
+            return size + 2; // list start and end flags
         }
 
         private static int GetSize(File[] files)
         {
+            if (files.Length < 1)
+                return 0;
+
             var size = files.Sum(GetSize);
 
             return size + (sizeof(byte) * 2); // list start and end flags
         }
 
-    /// <summary>
+        /// <summary>
         /// Get the total size of a single File as it would be represented in
         /// the binary filesystem format
         /// </summary>
@@ -582,7 +532,7 @@ namespace AlphaNET.Framework.IO
         /// <returns>The total size of the Directory</returns>
         private static int GetSize(Directory directory)
         {
-            return (sizeof(byte) * 2) + // dir start and end flag
+            return 2 + // dir start and end flag
                    GetSize(CreateGenericObjectMeta(directory));
         }
 
