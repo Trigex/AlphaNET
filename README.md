@@ -1,7 +1,5 @@
-# AlphaNET
-
 <p align="center">
-  <img width="512" height="256" src="https://github.com/Trigex/AlphaNET/blob/master/Assets/alphanet_banner_512.png">
+  <img width="512" height="256" src="https://github.com/Trigex/AlphaNET/blob/master/Assets/Images/Banners/alphanet_banner_512.png">
 </p>
 
 It's AlphaNET, but the 4th rewrite!
