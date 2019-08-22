@@ -1,5 +1,7 @@
 # AlphaNET
 
+![AlphaNET Banner](https://github.com/Trigex/AlphaNET/master/Assets/alphanet_banner.png)
+
 It's AlphaNET, but the 4th rewrite!
 
 Hacking games are a very niche and underexplored genre. You’ve got the bigger games like Hacker Experience, Hacknet, Hackmud, and Dark Signs/Hacking Simulator. However, here’s an issue with all these games: it’s nothing like actual hacking.
