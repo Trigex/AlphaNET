@@ -1,6 +1,8 @@
 # AlphaNET
 
-![AlphaNET Banner](https://github.com/Trigex/AlphaNET/blob/master/Assets/alphanet_banner.png)
+<p align="center">
+  <img width="512" height="256" src="https://github.com/Trigex/AlphaNET/blob/master/Assets/alphanet_banner_512.png">
+</p>
 
 It's AlphaNET, but the 4th rewrite!
 
