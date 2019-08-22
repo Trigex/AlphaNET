@@ -84,5 +84,5 @@ _A Filesystem File object, which contains arbitrary or UTF-8 Encoded string byte
 | Title                               | UTF-8 Encoded String | A valid UTF-8 Encoded string, with a max character length of 65535                                         |
 | Plaintext                           | Byte				 | 1, or 0, 1 = Is Plaintext, 0 = Not Plaintext                                                               |
 | Contents Length				      | Uint                 | 1-4294967295                                                                                               |
-| Contents							  | Byte[]               | Raw array of bytes, with a max length of 4294967295, or a UTF-8 Encoded string, if `Plaintext` was true    |
+| Contents							  | Byte[]               | Raw array of bytes, with a maximum length of 4294967295 bytes, or a UTF-8 Encoded string, if `Plaintext` was true    |
 | File Object End Flag                | Byte                 | 8 (Constant)                                                                                               |

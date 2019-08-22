@@ -8,7 +8,7 @@ They are essentially puzzle games, with a hacking/computer theme. Some have prog
 
 And that’s the goal of AlphaNET. AlphaNET aims to be a complete sandbox, with a fully featured scripting API, realistic and open operating system internals, complete customization, and most importantly: actual hacking and cracking!
 
-## Project Structure
+## Solution Structure
 
 ### AlphaNET.Framework (.NET Standard 2.0)
 
