@@ -10,6 +10,21 @@ They are essentially puzzle games, with a hacking/computer theme. Some have prog
 
 And that’s the goal of AlphaNET. AlphaNET aims to be a complete sandbox, with a fully featured scripting API, realistic and open operating system internals, complete customization, and most importantly: actual hacking and cracking!
 
+## Building and editing
+
+### Requirements
+* .NET Core SDK 2.2 or higher
+* .NET Framework 4.6.1 or higher (For `AlphaNET.Editor.Windows`)
+* A solid IDE or editor with C# support, such as Visual Studio or Visual Studio Code
+
+### Windows
+
+For building and editing on Windows, it's recommended to use Visual Studio, with the default Build/Run functionallity. For building `AlphaNET.Clent.Console` for example, the primary client of this project, load `AlphaNET.sln` at the root of this project into Visual Studio, and set your startup project to `AlphaNET.Client.Console`, and click run.
+
+### Linux
+
+For Linux, it's recommended to use Visual Studio Code, or the dotnet cli. Before any build should be attempted, run `dotnet restore` at the root of this project, which pulls Nuget dependencies. Then, you can build and run `AlphaNET.Client.Console` for example, using `dotnet run --project AlphaNET.Client.Console` (Do note that you can use the dotnet cli method on Windows too, but you have Visual Studio on Windows, which is the greatest, so what's the point?!)
+
 ## Solution Structure
 
 ### AlphaNET.Framework (.NET Standard 2.0)
@@ -36,20 +51,11 @@ Projects for platform specific builds of AlphaNET.Editor, including respective U
 
 The primary TCP server implementation for AlphaNET, facilitates all networking components of the game (Mainly Virtual Sockets and Virtual IPs, allowing for communication between two AlphaNET clients). It's planned to offer paid services for AlphaNET as well, such as AlphaHosting (Service which allows a user to control a server-hosted AlphaNET client, sort of like a VPS. Great for people who want to run an in game persistent application, but don't have the resources to run a client 24/7 themselves.)
 
-## Building and editing
+## Discord
 
-### Requirements
-* .NET Core SDK 2.2 or higher
-* .NET Framework 4.6.1 or higher (For `AlphaNET.Editor.Windows`)
-* A solid IDE or editor with C# support, such as Visual Studio or Visual Studio Code
+[AlphaNET Discord Invite](https://discordapp.com/invite/7HQxx4)
 
-### Windows
-
-For building and editing on Windows, it's recommended to use Visual Studio, with the default Build/Run functionallity. For building `AlphaNET.Clent.Console` for example, the primary client of this project, load `AlphaNET.sln` at the root of this project into Visual Studio, and set your startup project to `AlphaNET.Client.Console`, and click run.
-
-### Linux
-
-For Linux, it's recommended to use Visual Studio Code, or the dotnet cli. Before any build should be attempted, run `dotnet restore` at the root of this project, which pulls Nuget dependencies. Then, you can build and run `AlphaNET.Client.Console` for example, using `dotnet run --project AlphaNET.Client.Console` (Do note that you can use the dotnet cli method on Windows too, but you have Visual Studio on Windows, which is the greatest, so what's the point?!)
+Personally, I would have opted for IRC, but...
 
 ## Documentation
 
