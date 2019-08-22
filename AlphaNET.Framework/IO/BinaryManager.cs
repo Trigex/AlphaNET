@@ -30,10 +30,7 @@ namespace AlphaNET.Framework.IO
         // Static sizes
         private const byte FsHeaderSize = 3;
 
-        // Patterns
-        private static readonly byte[] DirListEndPattern = {2, 3};
-        private static readonly byte[] FileListEndPattern = {8, 4};
-
+        #region Creation Methods
         /// <summary>
         /// Creates a binary encoded <c>Filesystem</c> from a <c>Filesystem</c> instance
         /// </summary>
@@ -136,18 +133,9 @@ namespace AlphaNET.Framework.IO
 
             return fs;
         }
+        #endregion
 
-        /// <summary>
-        /// Reloads a given <c>Filesystem</c> from the contents of a binary encoded <c>Filesystem</c>
-        /// </summary>
-        /// <param name="filesystem"><c>Filesystem</c> instance to be reloaded</param>
-        /// <param name="bin">Binary encoded <c>Filesystem</c> byte array to load from</param>
-        public static void ReloadFilesystemFromBinary(Filesystem filesystem, byte[] bin)
-        {
-            if (filesystem == null) throw new ArgumentNullException(nameof(filesystem));
-            filesystem = CreateFilesystemFromBinary(bin, filesystem.FsPath);
-        }
-
+        #region Insertion Methods
         public static void InsertFilesystemObjectIntoBinary(FilesystemObject obj, string path, Filesystem fs)
         {
             // Change this later to allow an actual FileStream, which was the whole point of allowing
@@ -200,6 +188,9 @@ namespace AlphaNET.Framework.IO
             writer.Close();
             return modified;
         }
+        #endregion
+
+        #region Read and Write Methods
 
         /// <summary>
         /// Reads the binary contents of a file at the given path
@@ -347,6 +338,9 @@ namespace AlphaNET.Framework.IO
             return genericObjectMeta;
         }
 
+        #endregion
+
+        #region Encode Methods
         private static byte[] EncodeFile(File file)
         {
             byte[] encoded;
@@ -384,28 +378,14 @@ namespace AlphaNET.Framework.IO
 
             return encoded;
         }
+        #endregion
 
-        private static int SeekPattern(byte[] bin, byte[] pattern)
-        {
-            var byteList = new List<byte>(bin);
-            var index = -1;
-
-            if (pattern.SequenceEqual(DirListEndPattern))
-            {
-                index = IOUtils.GetIndex(byteList, pattern);
-            } else if(pattern.SequenceEqual(FileListEndPattern))
-            {
-                index = byteList.Count - 1; // set as second to last byte, change this later to not be retarded
-            }
-
-            return index;
-        }
-
+        #region Seek Methods
         private static int SeekFileListEnd(Filesystem fs)
         {
             var dirListSize = GetSize(fs.GetAllDirectories());
             var fileList = fs.GetAllFiles().ToList();
-            fileList.RemoveAt(fileList.Count - 1);
+            fileList.RemoveAt(fileList.Count - 1); // remove 1 file, you get the reason
             var fileListSize = GetSize(fileList.ToArray());
             return FsHeaderSize
                    + dirListSize
@@ -420,53 +400,9 @@ namespace AlphaNET.Framework.IO
             return FsHeaderSize
                    + dirListSize - 1;
         }
+        #endregion
 
-        public static void PrintFilesystem(byte[] bin)
-        {
-            using (var reader = new BinaryReader(new MemoryStream(bin)))
-            {
-                reader.BaseStream.Seek(0, SeekOrigin.Begin);
-                Console.WriteLine($"FS File Header Start: {reader.ReadByte()}");
-                Console.WriteLine($"FS Version: {reader.ReadByte()}");
-                Console.WriteLine($"FS File Header End: {reader.ReadByte()}");
-                Console.WriteLine($"Dir List Start: {reader.ReadByte()}");
-                while (reader.ReadByte() != DirListEnd)
-                {
-                    reader.BaseStream.Position -= 1;
-                    Console.WriteLine($"Directory Start: {reader.ReadByte()}");
-                    Console.WriteLine($"Directory ID: {reader.ReadUInt32()}");
-                    Console.WriteLine($"Directory Owner ID: {reader.ReadUInt32()}");
-                    var dirTitleLength = reader.ReadUInt16();
-                    Console.WriteLine($"Directory Title Length: {dirTitleLength}");
-                    Console.WriteLine($"Directory Title: {Encoding.UTF8.GetString(reader.ReadBytes(dirTitleLength))}");
-                    Console.WriteLine($"Directory End: {reader.ReadByte()}");
-                }
-
-                reader.BaseStream.Position -= 1; // set back to dir list end
-                Console.WriteLine($"Dir List End: {reader.ReadByte()}");
-                Console.WriteLine($"File List Start: {reader.ReadByte()}");
-                while (reader.ReadByte() != FileListEnd)
-                {
-                    reader.BaseStream.Position -= 1;
-                    Console.WriteLine($"File Start: {reader.ReadByte()}");
-                    Console.WriteLine($"File ID: {reader.ReadUInt32()}");
-                    Console.WriteLine($"File Owner ID: {reader.ReadUInt32()}");
-                    var fileTitleLength = reader.ReadUInt16();
-                    Console.WriteLine($"File Title Length: {fileTitleLength}");
-                    Console.WriteLine($"File Title: {Encoding.UTF8.GetString(reader.ReadBytes(fileTitleLength))}");
-                    Console.WriteLine($"File Plaintext?: {reader.ReadByte()}");
-                    var fileContentsLength = reader.ReadUInt32();
-                    Console.WriteLine($"File Contents Length: {fileContentsLength}");
-                    var contents = reader.ReadBytes((int)fileContentsLength);
-                    Console.WriteLine($"File Contents: {contents.Length}");
-                    Console.WriteLine($"File End: {reader.ReadByte()}");
-                }
-
-                reader.BaseStream.Position -= 1;
-                Console.WriteLine($"File List End: {reader.ReadByte()}");
-            }
-        }
-
+        #region Size Methods
         /// <summary>
         /// Get the total size of a Filesystem object as it would be represented
         /// in the binary filesystem format
@@ -552,7 +488,9 @@ namespace AlphaNET.Framework.IO
                    sizeof(ushort) + // title length
                    meta.Title.Length; // size of the title
         }
+        #endregion
 
+        #region Util Methods
         /// <summary>
         /// Create a GenericObjectMeta instance from a FilesystemObject instance
         /// </summary>
@@ -563,6 +501,53 @@ namespace AlphaNET.Framework.IO
             return new GenericObjectMeta
                 {Id = obj.Id, OwnerId = obj.Owner.Id, Title = Encoding.UTF8.GetBytes(obj.Title), TitleLength = (ushort)Encoding.UTF8.GetByteCount(obj.Title)};
         }
+
+        public static void PrintFilesystem(byte[] bin)
+        {
+            using (var reader = new BinaryReader(new MemoryStream(bin)))
+            {
+                reader.BaseStream.Seek(0, SeekOrigin.Begin);
+                Console.WriteLine($"FS File Header Start: {reader.ReadByte()}");
+                Console.WriteLine($"FS Version: {reader.ReadByte()}");
+                Console.WriteLine($"FS File Header End: {reader.ReadByte()}");
+                Console.WriteLine($"Dir List Start: {reader.ReadByte()}");
+                while (reader.ReadByte() != DirListEnd)
+                {
+                    reader.BaseStream.Position -= 1;
+                    Console.WriteLine($"Directory Start: {reader.ReadByte()}");
+                    Console.WriteLine($"Directory ID: {reader.ReadUInt32()}");
+                    Console.WriteLine($"Directory Owner ID: {reader.ReadUInt32()}");
+                    var dirTitleLength = reader.ReadUInt16();
+                    Console.WriteLine($"Directory Title Length: {dirTitleLength}");
+                    Console.WriteLine($"Directory Title: {Encoding.UTF8.GetString(reader.ReadBytes(dirTitleLength))}");
+                    Console.WriteLine($"Directory End: {reader.ReadByte()}");
+                }
+
+                reader.BaseStream.Position -= 1; // set back to dir list end
+                Console.WriteLine($"Dir List End: {reader.ReadByte()}");
+                Console.WriteLine($"File List Start: {reader.ReadByte()}");
+                while (reader.ReadByte() != FileListEnd)
+                {
+                    reader.BaseStream.Position -= 1;
+                    Console.WriteLine($"File Start: {reader.ReadByte()}");
+                    Console.WriteLine($"File ID: {reader.ReadUInt32()}");
+                    Console.WriteLine($"File Owner ID: {reader.ReadUInt32()}");
+                    var fileTitleLength = reader.ReadUInt16();
+                    Console.WriteLine($"File Title Length: {fileTitleLength}");
+                    Console.WriteLine($"File Title: {Encoding.UTF8.GetString(reader.ReadBytes(fileTitleLength))}");
+                    Console.WriteLine($"File Plaintext?: {reader.ReadByte()}");
+                    var fileContentsLength = reader.ReadUInt32();
+                    Console.WriteLine($"File Contents Length: {fileContentsLength}");
+                    var contents = reader.ReadBytes((int)fileContentsLength);
+                    Console.WriteLine($"File Contents: {contents.Length}");
+                    Console.WriteLine($"File End: {reader.ReadByte()}");
+                }
+
+                reader.BaseStream.Position -= 1;
+                Console.WriteLine($"File List End: {reader.ReadByte()}");
+            }
+        }
+        #endregion
     }
 
     /// <summary>

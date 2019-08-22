@@ -1,20 +1,39 @@
+================================================================ <FS Headers>
 00000110- (byte, 6 in decimal) FS File header start flag
 FS Version (byte) The FS Version of this file
 00001001- (byte, 9 in decimal) FS File header end flag
+================================================================
 
+================================================================ <List Meta> (TODO: IMPLEMENT)
+100 - (byte) List Meta Flag
+List Length - (uint, 4 bytes) - The number of directories the list contains
+List Byte Size - (ulong, 8 bytes) - The total length of the list in bytes
+(This property is a ludicrously long, well, ulong (heh), because this list meta also applies to the files list. And a single file can store up to 4 gigs. So, biggest number we can get eh?
+So, a single list could contain up to 18446744073709551615 bytes of data, or in other words, 16384 petabytes. Is this retarded? Yes. Do I care? only kinda.)
+(The binary reader, after reading list size, would expect either a dir list start flag, or file list start flag after this, depending on the context)
+================================================================
+
+================================================================ <Directory List>
 00000001 - (byte, 1 in decimal) Directory list start flag
-<Directory object schema>
+
+=========================================================== <Directory Object>
 00000101 - (byte, 5 in decimal) Directory start flag
 ID (uint, 4 bytes) A randomly generated ID, checked for collisions, used to identify this directory
 OwnerID (uint, 4 bytes) The ID of the directory that owns this directory
 Title length (2 bytes, max 65535 char length) Length of directory title in bytes
 Title (next 1-65535 bytes, UTF-8 encoded) Title of the directory
 00000110 - (byte, 6 in decimal) Directory end flag
+===========================================================
+
 00000010 - (byte, 2 in decimal) Directory list end flag
+================================================================
 
+================================================================ <List Meta (See above for schema, copy-pasting is bloat) ^^^> (TODO: IMPLEMENT)
 
+================================================================ <File List>
 00000011 - (byte, 3 in decimal) File list start flag
-<File object schema>
+
+=========================================================== <File Object>
 00000111 - (byte, 7 in decimal) File start flag
 ID (uint, 4 bytes) A randomly generated ID, checked for collisions, used to identify this file
 OwnerID (uint, 4 bytes) The ID of the directory that owns this file
@@ -24,4 +43,7 @@ Plaintext? (1 byte) Is this a plain text file? (0 = false, 1 = true)
 Contents length (uint, 4 bytes) Length of the file contents in bytes
 Contents (next 1-4294967295 bytes (4 gigs!)) The file contents, either as raw bytes, or UTF-8 encoded bytes, if plaintext was true
 00001000 - (byte, 8 in decimal) File end flag
+===========================================================
+
 00000100 - (byte, 4 in decimal) File list end flag
+================================================================

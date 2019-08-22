@@ -47,4 +47,8 @@ For building and editing on Windows, it's recommended to use Visual Studio, with
 
 ### Linux
 
-For Linux, it's recommended to use Visual Studio Code, or the dotnet cli. Before any build should be attempted, run `dotnet restore` at the root of this project, which pulls Nuget dependencies. Then, you can build and run `AlphaNET.Client.Console` for example, using `dotnet run --project AlphaNET.Client.Console`
+For Linux, it's recommended to use Visual Studio Code, or the dotnet cli. Before any build should be attempted, run `dotnet restore` at the root of this project, which pulls Nuget dependencies. Then, you can build and run `AlphaNET.Client.Console` for example, using `dotnet run --project AlphaNET.Client.Console` (Do note that you can use the dotnet cli method on Windows too, but you have Visual Studio on Windows, which is the greatest, so what's the point?!)
+
+## Documentation
+
+[Binary Filesystem Schema](Docs/FS_SCHEMA.md)
