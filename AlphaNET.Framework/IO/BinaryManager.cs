@@ -84,6 +84,7 @@ namespace AlphaNET.Framework.IO
         /// Creates a <c>Filesystem</c> instance from a binary encoded <c>Filesystem</c> byte array
         /// </summary>
         /// <param name="bin">The binary encoded <c>Filesystem</c> byte array</param>
+        /// <param name="fsPath">Path to the binary provided (The Filesystem object needs it!)</param>
         /// <returns>An instance of <c>Filesystem</c> representing the binary encoded <c>Filesystem</c></returns>
         public static Filesystem CreateFilesystemFromBinary(byte[] bin, string fsPath)
         {
@@ -145,7 +146,7 @@ namespace AlphaNET.Framework.IO
             WriteBinaryToFile(path, bin);
         }
 
-        public static byte[] InsertFilesystemObjectIntoBinary(FilesystemObject obj, byte[] bin, Filesystem fs)
+        private static byte[] InsertFilesystemObjectIntoBinary(FilesystemObject obj, byte[] bin, Filesystem fs)
         {
             var stream = new MemoryStream(bin);
             // create reader and writer from stream
@@ -154,6 +155,8 @@ namespace AlphaNET.Framework.IO
             // buffer to hold the encoded object to write
             byte[] encodedObj = null;
             // buffer to hold bin in a list for ease of inserting
+            
+            // TODO: this rapes the memory usage for a bit when inserting, so make this something a lot more efficient later
             var buffer = new List<byte>(stream.ToArray());
             var seekedPos = 0;
 
@@ -502,6 +505,10 @@ namespace AlphaNET.Framework.IO
                 {Id = obj.Id, OwnerId = obj.Owner.Id, Title = Encoding.UTF8.GetBytes(obj.Title), TitleLength = (ushort)Encoding.UTF8.GetByteCount(obj.Title)};
         }
 
+        /// <summary>
+        /// Prints the Filesystem binaries' contents, in detail
+        /// </summary>
+        /// <param name="bin">Binary to print</param>
         public static void PrintFilesystem(byte[] bin)
         {
             using (var reader = new BinaryReader(new MemoryStream(bin)))

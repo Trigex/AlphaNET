@@ -160,9 +160,3 @@ declare const Socket: SocketConstructor;
 declare const FILE: FileConstructor
 declare const DIRECTORY: DirectoryConstructor;
 declare const args: string[];
-
-/* EXTERNAL LIBRARY TYPE DEFINITIONS
- *
- *
- */
-/// <reference path="./thirdparty.d.ts" />

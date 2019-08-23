@@ -5,7 +5,7 @@ namespace AlphaNET.Framework.Proxies
     public class FilesystemProxy
     {
         public Directory Root;
-        private Filesystem _filesystem;
+        private readonly Filesystem _filesystem;
 
         public FilesystemProxy(Filesystem filesystem)
         {

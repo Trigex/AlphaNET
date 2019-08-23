@@ -7,7 +7,7 @@ namespace AlphaNET.Framework.JS
 {
     public class TypescriptCompiler
     {
-        private Engine _engine;
+        private readonly Engine _engine;
 
         public TypescriptCompiler()
         {

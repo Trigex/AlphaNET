@@ -18,7 +18,7 @@ namespace AlphaNET.Framework.JS
     public class JsInterpreter
     {
         private static string _systemScript;
-        private JsValue _global;
+        private readonly JsValue _global;
         private readonly FilesystemProxy _filesystemProxy;
         private readonly IConsole _console;
         private readonly List<Thread> _threadList;

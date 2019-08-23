@@ -131,5 +131,6 @@ class CONSOLE implements Console {
 }
 
 // Globals
+// @ts-ignore
 const console: Console = new CONSOLE();
 const Sockets = new List<Socket>();

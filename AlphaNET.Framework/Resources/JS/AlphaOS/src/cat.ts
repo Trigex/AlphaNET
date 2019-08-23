@@ -1,5 +1,4 @@
 /// <reference path="kernel/types/os.d.ts" />
-/// <reference path="kernel/types/thirdparty.d.ts" />
 /// <reference path="kernel/system.ts" />
 var file: FILE;
 
