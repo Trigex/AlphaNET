@@ -100,7 +100,7 @@ namespace AlphaNET.Server
 
         private bool MessageReceived(string ipPort, byte[] data)
         {
-            Packet packet = PacketUtils.Deserialize(data);
+            var packet = PacketUtils.Deserialize(data);
 
             try
             {

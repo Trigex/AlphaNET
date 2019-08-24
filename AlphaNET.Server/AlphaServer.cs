@@ -3,30 +3,43 @@ using System.IO;
 
 namespace AlphaNET.Server
 {
-    public class AlphaServer
+    public static class AlphaServer
     {
-        public static TcpServer Server;
-        public static Config Config = Config.CreateConfig(File.ReadAllText("server.json"));
+        /// <summary>
+        /// Main TcpServer instance, through which the server communicates with clients
+        /// </summary>
+        private static TcpServer _server;
+        /// <summary>
+        /// Static configuration file used throughout the program 
+        /// </summary>
+        public static readonly Config Config = Config.CreateConfig(File.ReadAllText("server.json"));
+
+        public static bool Running = false;
 
         private static void Main(string[] args)
         {
-            var running = false;
+            // Load nlog configuration file
             LogManager.LoadConfiguration("nlog.config");
-            var log = LogManager.GetCurrentClassLogger();
-            log.Info("Server is starting...");
-            Server = new TcpServer();
-            if (Server.Init(Config.Tcp.Ip, Config.Tcp.Port) != true)
+            // AlphaServer's logger instance
+            var logger = LogManager.GetCurrentClassLogger();
+            
+            logger.Info("Server is starting...");
+            
+            _server = new TcpServer();
+            // The TcpServer encountered an error during initialization (details of the error appear in it's class logger)
+            if (_server.Init(Config.Tcp.Ip, Config.Tcp.Port) != true)
             {
-                log.Fatal("Tcp Server unsuccessfully initialized, exiting...");
+                logger.Fatal("Tcp Server unsuccessfully initialized, exiting...");
                 return;
             }
             else
-                running = true;
+                Running = true;
 
-            while (running)
+            while (Running)
             {
             }
-            log.Info("The server is shutting down! Broke out of main loop");
+            
+            logger.Info("The server is shutting down! Broke out of main loop");
         }
     }
 }

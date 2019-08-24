@@ -53,10 +53,12 @@ The primary TCP server implementation for AlphaNET, facilitates all networking c
 
 ## Discord
 
-[AlphaNET Discord Invite](https://discordapp.com/invite/7HQxx4)
+[AlphaNET Discord Invite](https://discord.gg/FynHbZM)
 
 Personally, I would have opted for IRC, but...
 
 ## Documentation
 
 [Binary Filesystem Schema](Docs/FS_SCHEMA.md)
+
+[Networking Protocol](Docs/NETWORKING.md)

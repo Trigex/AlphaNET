@@ -7,6 +7,7 @@ using System.Text;
 
 namespace AlphaNET.Framework.IO
 {
+    // TODO: rewrite this whole piece of shit
     /// <summary>
     /// <c>BinaryManager</c> is a static util class with methods enabling the reading, 
     /// and writing of a <c>Filesystem</c> to a binary format
@@ -141,9 +142,14 @@ namespace AlphaNET.Framework.IO
         {
             // Change this later to allow an actual FileStream, which was the whole point of allowing
             // individual file insertion baka dayou
-            var bin = ReadBinaryFromFile(path);
+            using (var fStream = new FileStream(path, FileMode.Open))
+            {
+                byte[] encodedObj = null;
+            }
+            
+            /*var bin = ReadBinaryFromFile(path);
             bin = InsertFilesystemObjectIntoBinary(obj, bin, fs);
-            WriteBinaryToFile(path, bin);
+            WriteBinaryToFile(path, bin);*/
         }
 
         private static byte[] InsertFilesystemObjectIntoBinary(FilesystemObject obj, byte[] bin, Filesystem fs)
@@ -191,6 +197,17 @@ namespace AlphaNET.Framework.IO
             writer.Close();
             return modified;
         }
+
+        private static void InsertBytes(byte[] bytes, int pos, Stream stream)
+        {
+            var originalLength = stream.Length - 1;
+            var insertLength = bytes.Length - 1;
+            var outLength = originalLength + insertLength;
+            
+            // expand stream length to current size + size to insert
+            stream.SetLength(outLength);
+        }
+        
         #endregion
 
         #region Read and Write Methods
@@ -402,6 +419,18 @@ namespace AlphaNET.Framework.IO
             var dirListSize = GetSize(dirList.ToArray());
             return FsHeaderSize
                    + dirListSize - 1;
+        }
+
+        private static int SeekFileMetaStart(Filesystem fs)
+        {
+            // TODO: Implement this after implementing GetSize(ListMeta)
+            return 0;
+        }
+
+        private static int SeekDirectoryMetaStart()
+        {
+            return FsHeaderSize
+                   + 1; // first section after fs file header is directory meta
         }
         #endregion
 

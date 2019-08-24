@@ -8,11 +8,12 @@ namespace AlphaNET.Framework.IO
     public class Filesystem
     {
         public List<FilesystemObject> FilesystemObjects { get; }
-        public string FsPath;
+        private readonly string _fsPath;
+        private const int MemoryCap = 536870912; // 512 mb file contents memory cap
 
         public Filesystem(string fsPath)
         {
-            FsPath = fsPath;
+            _fsPath = fsPath;
             FilesystemObjects = new List<FilesystemObject>();
         }
 
@@ -81,7 +82,7 @@ namespace AlphaNET.Framework.IO
                 // Loop for all children
                 foreach (var subObj in dirObj.Children.ToList())
                 {
-                    // Recurrsion!!! This'll probably work, I hope
+                    // Recursion!!! This'll probably work, I hope
                     DeleteObject(subObj);
                 }
             }
@@ -219,7 +220,7 @@ namespace AlphaNET.Framework.IO
 
         private void WriteObject(FilesystemObject obj)
         {
-            BinaryManager.InsertFilesystemObjectIntoBinary(obj, FsPath, this);
+            BinaryManager.InsertFilesystemObjectIntoBinary(obj, _fsPath, this);
         }
     }
 }
