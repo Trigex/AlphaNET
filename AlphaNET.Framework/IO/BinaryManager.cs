@@ -142,14 +142,10 @@ namespace AlphaNET.Framework.IO
         {
             // Change this later to allow an actual FileStream, which was the whole point of allowing
             // individual file insertion baka dayou
-            using (var fStream = new FileStream(path, FileMode.Open))
-            {
-                byte[] encodedObj = null;
-            }
-            
-            /*var bin = ReadBinaryFromFile(path);
+
+            var bin = ReadBinaryFromFile(path);
             bin = InsertFilesystemObjectIntoBinary(obj, bin, fs);
-            WriteBinaryToFile(path, bin);*/
+            WriteBinaryToFile(path, bin);
         }
 
         private static byte[] InsertFilesystemObjectIntoBinary(FilesystemObject obj, byte[] bin, Filesystem fs)

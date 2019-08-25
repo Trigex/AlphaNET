@@ -20,16 +20,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AlphaNET.Framework\AlphaNET.Framework.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="nlog.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="server.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AlphaNET.Framework\AlphaNET.Framework.csproj" />
   </ItemGroup>
 
 </Project>

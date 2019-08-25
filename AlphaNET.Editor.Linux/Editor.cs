@@ -9,6 +9,7 @@ namespace AlphaNET.Editor.Linux
         [STAThread]
         static void Main(string[] args)
         {
+            var a = 1;
             new Application(Eto.Platform.Detect).Run(new EditorForm());
         }
     }

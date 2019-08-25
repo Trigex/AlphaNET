@@ -20,8 +20,7 @@ namespace AlphaNET.Framework.Client
         public void Init(Filesystem filesystem, bool offlineMode, string ip = null, int port = 0, IConsole console = null)
         {
             _console = console ?? new Terminal();
-
-            _fs = filesystem ?? BootstrapFilesystem();
+            _compiler = new TypescriptCompiler();
 
             if (!offlineMode && ip != null && port != 0) // Not in offline mode
             {
@@ -39,14 +38,21 @@ namespace AlphaNET.Framework.Client
                     _console.WriteLine("Error: " + e.Message + "\n\nUnable to establish connection with server; To retry a connection, issue \"net server connect\" to the shell...");
                 }
             }
-            _compiler = new TypescriptCompiler();
-            var system = _compiler.Compile(new[] { IOUtils.ReadManifestData<Computer>("system.ts") });
-            // append third party libs
-            system += "\n" + IOUtils.ReadManifestData<Computer>("minimist.js") + "\n" + IOUtils.ReadManifestData<Computer>("lodash.min.js");
 
-            _interpreter = new JsInterpreter(_fs, _console, _socketManager, system);
-            _console.WriteLine("Compiling kernel...");
-            InstallOs(system);
+            if (filesystem == null)
+            {
+                _fs = BootstrapFilesystem();
+                
+                var system = _compiler.Compile(new[] { IOUtils.ReadManifestData<Computer>("system.ts") });
+                // append third party libs
+                system += "\n" + IOUtils.ReadManifestData<Computer>("minimist.js") + "\n" + IOUtils.ReadManifestData<Computer>("lodash.min.js");
+
+                _interpreter = new JsInterpreter(_fs, _console, _socketManager, system);
+                _console.WriteLine("Compiling kernel...");
+                InstallOs(system);
+            }
+            else
+                _fs = filesystem;
         }
 
         public void Start()

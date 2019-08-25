@@ -17,8 +17,7 @@ namespace AlphaNET.Client.Console
             {
                 var ip = DefaultIp;
                 var port = DefaultPort;
-
-                //o.FilesystemPath = "debug.fs";
+                Filesystem fs = null;
 
                 if (o.Host != null)
                     ip = o.Host;
@@ -26,8 +25,9 @@ namespace AlphaNET.Client.Console
                 if (o.Port != 0)
                     port = o.Port;
 
-                var fs = o.FilesystemPath != null ? BinaryManager.CreateFilesystemFromBinary(BinaryManager.ReadBinaryFromFile(o.FilesystemPath), o.FilesystemPath) : null;
-
+                if (o.FilesystemPath != null)
+                    fs = BinaryManager.CreateFilesystemFromBinary(BinaryManager.ReadBinaryFromFile(o.FilesystemPath), o.FilesystemPath);
+                
                 if (o.Offline)
                     computer.Init(fs, true);
                 else
