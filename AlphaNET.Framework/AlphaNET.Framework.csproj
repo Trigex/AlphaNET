@@ -20,8 +20,4 @@
     <EmbeddedResource Include="Resources/JS/AlphaOS/src/kernel/thirdparty/*.js"></EmbeddedResource>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Tests\" />
-  </ItemGroup>
-
 </Project>

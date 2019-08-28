@@ -6,86 +6,12 @@
     <e p="$PROJECT_DIR$" t="IncludeFlat">
       <e p="AlphaNET.Client.Console" t="IncludeRecursive">
         <e p="AlphaNET.Client.Console.csproj" t="IncludeRecursive" />
-        <e p="AlphaNET.cs" t="Include" />
-        <e p="bin" t="ExcludeRecursive" />
-        <e p="obj" t="ExcludeRecursive">
-          <e p="Debug" t="Include">
-            <e p="netcoreapp2.0" t="Include">
-              <e p="AlphaNET.Client.Console.AssemblyInfo.cs" t="Include" />
-            </e>
-          </e>
-        </e>
       </e>
       <e p="AlphaNET.Client.Visual" t="IncludeRecursive">
         <e p="AlphaNET.Client.Visual.csproj" t="IncludeRecursive" />
-        <e p="AlphaNET.cs" t="Include" />
-        <e p="Content" t="Include">
-          <e p="Content.mgcb" t="Include" />
-          <e p="bin" t="Include">
-            <e p="DesktopGL" t="Include">
-              <e p="Content" t="Include">
-                <e p="tty.xnb" t="Include" />
-              </e>
-              <e p="tty.xnb" t="Include" />
-            </e>
-          </e>
-          <e p="obj" t="Include">
-            <e p="DesktopGL" t="Include">
-              <e p=".mgcontent" t="Include" />
-              <e p=".mgstats" t="Include" />
-              <e p="Content" t="Include">
-                <e p=".mgcontent" t="Include" />
-                <e p="tty.mgcontent" t="Include" />
-              </e>
-              <e p="tty.mgcontent" t="Include" />
-            </e>
-          </e>
-          <e p="tty.spritefont" t="Include" />
-        </e>
-        <e p="Tty.cs" t="Include" />
-        <e p="Visual.cs" t="Include" />
-        <e p="bin" t="ExcludeRecursive" />
-        <e p="obj" t="ExcludeRecursive">
-          <e p="Debug" t="Include">
-            <e p="netcoreapp2.2" t="Include">
-              <e p="AlphaNET.Client.Visual.AssemblyInfo.cs" t="Include" />
-            </e>
-          </e>
-        </e>
       </e>
       <e p="AlphaNET.Editor" t="IncludeRecursive">
         <e p="AlphaNET.Editor.csproj" t="IncludeRecursive" />
-        <e p="Commands" t="Include">
-          <e p="CreateFile.cs" t="Include" />
-          <e p="DeleteObject.cs" t="Include" />
-          <e p="ImportAsset.cs" t="Include" />
-          <e p="OpenFilesystem.cs" t="Include" />
-          <e p="SaveAsFilesystem.cs" t="Include" />
-          <e p="SaveFilesystem.cs" t="Include" />
-        </e>
-        <e p="Controls" t="Include">
-          <e p="FilesystemView.cs" t="Include" />
-        </e>
-        <e p="Forms" t="Include">
-          <e p="EditorForm.cs" t="Include" />
-        </e>
-        <e p="GridItems" t="Include">
-          <e p="DirectoryGridItem.cs" t="Include" />
-          <e p="FileGridItem.cs" t="Include" />
-          <e p="FilesystemObjectGridItem.cs" t="Include" />
-        </e>
-        <e p="Layouts" t="Include">
-          <e p="EditorLayout.cs" t="Include" />
-          <e p="MenuLayout.cs" t="Include" />
-        </e>
-        <e p="bin" t="ExcludeRecursive" />
-        <e p="obj" t="ExcludeRecursive">
-          <e p="Debug" t="Include">
-            <e p="netstandard2.0" t="Include">
-              <e p="AlphaNET.Editor.AssemblyInfo.cs" t="Include" />
-            </e>
-          </e>
-        </e>
       </e>
       <e p="AlphaNET.Editor.Linux" t="IncludeRecursive">
         <e p="AlphaNET.Editor.Linux.csproj" t="IncludeRecursive" />
@@ -113,13 +39,16 @@
           <e p="InvalidFilesystemHeaderException.cs" t="Include" />
         </e>
         <e p="IO" t="Include">
-          <e p="BinaryManager.cs" t="Include" />
+          <e p="Block.cs" t="Include" />
           <e p="Directory.cs" t="Include" />
           <e p="File.cs" t="Include" />
           <e p="Filesystem.cs" t="Include" />
           <e p="FilesystemObject.cs" t="Include" />
           <e p="IOStatusCode.cs" t="Include" />
           <e p="IOUtils.cs" t="Include" />
+          <e p="Inode.cs" t="Include" />
+          <e p="PointerBlock.cs" t="Include" />
+          <e p="SuperBlock.cs" t="Include" />
         </e>
         <e p="JS" t="Include">
           <e p="JSInterpreter.cs" t="Include" />
@@ -1587,7 +1516,6 @@
             </e>
           </e>
         </e>
-        <e p="Tests" t="Include" />
         <e p="bin" t="ExcludeRecursive" />
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">

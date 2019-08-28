@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using static System.String;
 
 namespace AlphaNET.Framework.IO
 {
+    /*
     public class Filesystem
     {
         public List<FilesystemObject> FilesystemObjects { get; }
@@ -221,6 +224,111 @@ namespace AlphaNET.Framework.IO
         private void WriteObject(FilesystemObject obj)
         {
             BinaryManager.InsertFilesystemObjectIntoBinary(obj, _fsPath, this);
+        }
+    }*/
+    
+    /// <summary>
+    /// The Filesystem class interacts with a .fs Filesystem file, retrieving, and writing data representing the Filesystem to and from the file.
+    /// </summary>
+    public class Filesystem
+    {
+        #region Dynamic Properties
+        /// <summary>
+        /// The path to the .fs file this Filesystem instance is working with
+        /// </summary>
+        private readonly string _fsPath;
+        /// <summary>
+        /// The total size (in bytes) of the .fs file to which this Filesystem instance is assigned
+        /// </summary>
+        private int _fsSize;
+        /// <summary>
+        /// The total count of blocks present in the .fs file
+        /// </summary>
+        private int _blockCount;
+        /// <summary>
+        /// The total count of INodes present in the .fs file
+        /// </summary>
+        private int _inodeCount;
+        /// <summary>
+        /// The FileStream this instance will constantly have open, for interaction with the .fs file
+        /// </summary>
+        private readonly FileStream _fsStream;
+        #endregion
+        
+        #region Constant Properties
+        /// <summary>
+        /// The size (in bytes) of a SuperBlock .fs file section
+        /// </summary>
+        private const int SuperBlockSectionSize = 37;
+        /// <summary>
+        /// The target .fs file version
+        /// </summary>
+        private const byte FsVersion = 1;
+        /// <summary>
+        /// The size (in bytes) of a single block in the .fs file
+        /// </summary>
+        private const int BlockSize = 4096;
+        /// <summary>
+        /// The size (in bytes) of a single INode object in the .fs file
+        /// </summary>
+        private const int INodeSize = 132;
+        /// <summary>
+        /// The INode Number assigned to the Filesystem's root Directory
+        /// </summary>
+        private const int RootINodeNumber = 1;
+        
+        private const int INodePerByteRatio = 16384;
+        #endregion
+        
+        /// <summary>
+        /// Instantiates a new Filesystem instance, and opens a FileStream
+        /// </summary>
+        /// <param name="fsPath">The path to the .fs file to open a FileStream from</param>
+        public Filesystem(string fsPath)
+        {
+            _fsPath = fsPath;
+            _fsStream = new FileStream(_fsPath, FileMode.OpenOrCreate);
+        }
+
+        ~Filesystem()
+        {
+            // Dispose of the FileStream when the Filesystem gets garbage collected
+            _fsStream.Dispose();
+        }
+        
+        /// <summary>
+        /// Initializes the Filesystem's .fs file
+        /// </summary>
+        /// <param name="fsSize">The size (in megabytes) of the Filesystem file</param>
+        public async Task InitializeFilesystem(int fsSize)
+        {
+            // Fill file with zeroes in worker thread
+            await Task.Run(() =>
+            {
+                // Seeks to the last byte of the specified size
+                _fsStream.Seek(fsSize, SeekOrigin.Begin);
+                // Writes a zero, which would actually fill the file
+                _fsStream.WriteByte(0);
+                // set stream position back to 0
+                ResetStreamPosition();
+            });
+            
+            // set fs properties
+            _fsSize = fsSize;
+            _blockCount = fsSize / BlockSize;
+            _inodeCount = fsSize / INodePerByteRatio;
+
+            // Write Superblock
+        }
+
+        public void LoadFilesystem()
+        {
+            
+        }
+
+        private void ResetStreamPosition()
+        {
+            _fsStream.Seek(0, SeekOrigin.Begin);
         }
     }
 }
