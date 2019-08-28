@@ -15,15 +15,6 @@
       </e>
       <e p="AlphaNET.Editor.Linux" t="IncludeRecursive">
         <e p="AlphaNET.Editor.Linux.csproj" t="IncludeRecursive" />
-        <e p="Editor.cs" t="Include" />
-        <e p="bin" t="ExcludeRecursive" />
-        <e p="obj" t="ExcludeRecursive">
-          <e p="Debug" t="Include">
-            <e p="netcoreapp2.2" t="Include">
-              <e p="AlphaNET.Editor.Linux.AssemblyInfo.cs" t="Include" />
-            </e>
-          </e>
-        </e>
       </e>
       <e p="AlphaNET.Editor.Windows" t="IncludeRecursive">
         <e p="AlphaNET.Editor.Windows.csproj" t="IncludeRecursive" />
@@ -40,11 +31,7 @@
         </e>
         <e p="IO" t="Include">
           <e p="Block.cs" t="Include" />
-          <e p="Directory.cs" t="Include" />
-          <e p="File.cs" t="Include" />
           <e p="Filesystem.cs" t="Include" />
-          <e p="FilesystemObject.cs" t="Include" />
-          <e p="IOStatusCode.cs" t="Include" />
           <e p="IOUtils.cs" t="Include" />
           <e p="Inode.cs" t="Include" />
           <e p="PointerBlock.cs" t="Include" />
@@ -1527,26 +1514,6 @@
       </e>
       <e p="AlphaNET.Server" t="IncludeRecursive">
         <e p="AlphaNET.Server.csproj" t="IncludeRecursive" />
-        <e p="AlphaServer.cs" t="Include" />
-        <e p="Config.cs" t="Include" />
-        <e p="Database.cs" t="Include" />
-        <e p="Migrations" t="Include">
-          <e p="20190807161820_InitalCreate.Designer.cs" t="Include" />
-          <e p="20190807161820_InitalCreate.cs" t="Include" />
-          <e p="UserContextModelSnapshot.cs" t="Include" />
-        </e>
-        <e p="TcpServer.cs" t="Include" />
-        <e p="Utils.cs" t="Include" />
-        <e p="bin" t="ExcludeRecursive" />
-        <e p="nlog.config" t="Include" />
-        <e p="obj" t="ExcludeRecursive">
-          <e p="Debug" t="Include">
-            <e p="netcoreapp2.2" t="Include">
-              <e p="AlphaNET.Server.AssemblyInfo.cs" t="Include" />
-            </e>
-          </e>
-        </e>
-        <e p="server.json" t="Include" />
       </e>
       <e p="AlphaNET.sln" t="IncludeFlat" />
       <e p="packages" t="ExcludeRecursive" />

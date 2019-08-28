@@ -1,0 +1,72 @@
+AlphaFS Filesystem Schema Version 2
+
+Notes:
+All "Size" properties are assumed to be in bytes
+
+FsVersion should always be the first byte of the file
+
+Block size is a constant 4096 bytes (4kb)
+
+The Inodes per bytes ratio is 1 INode per 16 kb (I.E, on a 3 gb filesystem file, 3221225472 / 16384 = 196608 inodes)
+
+Total Block count is FilesystemFileSize / Block Size (I.E, on a 3 gb filesystem file with default block size, 3221225472 / 4096 = 786432 blocks)
+
+Terminology:
+SuperBlock - The first 
+
+INode - A statically allocated 132 byte object, stored in the INode Table, which describes a given file's properties, and location by which it can be accessed
+
+Creation:
+When a .fs file is created, it first fills the file with zeroes, the quantity being of the FilesystemFileSize. It then sets up the superblock, and then allocates INodeCount number of INodes in the INode table. These INodes all have their properties set to 0.
+Then, a root directory INode is created (as INode number 1). The INode's data block pointer value is then determined (for root, the location would be SuperBlockSize + (INodeSize * INodeCount) + 1) . In the data block, the parent file INode number is set to 1, and the relative INode number is set to 1.
+
+Filesystem Objects
+---------------------------------------------
+
+INode Object (132 bytes in length)
+==============================================================
+Number (uint) - The INode's identifying number
+BlockCount (uint) - The total number of unique blocks allocated for this INode
+TotalSize (uint) - The total size of all allocated block's added together
+(The following are all ulong sized pointers to data blocks)
+DirectDataBlockPointer1 (ulong)
+DirectDataBlockPointer2 (ulong)
+DirectDataBlockPointer3 (ulong)
+DirectDataBlockPointer4 (ulong)
+DirectDataBlockPointer5 (ulong)
+DirectDataBlockPointer6 (ulong)
+DirectDataBlockPointer7 (ulong)
+DirectDataBlockPointer8 (ulong)
+DirectDataBlockPointer9 (ulong)
+DirectDataBlockPointer10 (ulong)
+DirectDataBlockPointer11 (ulong)
+DirectDataBlockPointer12 (ulong)
+DirectDataBlockPointer13 (ulong)
+PointerBlockPointer (ulong) - Points to the position of a single Pointer Block object
+DoubleIndirectPointerBlockPointer (ulong) - Points to the position of a Pointer Block Object, which themselves point to the position of pointer block object
+
+Pointer Block Object (4096 bytes in length, an entire block)
+==============================================================
+(512 unique entries) DataBlockPointer (ulong) - Points to the position in the .fs file of the start of a datablock
+
+Directory Object (Stored in a data block)
+==============================================================
+Uint - 
+
+Filesystem File Structure
+---------------------------------------------
+
+Superblock (First section of file) (37 bytes in length)
+==============================================================
+FsVersion (byte)
+FilesystemFileSize (ulong)
+BlockSize (ushort)
+INodeSize (ushort)
+INodeCount (uint)
+BlockCount (uint)
+FreeINodeCount (uint)
+FreeBlockCount (uint)
+INodeTablePointer (ulong)
+==============================================================
+
+

@@ -6,23 +6,8 @@ using System.Reflection;
 
 namespace AlphaNET.Framework.IO
 {
-    /// <summary>
-    /// Static class with util methods for IO operations
-    /// </summary>
     public static class IOUtils
     {
-        /// <summary>
-        /// Generates a random <c>uint32</c>, used to uniquely identify <c>FilesystemObject</c>s
-        /// </summary>
-        /// <returns></returns>
-        public static uint GenerateId()
-        {
-            var random = new Random();
-            var thirtyBits = (uint)random.Next(1 << 30);
-            var twoBits = (uint)random.Next(1 << 2);
-            return (thirtyBits << 2) | twoBits;
-        }
-
         public static string ReadManifestData<TSource>(string embeddedFileName) where TSource : class
         {
             var assembly = typeof(TSource).GetTypeInfo().Assembly;
@@ -39,18 +24,6 @@ namespace AlphaNET.Framework.IO
                     return reader.ReadToEnd();
                 }
             }
-        }
-
-        public static int GetIndex<T>(IList<T> largeList, IList<T> sublist)
-        {
-            for (int i = 0; i < largeList.Count - sublist.Count; i++)
-            {
-                bool isContained = largeList.Skip(i).Take(sublist.Count).SequenceEqual(sublist);
-                if (isContained)
-                    return i;
-            }
-
-            return -1;
         }
     }
 }

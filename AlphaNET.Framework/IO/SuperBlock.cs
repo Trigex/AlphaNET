@@ -1,3 +1,5 @@
+using System.IO;
+
 namespace AlphaNET.Framework.IO
 {
     public class SuperBlock
@@ -11,5 +13,26 @@ namespace AlphaNET.Framework.IO
         public uint FreeINodeCount { get; set; }
         public uint FreeBlockCount { get; set; }
         public ulong InodeTablePointer { get; set; }
+
+        public byte[] Serialize()
+        {
+            var stream = new MemoryStream();
+            byte[] bytes;
+            using (var writer = new BinaryWriter(stream))
+            {
+                writer.Write(FsVersion);
+                writer.Write(FsFileSize);
+                writer.Write(BlockSize);
+                writer.Write(InodeSize);
+                writer.Write(BlockCount);
+                writer.Write(InodeCount);
+                writer.Write(FreeBlockCount);
+                writer.Write(FreeINodeCount);
+                writer.Write(InodeTablePointer);
+                bytes = stream.ToArray();
+            }
+
+            return bytes;
+        }
     }
 }
