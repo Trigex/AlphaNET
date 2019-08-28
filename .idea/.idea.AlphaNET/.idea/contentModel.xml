@@ -3,9 +3,21 @@
   <component name="ContentModelStore">
     <e p="$USER_HOME$/.Rider2019.2/system/extResources" t="IncludeRecursive" />
     <e p="$USER_HOME$/.Rider2019.2/system/resharper-host/local/Transient/ReSharperHost/v192/SolutionCaches/_AlphaNET.-251582351.00" t="ExcludeRecursive" />
+    <e p="$USER_HOME$/.nuget/packages/nunit3testadapter/3.11.0/build/netcoreapp1.0/NUnit3.TestAdapter.dll" t="Include" />
+    <e p="$USER_HOME$/.nuget/packages/nunit3testadapter/3.11.0/build/netcoreapp1.0/NUnit3.TestAdapter.pdb" t="Include" />
+    <e p="$USER_HOME$/.nuget/packages/nunit3testadapter/3.11.0/build/netcoreapp1.0/nunit.engine.netstandard.dll" t="Include" />
     <e p="$PROJECT_DIR$" t="IncludeFlat">
-      <e p="AlphaNET.Client.Console" t="IncludeRecursive">
-        <e p="AlphaNET.Client.Console.csproj" t="IncludeRecursive" />
+      <e p="AlphaNET.Client.Terminal" t="IncludeRecursive">
+        <e p="AlphaNET.Client.Terminal.csproj" t="IncludeRecursive" />
+        <e p="AlphaNET.cs" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp2.0" t="Include">
+              <e p="AlphaNET.Client.Terminal.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
       </e>
       <e p="AlphaNET.Client.Visual" t="IncludeRecursive">
         <e p="AlphaNET.Client.Visual.csproj" t="IncludeRecursive" />
@@ -23,8 +35,15 @@
         <e p="AlphaNET.Framework.csproj" t="IncludeRecursive" />
         <e p="Client" t="Include">
           <e p="CliArgs.cs" t="Include" />
+          <e p="ClientType.cs" t="Include" />
           <e p="Computer.cs" t="Include" />
-          <e p="Console.cs" t="Include" />
+          <e p="IConsole.cs" t="Include" />
+          <e p="Terminal" t="Include">
+            <e p="Terminal.cs" t="Include" />
+          </e>
+          <e p="Visual" t="Include">
+            <e p="Tty.cs" t="Include" />
+          </e>
         </e>
         <e p="Exceptions" t="Include">
           <e p="InvalidFilesystemHeaderException.cs" t="Include" />
@@ -32,6 +51,7 @@
         <e p="IO" t="Include">
           <e p="Block.cs" t="Include" />
           <e p="Filesystem.cs" t="Include" />
+          <e p="FilesystemUtils.cs" t="Include" />
           <e p="IOUtils.cs" t="Include" />
           <e p="Inode.cs" t="Include" />
           <e p="PointerBlock.cs" t="Include" />
@@ -1508,6 +1528,19 @@
           <e p="Debug" t="Include">
             <e p="netstandard2.0" t="Include">
               <e p="AlphaNET.Framework.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+      </e>
+      <e p="AlphaNET.Framework.Tests" t="IncludeRecursive">
+        <e p="AlphaNET.Framework.Tests.csproj" t="IncludeRecursive" />
+        <e p="FilesystemTests.cs" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp2.2" t="Include">
+              <e p="AlphaNET.Framework.Tests.AssemblyInfo.cs" t="Include" />
+              <e p="AlphaNET.Framework.Tests.Program.cs" t="Include" />
             </e>
           </e>
         </e>

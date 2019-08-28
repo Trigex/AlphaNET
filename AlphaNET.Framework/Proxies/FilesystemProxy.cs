@@ -2,6 +2,7 @@
 
 namespace AlphaNET.Framework.Proxies
 {
+    /*
     public class FilesystemProxy
     {
         public Directory Root;
@@ -77,5 +78,5 @@ namespace AlphaNET.Framework.Proxies
         {
             return _filesystem.DeleteObject(fsObj);
         }
-    }
+    }*/
 }

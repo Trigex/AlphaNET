@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29123.88
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlphaNET.Client.Console", "AlphaNET.Client.Console\AlphaNET.Client.Console.csproj", "{4C11B844-E48F-4425-882F-F9ADB55AA21E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlphaNET.Client.Terminal", "AlphaNET.Client.Terminal\AlphaNET.Client.Terminal.csproj", "{4C11B844-E48F-4425-882F-F9ADB55AA21E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlphaNET.Server", "AlphaNET.Server\AlphaNET.Server.csproj", "{AF86407E-0E06-4366-B9E1-277833E63956}"
 EndProject
@@ -16,6 +16,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlphaNET.Editor.Windows", "AlphaNET.Editor.Windows\AlphaNET.Editor.Windows.csproj", "{5B5DCCFB-55B5-49C5-AA27-493430B8CC62}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlphaNET.Framework", "AlphaNET.Framework\AlphaNET.Framework.csproj", "{FAB98577-81A6-4480-8DBC-CF546182BA72}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlphaNET.Framework.Tests", "AlphaNET.Framework.Tests\AlphaNET.Framework.Tests.csproj", "{8DEE06CF-C9F9-40B8-B27C-7E03B3703BEB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{FAB98577-81A6-4480-8DBC-CF546182BA72}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FAB98577-81A6-4480-8DBC-CF546182BA72}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FAB98577-81A6-4480-8DBC-CF546182BA72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DEE06CF-C9F9-40B8-B27C-7E03B3703BEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DEE06CF-C9F9-40B8-B27C-7E03B3703BEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DEE06CF-C9F9-40B8-B27C-7E03B3703BEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DEE06CF-C9F9-40B8-B27C-7E03B3703BEB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

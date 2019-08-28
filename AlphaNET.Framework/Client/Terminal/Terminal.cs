@@ -2,27 +2,11 @@
 
 namespace AlphaNET.Framework.Client
 {
-    public interface IConsole
-    {
-        void Write(string text);
-        void WriteLine(string text);
-        int Read();
-        string ReadLine();
-        void Clear();
-    }
-
+    /// <summary>
+    /// The Terminal Emulator based Console implementation, used in the AlphaNET.Client.Terminal client
+    /// </summary>
     public class Terminal : IConsole
     {
-        public enum Std
-        {
-            Console,
-            File
-        }
-
-        public Std Stdout { get; set; }
-        public Std Stdin { get; set; }
-        public Std Stderr { get; set; }
-
         public void Write(string text)
         {
             Console.Write(text);

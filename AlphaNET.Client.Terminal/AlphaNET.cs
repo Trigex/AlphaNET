@@ -2,7 +2,7 @@
 using AlphaNET.Framework.IO;
 using CommandLine;
 
-namespace AlphaNET.Client.Console
+namespace AlphaNET.Client.Terminal
 {
     internal class AlphaNET
     {
@@ -11,13 +11,12 @@ namespace AlphaNET.Client.Console
 
         private static void Main(string[] args)
         {
-            var computer = new Computer();
-
             CliArgs.Parse(args).WithParsed(o =>
             {
+                Computer computer;
                 var ip = DefaultIp;
                 var port = DefaultPort;
-                Filesystem fs = null;
+                var fsFilePath = "debug.fs";
 
                 if (o.Host != null)
                     ip = o.Host;
@@ -26,15 +25,15 @@ namespace AlphaNET.Client.Console
                     port = o.Port;
 
                 if (o.FilesystemPath != null)
-                    fs = BinaryManager.CreateFilesystemFromBinary(BinaryManager.ReadBinaryFromFile(o.FilesystemPath), o.FilesystemPath);
+                    fsFilePath = o.FilesystemPath;
                 
                 if (o.Offline)
-                    computer.Init(fs, true);
+                    computer = new Computer(fsFilePath, new Framework.Client.Terminal(), true);
                 else
-                    computer.Init(fs, false, ip, port);
+                    computer = new Computer(fsFilePath, new Framework.Client.Terminal(), false, ip, port);
+                
+                computer.Start();
             });
-
-            computer.Start();
         }
     }
 }

@@ -19,7 +19,7 @@ namespace AlphaNET.Framework.JS
     {
         private static string _systemScript;
         private readonly JsValue _global;
-        private readonly FilesystemProxy _filesystemProxy;
+        //private readonly FilesystemProxy _filesystemProxy;
         private readonly IConsole _console;
         private readonly List<Thread> _threadList;
         private readonly SocketManagerProxy _socketManagerProxy;
@@ -31,7 +31,7 @@ namespace AlphaNET.Framework.JS
         {
             _systemScript = systemScript;
             _console = console;
-            _filesystemProxy = new FilesystemProxy(fs);
+            //_filesystemProxy = new FilesystemProxy(fs);
             _socketManagerProxy = new SocketManagerProxy(socketManager);
             ProcessStack = new Stack<Process>();
             _threadList = new List<Thread>();
@@ -74,16 +74,16 @@ namespace AlphaNET.Framework.JS
             // Terminal
             engine.SetValue("Terminal", _console);
             // FilesystemObject abstract class
-            engine.SetValue("FilesystemObject", TypeReference.CreateTypeReference(engine, typeof(FilesystemObject)));
+            //engine.SetValue("FilesystemObject", TypeReference.CreateTypeReference(engine, typeof(FilesystemObject)));
             // File (Uppercase to avoid conflicts with Typescript, should be changed later when I write a VS Code extension to disable certain linting!)
-            engine.SetValue("FILE", TypeReference.CreateTypeReference(engine, typeof(File)));
+            //engine.SetValue("FILE", TypeReference.CreateTypeReference(engine, typeof(File)));
             // Directory
-            engine.SetValue("DIRECTORY", TypeReference.CreateTypeReference(engine, typeof(Directory)));
+            ///engine.SetValue("DIRECTORY", TypeReference.CreateTypeReference(engine, typeof(Directory)));
             // StatusCodes
-            engine.SetValue("IOStatusCode", TypeReference.CreateTypeReference(engine, typeof(IoStatusCode)));
+            //engine.SetValue("IOStatusCode", TypeReference.CreateTypeReference(engine, typeof(IoStatusCode)));
             engine.SetValue("NetStatusCode", TypeReference.CreateTypeReference(engine, typeof(NetStatusCode)));
             // FilesystemProxy
-            engine.SetValue("Filesystem", _filesystemProxy);
+            //engine.SetValue("Filesystem", _filesystemProxy);
             // List, pretty ghetto way to offer "generic" lists to JavaScript, since it'll just accept anything, but oh well!
             engine.SetValue("List", TypeReference.CreateTypeReference(engine, typeof(System.Collections.Generic.List<object>)));
             // This ;) Make a proxy later

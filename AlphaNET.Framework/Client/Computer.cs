@@ -2,64 +2,104 @@
 using AlphaNET.Framework.JS;
 using AlphaNET.Framework.Net;
 using System;
-using System.Text;
+using AlphaNET.Framework.Client.Visual;
 
 namespace AlphaNET.Framework.Client
 {
+    /// <summary>
+    /// The Computer class is the main controlling entity of an AlphaNET Client. It holds all components that the client uses throughout it's run,
+    /// such as the Filesystem, the JsInterpreter, Console implementation, TcpClient, etc. It also is what gets the AlphaOS init script up
+    /// and running.
+    /// </summary>
     public class Computer
     {
+        /// <summary>
+        /// The Filesystem instance
+        /// </summary>
         private Filesystem _fs;
-        private JsInterpreter _interpreter;
-        private IConsole _console;
+        /// <summary>
+        /// The JsInterpreter instance, used to run all the scripts this Computer may want to execute
+        /// </summary>
+        private readonly JsInterpreter _interpreter;
+        /// <summary>
+        /// The Console implementation this Computer reads and writes stdout text with
+        /// </summary>
+        private readonly IConsole _console;
+        /// <summary>
+        /// The TcpClient instance this Computer uses to communicate with the AlphaNET server
+        /// </summary>
         private TcpClient _tcpClient;
+        /// <summary>
+        /// The SocketManager this Computer uses to manage Virtual Sockets
+        /// </summary>
         private SocketManager _socketManager;
+        /// <summary>
+        /// Is the computer currently in offline mode?
+        /// </summary>
+        private bool _offlineMode;
+        /// <summary>
+        /// The TypescriptCompiler this Computer uses to dynamically compile scripts
+        /// </summary>
         private TypescriptCompiler _compiler;
-
-        private const string FsPath = "debug.fs";
-
-        public void Init(Filesystem filesystem, bool offlineMode, string ip = null, int port = 0, IConsole console = null)
+        
+        /// <summary>
+        /// Instantiates a new Computer, with basic initialization of all components
+        /// </summary>
+        /// <param name="fsFilePath">The path to the target Filesystem File</param>
+        /// <param name="console">Console implementation the Computer should use</param>
+        /// <param name="offlineMode">Is the Computer in Offline Mode?</param>
+        /// <param name="serverIp">If not in Offline Mode, the target AlphaNET Server Ip</param>
+        /// <param name="serverPort">If not in Offline Mode, the target AlphaNET Server port</param>
+        /// <exception cref="Exception">Invalid server address arguments!</exception>
+        public Computer(string fsFilePath, IConsole console, bool offlineMode, string serverIp = null, int serverPort = 0)
         {
-            _console = console ?? new Terminal();
-            _compiler = new TypescriptCompiler();
-
-            if (!offlineMode && ip != null && port != 0) // Not in offline mode
+            _console = console;
+            _offlineMode = offlineMode;
+            
+            // Setup network stuff
+            // online mode
+            if (!offlineMode)
             {
-                _tcpClient = new TcpClient(ip, port);
-                _socketManager = new SocketManager(_tcpClient);
-                _tcpClient.AddSocketManager(_socketManager);
-
-                _console.WriteLine("Connecting to server...");
-                try
+                if (serverIp == null || serverPort == 0 || serverPort > 65535) // we're set to online mode, but the server parameters were invalid!
                 {
-                    _tcpClient.Start();
+                    // TODO: Make custom Exceptions to handle these bits
+                    throw new Exception("Online Mode was enabled, but invalid server address parameters were provided!");
                 }
-                catch (Exception e)
+                else // everything is cool
                 {
-                    _console.WriteLine("Error: " + e.Message + "\n\nUnable to establish connection with server; To retry a connection, issue \"net server connect\" to the shell...");
+                    // instantiate tcp client
+                    _tcpClient = new TcpClient(serverIp, serverPort);
+                    // instantiate socket manager
+                    _socketManager = new SocketManager(_tcpClient);
+                    _tcpClient.AddSocketManager(_socketManager);
                 }
             }
-
-            if (filesystem == null)
-            {
-                _fs = BootstrapFilesystem();
-                
-                var system = _compiler.Compile(new[] { IOUtils.ReadManifestData<Computer>("system.ts") });
-                // append third party libs
-                system += "\n" + IOUtils.ReadManifestData<Computer>("minimist.js") + "\n" + IOUtils.ReadManifestData<Computer>("lodash.min.js");
-
-                _interpreter = new JsInterpreter(_fs, _console, _socketManager, system);
-                _console.WriteLine("Compiling kernel...");
-                InstallOs(system);
-            }
+            // offline mode
             else
-                _fs = filesystem;
+            {
+                _tcpClient = null;
+                _socketManager = null;
+            }
+            
+            // Setup filesystem stuff
+            // fs file is initialized
+            if (FilesystemUtils.IsFsFileInitialized(fsFilePath))
+            {
+                // TODO: Load Filesystem from here
+            }
+            else // fs file is not initialized!
+            {
+                // TODO: Provide interface to create a Filesystem
+            }
+            
+            // TODO: Initialize JsInterpreter
         }
 
         public void Start()
         {
-            _console.WriteLine("Running Init script...");
+            /*_console.WriteLine("Running Init script...");
             var init = (File)_fs.GetObjectByAbsolutePath("/bin/init.js");
-            _interpreter.Execute(new Process(Encoding.UTF8.GetString(init.Contents), new string[1]), true);
+            _interpreter.Execute(new Process(Encoding.UTF8.GetString(init.Contents), new string[1]), true);*/
         }
 
         /// <summary>
@@ -67,6 +107,7 @@ namespace AlphaNET.Framework.Client
         /// </summary>
         private void InstallOs(string system)
         {
+            /*
             _console.WriteLine("Compiling and installing OS files...");
             var initProgram = IOUtils.ReadManifestData<Computer>("init.ts");
             var shellProgram = IOUtils.ReadManifestData<Computer>("shell.ts");
@@ -82,7 +123,7 @@ namespace AlphaNET.Framework.Client
             _fs.AddObject(new File("ls.js", _fs.GenerateFilesystemObjectId(), true, Encoding.UTF8.GetBytes(_compiler.Compile(lsProgram))), bin);
             _fs.AddObject(new File("cat.js", _fs.GenerateFilesystemObjectId(), true, Encoding.UTF8.GetBytes(_compiler.Compile(catProgram))), bin);
             _fs.AddObject(new File("net.js", _fs.GenerateFilesystemObjectId(), true, Encoding.UTF8.GetBytes(_compiler.Compile(netProgram))), bin);
-            _fs.AddObject(new File("cd.js", _fs.GenerateFilesystemObjectId(), true, Encoding.UTF8.GetBytes(_compiler.Compile(cdProgram))), bin);
+            _fs.AddObject(new File("cd.js", _fs.GenerateFilesystemObjectId(), true, Encoding.UTF8.GetBytes(_compiler.Compile(cdProgram))), bin);*/
         }
 
         /// <summary>
@@ -91,6 +132,7 @@ namespace AlphaNET.Framework.Client
         /// <returns>The generated <c>Filesystem</c></returns>
         private static Filesystem BootstrapFilesystem()
         {
+            /*
             Console.WriteLine("Bootstrapping filesystem...");
             var fs = new Filesystem(FsPath);
             // run create binary to get basic layout setup
@@ -110,7 +152,9 @@ namespace AlphaNET.Framework.Client
             fs.AddObject(src, root);
 
             //BinaryManager.WriteBinaryToFile("debug.fs", BinaryManager.CreateBinaryFromFilesystem(fs));
-            return fs;
+            return fs;*/
+
+            return null;
         }
     }
 }
