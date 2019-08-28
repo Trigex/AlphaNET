@@ -162,7 +162,6 @@ namespace AlphaNET.Framework.IO
             var emptyInode = Inode.GenerateEmptyInode().Serialize();
             for (int i = 1; i <= _inodeCount; i++)
             {
-                WriteBufferToStreamAsync()
             }
         }
         
