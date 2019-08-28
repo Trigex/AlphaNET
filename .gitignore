@@ -352,3 +352,6 @@ MigrationBackup/
 .ionide/
 
 /.idea.AlphaNET/.idea/workspace.xml
+/.idea/.gitignore
+/.idea/.idea.AlphaNET/.idea/misc.xml
+AlphaNET.sln.DotSettings.user

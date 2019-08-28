@@ -151,17 +151,39 @@ namespace AlphaNET.Framework.IO
             }
 
             // setup SuperBlock section
-            var superBlock = GenerateSuperBlock();
-            var superBlockBuffer = superBlock.Serialize();
+            _superBlock = GenerateSuperBlock();
+            var superBlockBuffer = _superBlock.Serialize();
                 
             // SuperBlock gets written at the very start of the file
-            await WriteToBlockAsync(superBlockBuffer, 0);
-
+            await WriteToBlockAsync(superBlockBuffer, _blockPointers[0]);
+            
+            // set inode table pointer property
             _inodeTablePointer = _blockPointers[1]; // INode table starts at the second block
-            // Create Inode table starting at the file's second block, fill with empty inodes
+            // amount of blocks needed to hold all inodes
+            var inodeTableBlockCount = _blockCount / (_inodeCount / InodeSize); 
+            
+            // get empty inode object bytes to fill buffer with
             var emptyInode = Inode.GenerateEmptyInode().Serialize();
-            for (int i = 1; i <= _inodeCount; i++)
+            // create the buffer we will write to the table inodeTableBlockCount times, contains 31 empty inodes in a row
+            byte[] emptyInodeBuffer;
+            
+            var memStream = new MemoryStream();
+            using (var writer = new BinaryWriter(memStream))
             {
+                // writes 31 empty inodes
+                for (int i = 1; i < InodesPerBlock; i++)
+                {
+                    writer.Write(emptyInode);
+                }
+
+                emptyInodeBuffer = memStream.ToArray();
+            }
+
+            // fill blocks 1 to inodeTableBlockCount - 1 with empty inode buffer
+            for (int i = 1; i < inodeTableBlockCount; i++)
+            {
+                // write 
+                await WriteToBlockAsync(emptyInodeBuffer, _blockPointers[i]);
             }
         }
         

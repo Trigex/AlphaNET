@@ -7,6 +7,7 @@ namespace AlphaNET.Framework.IO
         public uint Number { get; set; }
         public uint BlockCount { get; set; }
         public uint TotalSize { get; set; }
+        public const int DirectDataBlockPointerCount = 13;
         public ulong[] DirectDataBlockPointers { get; set; }
         public ulong PointerBlockPointer { get; set; }
         public ulong DoublePointerBlockPointer { get; set; }
@@ -37,9 +38,9 @@ namespace AlphaNET.Framework.IO
         {
             return new Inode
             {
-                Number = 0,
+                Number = 221,
                 BlockCount = 0,
-                DirectDataBlockPointers = new ulong[13],
+                DirectDataBlockPointers = new ulong[DirectDataBlockPointerCount],
                 PointerBlockPointer = 0,
                 DoublePointerBlockPointer = 0
             };

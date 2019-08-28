@@ -15,11 +15,11 @@ And that’s the goal of AlphaNET. AlphaNET aims to be a complete sandbox, with 
 ### Requirements
 * .NET Core SDK 2.2 or higher
 * .NET Framework 4.6.1 or higher (For `AlphaNET.Editor.Windows`)
-* A solid IDE or editor with C# support, such as Visual Studio or Visual Studio Code
+* An IDE or editor with C# support, such as Visual Studio, Jetbrains Rider, or Visual Studio Code (Technically not a requirement, but can't imagine working without one!)
 
 ### Windows
 
-For building and editing on Windows, it's recommended to use Visual Studio, with the default Build/Run functionallity. For building `AlphaNET.Clent.Console` for example, the primary client of this project, load `AlphaNET.sln` at the root of this project into Visual Studio, and set your startup project to `AlphaNET.Client.Console`, and click run.
+For building and editing on Windows, it's recommended to use Visual Studio or Jetbrains Rider, with the default Build/Run functionallity. For building `AlphaNET.Clent.Console` for example, the primary client of this project, load `AlphaNET.sln` at the root of this project into Visual Studio, and set your startup project to `AlphaNET.Client.Console`, and click run.
 
 ### Linux
 
@@ -31,9 +31,13 @@ For Linux, it's recommended to use Visual Studio Code, or the dotnet cli. Before
 
 The core class library of AlphaNET, contains most client side functionality, and various components used by other AlphaNET projects
 
-### AlphaNET.Client.Console (.NET Core 2.2 Console application)
+### AlphaNET.Framework.Tests (.Net Core 2.2)
 
-The console client for the game, which depends on `AlphaNET.Framework`. Contains most platform specific changes that need to be made, and gets the game up and running.
+Unit tests for AlphaNET.Framework
+
+### AlphaNET.Client.Terminal (.NET Core 2.2 Console application)
+
+The Terminal client for the game, which depends on `AlphaNET.Framework`. Contains most platform specific changes that need to be made, and gets the game up and running.
 
 ### AlphaNET.Client.Visual (.NET Core 2.2 MonoGame application)
 

@@ -11,7 +11,7 @@ namespace AlphaNET.Client.Terminal
 
         private static void Main(string[] args)
         {
-            CliArgs.Parse(args).WithParsed(o =>
+            /*CliArgs.Parse(args).WithParsed(o =>
             {
                 Computer computer;
                 var ip = DefaultIp;
@@ -33,7 +33,9 @@ namespace AlphaNET.Client.Terminal
                     computer = new Computer(fsFilePath, new Framework.Client.Terminal(), false, ip, port);
                 
                 computer.Start();
-            });
+            });*/
+            var fs = new Filesystem("debug.fs");
+            fs.InitializeFilesystemAsync(3221225472);
         }
     }
 }

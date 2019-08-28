@@ -3,16 +3,19 @@ AlphaFS Filesystem Schema Version 2
 Notes:
 All "Size" properties are assumed to be in bytes
 
-FsVersion should always be the first byte of the file
-
 Block size is a constant 4096 bytes (4kb)
 
 The Inodes per bytes ratio is 1 INode per 16 kb (I.E, on a 3 gb filesystem file, 3221225472 / 16384 = 196608 inodes)
 
 Total Block count is FilesystemFileSize / Block Size (I.E, on a 3 gb filesystem file with default block size, 3221225472 / 4096 = 786432 blocks)
 
+Inodes, being 132 bytes, mean a single block can hold about 31 inodes (and just a bit more space left over), 
+assuming the previous example Inode and block counts, the total count of blocks taken up by the Inode table would be:
+BlockCount / (InodeCount / InodeSize)
+786432 / (196608 / 31) = 124 blocks used by Inode table
+
 Terminology:
-SuperBlock - The first 
+SuperBlock - The first block of the filesystem, containing important metadata information about the filesystem
 
 INode - A statically allocated 132 byte object, stored in the INode Table, which describes a given file's properties, and location by which it can be accessed
 
