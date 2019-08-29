@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using static System.String;
 
 namespace AlphaNET.Framework.IO
@@ -160,40 +161,98 @@ namespace AlphaNET.Framework.IO
             // set inode table pointer property
             _inodeTablePointer = _blockPointers[1]; // INode table starts at the second block
             // amount of blocks needed to hold all inodes
-            var inodeTableBlockCount = _blockCount / (_inodeCount / InodeSize); 
-            
-            // get empty inode object bytes to fill buffer with
-            var emptyInode = Inode.GenerateEmptyInode().Serialize();
-            // create the buffer we will write to the table inodeTableBlockCount times, contains 31 empty inodes in a row
-            byte[] emptyInodeBuffer;
-            
-            var memStream = new MemoryStream();
-            using (var writer = new BinaryWriter(memStream))
-            {
-                // writes 31 empty inodes
-                for (int i = 1; i < InodesPerBlock; i++)
-                {
-                    writer.Write(emptyInode);
-                }
+            var inodeTableBlockCount = _blockCount / (_inodeCount / InodeSize);
 
-                emptyInodeBuffer = memStream.ToArray();
+            // list of all Inodes in the filesystem, serialized
+            var completeInodeList = new List<byte[]>();
+                
+            // Loop for all inodes
+            for (int z = 1; z < _inodeCount; z++)
+            {
+                // add serialized Inode to list
+                completeInodeList.Add(new Inode((uint)z).Serialize());
             }
 
-            // fill blocks 1 to inodeTableBlockCount - 1 with empty inode buffer
+            // fill blocks 1 to inodeTableBlockCount with inode buffers, containing 31 Inodes
             for (int i = 1; i < inodeTableBlockCount; i++)
             {
-                // write 
-                await WriteToBlockAsync(emptyInodeBuffer, _blockPointers[i]);
+                // get current table block inode range from completeInodeList
+                var blockTable = completeInodeList.GetRange((i - 1) * InodesPerBlock, InodesPerBlock - 1);
+                var buffer = new List<byte>();
+                // copy block table into buffer
+                foreach (var inode in blockTable)
+                {
+                    // copy inode's bytes into buffer
+                    foreach (var _byte in inode)
+                    {
+                        buffer.Add(_byte);
+                    }
+                }
+
+                // finally, write the table block!
+                await WriteToBlockAsync(buffer.ToArray(), _blockPointers[i]);
             }
+            
+            // create root inode
+            
         }
+        
+        #region Inode Methods
+        /// <summary>
+        /// Returns free Inode in the Inode table
+        /// </summary>
+        /// <returns>Empty INode</returns>
+        private Inode GetFreeInode()
+        {
+            return null;
+        }
+        
+        /// <summary>
+        /// Returns an Inode of the given Inode Number
+        /// </summary>
+        /// <param name="inodeNumber">The Inode Number of the Inode to return</param>
+        /// <returns>Inode object of the matching Inode Number</returns>
+        private async Task<Inode> GetInodeAsync(uint inodeNumber)
+        {
+            // get the block the inode is stored in
+            var blockNumber = GetInodeTableBlock(inodeNumber);
+            // get the index of the inode in it's block
+            var tableIndex = GetInodeIndexInTableBlock(inodeNumber, blockNumber);
+            // the inode table starts after the super block, so our inode table block would be blockNumber - 1
+            var blockPointer = _blockPointers[blockNumber - 1];
+            // gets us to the first byte of the index Inode
+            var inodeOffsets =  ((InodesPerBlock - tableIndex) * InodeSize);
+            // read inode bytes
+            var buffer = await ReadBufferFromStreamAsync(blockPointer + inodeOffsets, InodeSize);
+            return Inode.Deserialize(buffer);
+        }
+
+        /// <summary>
+        /// Finds the index of an Inode in a Table Block 
+        /// </summary>
+        /// <param name="inodeNumber">The Inode Number of the Inode to find in the block</param>
+        /// <param name="tableBlockNumber">The Inode Table Block to search for the Inode in</param>
+        /// <returns>Index of the Inode object in the Table Block</returns>
+        private uint GetInodeIndexInTableBlock(uint inodeNumber, uint tableBlockNumber)
+        {
+            return inodeNumber - (InodesPerBlock * (tableBlockNumber - 1));
+        }
+        
+        /// <summary>
+        /// Returns the Inode Table Block containing an Inode of the given Inode Number
+        /// </summary>
+        /// <param name="inodeNumber">Inode to find the table block of</param>
+        /// <returns>Table block number</returns>
+        private uint GetInodeTableBlock(uint inodeNumber)
+        {
+            return (inodeNumber / InodesPerBlock) + 1;
+        }
+        #endregion
         
         #region Block IO & Management Methods
         private async Task<byte[]> ReadFromBlockAsync(ulong blockPointer)
         {
-            var buffer = new byte[BlockSize];
-            // Reads BlockSize count bytes from the the start of the block pointer to the end
-            await _fsStream.ReadAsync(buffer, 0, BlockSize);
-            return buffer;
+            return await ReadBufferFromStreamAsync(blockPointer, BlockSize);
         }
         
         /// <summary>

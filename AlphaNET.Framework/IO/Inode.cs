@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using Jint.Parser;
 
 namespace AlphaNET.Framework.IO
 {
@@ -11,6 +13,21 @@ namespace AlphaNET.Framework.IO
         public ulong[] DirectDataBlockPointers { get; set; }
         public ulong PointerBlockPointer { get; set; }
         public ulong DoublePointerBlockPointer { get; set; }
+
+        public Inode(uint number)
+        {
+            Number = number;
+        }
+        
+        public Inode(uint number, uint blockCount, uint totalSize, ulong[] directDataBlockPointers, ulong pointerBlockPointer, ulong doublePointerBlockPointer)
+        {
+            Number = number;
+            BlockCount = blockCount;
+            TotalSize = totalSize;
+            DirectDataBlockPointers = directDataBlockPointers;
+            PointerBlockPointer = pointerBlockPointer;
+            DoublePointerBlockPointer = doublePointerBlockPointer;
+        }
 
         public byte[] Serialize()
         {
@@ -34,16 +51,33 @@ namespace AlphaNET.Framework.IO
             return bytes;
         }
 
+        public static Inode Deserialize(byte[] buffer)
+        {
+            var stream = new MemoryStream(buffer);
+            Inode inode;
+            using (var reader = new BinaryReader(stream))
+            {
+                var number = reader.ReadUInt32();
+                var blockCount = reader.ReadUInt32();
+                var totalSize = reader.ReadUInt32();
+                var dataBlockPointers = new List<ulong>();
+                for (int i = 0; i < DirectDataBlockPointerCount; i++)
+                {
+                    dataBlockPointers.Push(reader.ReadUInt64());
+                }
+
+                var pointerBlockPointer = reader.ReadUInt64();
+                var doublePointerBlockPointer = reader.ReadUInt64();
+                
+                inode = new Inode(number, blockCount, totalSize, dataBlockPointers.ToArray(), pointerBlockPointer, doublePointerBlockPointer);
+            }
+
+            return inode;
+        }
+
         public static Inode GenerateEmptyInode()
         {
-            return new Inode
-            {
-                Number = 221,
-                BlockCount = 0,
-                DirectDataBlockPointers = new ulong[DirectDataBlockPointerCount],
-                PointerBlockPointer = 0,
-                DoublePointerBlockPointer = 0
-            };
+            return new Inode(0, 0, 0, new ulong[DirectDataBlockPointerCount], 0, 0);
         }
     }
 }
