@@ -133,13 +133,17 @@ namespace AlphaNET.Framework.IO
             _fsStream.WriteByte(0);
             // set stream position back to 0
             ResetStreamPosition();
+            
+            Console.WriteLine("Wrote zeroes to file");
                 
             // set fs properties
             _fsSize = fsSize;
             // blocks take up the entire .fs file
             _blockCount = (uint) (fsSize / BlockSize);
+            Console.WriteLine($"Filesystem Block count: {_blockCount}");
             // TODO: Tweak this number, I sense something possibly going wrong
             _inodeCount = (uint) (fsSize / InodePerByteRatio);
+            Console.WriteLine($"Filesystem Inode count: {_inodeCount}");
             _freeBlockCount = _blockCount;
             _freeInodeCount = _inodeCount;
                 
@@ -150,6 +154,8 @@ namespace AlphaNET.Framework.IO
                 // the start of each block is the block index * BlockSize
                 _blockPointers[i] = (ulong)(i * BlockSize);
             }
+            
+            Console.WriteLine($"{_blockPointers.Length} block pointers");
 
             // setup SuperBlock section
             _superBlock = GenerateSuperBlock();
@@ -158,26 +164,37 @@ namespace AlphaNET.Framework.IO
             // SuperBlock gets written at the very start of the file
             await WriteToBlockAsync(superBlockBuffer, _blockPointers[0]);
             
+            Console.WriteLine("Wrote SuperBlock to block 0");
+            
+            //Console.WriteLine(await ReadFromBlockAsync(_blockPointers[0]));
+            
             // set inode table pointer property
             _inodeTablePointer = _blockPointers[1]; // INode table starts at the second block
             // amount of blocks needed to hold all inodes
             var inodeTableBlockCount = _blockCount / (_inodeCount / InodeSize);
+            Console.WriteLine($"Blocks used for Inode Table: {inodeTableBlockCount}");
 
             // list of all Inodes in the filesystem, serialized
             var completeInodeList = new List<byte[]>();
-                
+            var blankInode = Inode.GenerateEmptyInode();
+            
             // Loop for all inodes
             for (int z = 1; z < _inodeCount; z++)
             {
+                blankInode.Number = (uint)z;
                 // add serialized Inode to list
-                completeInodeList.Add(new Inode((uint)z).Serialize());
+                completeInodeList.Add(blankInode.Serialize());
             }
+            
+            Console.WriteLine("Serialized Inodes into Inode list");
+            Console.WriteLine($"Size of an Inode: {completeInodeList[1].Length}");
 
             // fill blocks 1 to inodeTableBlockCount with inode buffers, containing 31 Inodes
             for (int i = 1; i < inodeTableBlockCount; i++)
             {
                 // get current table block inode range from completeInodeList
                 var blockTable = completeInodeList.GetRange((i - 1) * InodesPerBlock, InodesPerBlock - 1);
+                Console.WriteLine($"Table Block contains {blockTable.Count} Inodes");
                 var buffer = new List<byte>();
                 // copy block table into buffer
                 foreach (var inode in blockTable)
@@ -194,7 +211,9 @@ namespace AlphaNET.Framework.IO
             }
             
             // create root inode
-            
+            var rootNode = await GetFreeInode();
+            var a = 1;
+            Console.WriteLine("End of method");
         }
         
         #region Inode Methods
@@ -202,9 +221,12 @@ namespace AlphaNET.Framework.IO
         /// Returns free Inode in the Inode table
         /// </summary>
         /// <returns>Empty INode</returns>
-        private Inode GetFreeInode()
+        private async Task<Inode> GetFreeInode()
         {
-            return null;
+            Console.WriteLine($"Free Inode number: {((_inodeCount - _freeInodeCount) + 1)}");
+            var inode = await GetInodeAsync((_inodeCount - _freeInodeCount) + 1);
+            _freeInodeCount--;
+            return inode;
         }
         
         /// <summary>
@@ -214,16 +236,22 @@ namespace AlphaNET.Framework.IO
         /// <returns>Inode object of the matching Inode Number</returns>
         private async Task<Inode> GetInodeAsync(uint inodeNumber)
         {
+            Console.WriteLine($"Attempting to get Inode Number {inodeNumber}");
             // get the block the inode is stored in
             var blockNumber = GetInodeTableBlock(inodeNumber);
+            Console.WriteLine($"Inode block number: {blockNumber}");
             // get the index of the inode in it's block
             var tableIndex = GetInodeIndexInTableBlock(inodeNumber, blockNumber);
-            // the inode table starts after the super block, so our inode table block would be blockNumber - 1
-            var blockPointer = _blockPointers[blockNumber - 1];
+            Console.WriteLine($"Inode table index: {tableIndex}");
+            // the inode table starts after the super block, so our inode table block would be blockNumber
+            var blockPointer = _blockPointers[blockNumber];
+            Console.WriteLine($"Inode Block Pointer: {blockPointer}");
             // gets us to the first byte of the index Inode
             var inodeOffsets =  ((InodesPerBlock - tableIndex) * InodeSize);
+            Console.WriteLine($"Block Inode offsets: {inodeOffsets}");
             // read inode bytes
             var buffer = await ReadBufferFromStreamAsync(blockPointer + inodeOffsets, InodeSize);
+            Console.WriteLine(Inode.Deserialize(buffer).Number);
             return Inode.Deserialize(buffer);
         }
 
@@ -280,6 +308,8 @@ namespace AlphaNET.Framework.IO
                 var fillArr = new byte[fillSize];
                 await WriteBufferToStreamAsync(blockPointer + (ulong) buffer.Length + 1, fillArr);
             }
+
+            _freeBlockCount--;
         }
         #endregion
         
@@ -322,11 +352,14 @@ namespace AlphaNET.Framework.IO
         /// <summary>
         /// Reads bytes from the stream at the given position, of the given length
         /// </summary>
-        /// <param name="position">The position to start reading from</param>
+        /// <param name="position">The zero-based position to start reading from</param>
         /// <param name="length">The total length of bytes to read</param>
         /// <returns></returns>
         private async Task<byte[]> ReadBufferFromStreamAsync(ulong position, int length)
         {
+            if (position > (ulong)_fsStream.Length) 
+                throw new Exception("Attempting to read position outside of buffer length!");
+            
             var initialPosition = _fsStream.Position;
             // create buffer to hold read bytes
             var buffer = new byte[length];

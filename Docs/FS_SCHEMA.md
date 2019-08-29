@@ -1,88 +1,50 @@
-# Binary Filesystem Schema
+# AlphaFS Binary Filesystem Schema Version 2
 
-This document describes version 1 of the AlphaNET Binary Filesystem Schema. Each described section appears in the binary, in the order they are sequenced here (Except for Filesystem Object schemas, which are positioned and described under their respective list in this document).
+This document describes version 2 of the AlphaFs Binary Filesystem Schema.
 
 ## Notes
 
-Values marked as `(Constant)`, are arbitrary numbers, usually used as flags for the Filesystem loader to identify sections of the binary.
+All "Size" properties are assumed to have their value in bytes
 
-List sections contain an array of Filesystem Objects (File or Directory), held in-between the list's `Start` and `End` flags.  
+Block size is a constant 4096 bytes (4kb)
 
-# Binary Filesystem Headers
+## Handy Formulas
 
-_Headers, describing properties of this filesystem binary_
+The Inodes per bytes ratio is 1 INode per 16 kb, which can be expressed `as FilesystemFileSize / 16384`
 
-| Flag/Property          | Type          | Value        |
-| ---------------------- |:--------------|:-------------|
-| FS File Header Start   | Byte          | 6 (Constant) |
-| FS Version             | Byte          | 1-255        |
-| FS File Header End     | Byte          | 9 (Constant) |
+(I.E, on a 3 gb filesystem file, `3221225472 / 16384` = 196608 inodes)
 
-# Directory List Meta (Not yet implemented)
+Total Block count is the entire Filesystem, divided into blocks, which can be expressed as `FilesystemFileSize / Block Size` 
 
-_Generic metadata for the list that succeeds it_
+(I.E, on a 3 gb filesystem file with default block size, `3221225472 / 4096` = 786432 blocks)
 
-| Flag/Property          | Type          | Value                  |
-| ---------------------- |:--------------|:-----------------------|
-| List Meta Flag         | Byte          | 100 (Constant)         |
-| List Length            | Uint          | 1-4294967295           |
-| List Byte Size         | Ulong         | 1-18446744073709551615 |
+Inodes, being 132 bytes, means a single 4kb block can hold about 31 inodes (and just a bit more space left over), the total count of blocks taken up by the Inode table can be expressed as `BlockCount / (InodeCount / InodesPerBlock)`
 
-# Directory List
+(I.E, `786432 / (196608 / 31)` = 124 blocks used by Inode table)
 
-_A list of directories present in the filesystem._
+An Inode's parent inode-table number can be found with `(InodeNumber / InodesPerBlock) + 1`
 
-| Flag/Property                       | Type          | Value            |
-| ----------------------------------- |:--------------|:-----------------|
-| Directory List Start Flag           | Byte          | 1 (Constant)     | 
-| Directory Objects Array (See below) | Directory[]   | Cool folders :`) |
-| Directory List End Flag	      | Byte          | 2 (Constant)     |
+(I.E, `(42 / 31) + 1` = 2, INode number 42 is stored in inode-table block 2)
 
-## Directory Object
+An Inode's inode-table index can be found within the table block that holds it with `InodeNumber - (InodesPerBlock * (Inode Table Block Index - 1))`
+(I.E, `42 - (31 * (2 - 1)`) = 11, Inode 42 can be found in inode-table block 2 at index 11 )
 
-_A Filesystem Directory object, which, when loaded into AlphaNET, contains other Directory objects, and Files_
+## Terminology
 
-| Flag/Property                       | Type                 | Value                                                                     |
-| ----------------------------------- |:---------------------|:--------------------------------------------------------------------------|
-| Directory Object Start Flag         | Byte                 | 5 (Constant)                                                              |
-| ID                                  | Uint                 | 1-4294967295                                                              |
-| OwnerID                             | Uint                 | 1-4294967295                                                              |
-| Title Length                        | Ushort               | 1-65535                                                                   |
-| Title                               | UTF-8 Encoded String | A valid UTF-8 Encoded string, with a max character length of 65535        |
-| Directory Object End Flag           | Byte                 | 5 (Constant)                                                              |
+### Block
 
-# File List Meta (Not yet implemented)
+A statically sized section that the entire Filesystem is broken down into. (Usually sized as 4096 bytes)
+The Filesystem binary is only ever addressed in units of blocks.
 
-_Generic metadata for the list that succeeds it_
+### SuperBlock
 
-| Flag/Property          | Type          | Value                  |
-| ---------------------- |:--------------|:-----------------------|
-| List Meta Flag         | Byte          | 100 (Constant)         |
-| List Length            | Uint          | 1-4294967295           |
-| List Byte Size         | Ulong         | 1-18446744073709551615 |
+The first block of the Filesystem, starting at byte 0, it contains important metadata about the Filesystem binary.
 
-# File List
+### Inode
 
-_A list of files present in the filesystem._
+An Inode is a statically allocated 132 byte object, stored in the Inode table, it describes certain properties about a given File in the Filesystem, such as the data blocks it's contents can be found in,
+the total count of blocks allocated to it, and it's unique Inode number.
 
-| Flag/Property                       | Type          | Value            |
-| ----------------------------------- |:--------------|:-----------------|
-| File List Start Flag                | Byte          | 3 (Constant)     | 
-| File Objects Array (See below)      | File[]        | Cool files :`)   |
-| File List End Flag		      | Byte          | 4 (Constant)     |
+### Inode Table
 
-## File Object
-
-_A Filesystem File object, which contains arbitrary or UTF-8 Encoded string bytes, parented to a Directory object via OwnerID_
-
-| Flag/Property                       | Type                 | Value                                                                                                             |
-| ----------------------------------- |:---------------------|:------------------------------------------------------------------------------------------------------------------|
-| File Object Start Flag              | Byte                 | 7 (Constant)                                                                                                      |
-| ID                                  | Uint                 | 1-4294967295                                                                                                      |
-| OwnerID                             | Uint                 | 1-4294967295                                                                                                      |
-| Title Length                        | Ushort               | 1-65535                                                                                                           |
-| Title                               | UTF-8 Encoded String | A valid UTF-8 Encoded string, with a max character length of 65535                                                |
-| Plaintext                           | Byte		     | 1, or 0, 1 = Is Plaintext, 0 = Not Plaintext                                                                      |
-| Contents Length		      | Uint                 | 1-4294967295                                                                                                      |
-| Contents			      | Byte[]               | Raw array of bytes, with a maximum length of 4294967295 bytes, or a UTF-8 Encoded string, if `Plaintext` was true |
-| File Object End Flag                | Byte                 | 8 (Constant)                                                                                                      |
+A series of sequential blocks near the start of the Filesystem, dedicated to storing all Inodes in the Filesystem.

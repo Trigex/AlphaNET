@@ -7,12 +7,12 @@ namespace AlphaNET.Framework.IO
     public class Inode
     {
         public uint Number { get; set; }
-        public uint BlockCount { get; set; }
-        public uint TotalSize { get; set; }
+        public uint BlockCount { get; }
+        public uint TotalSize { get; }
         public const int DirectDataBlockPointerCount = 13;
-        public ulong[] DirectDataBlockPointers { get; set; }
-        public ulong PointerBlockPointer { get; set; }
-        public ulong DoublePointerBlockPointer { get; set; }
+        public ulong[] DirectDataBlockPointers { get; }
+        public ulong PointerBlockPointer { get; }
+        public ulong DoublePointerBlockPointer { get; }
 
         public Inode(uint number)
         {

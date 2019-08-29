@@ -36,7 +36,7 @@ namespace AlphaNET.Client.Terminal
             });*/
             var fs = new Filesystem("debug.fs");
             // 256 mb fs
-            fs.InitializeFilesystemAsync(268435456);
+            fs.InitializeFilesystemAsync(3221225472);
         }
     }
 }
