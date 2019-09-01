@@ -83,14 +83,14 @@ namespace AlphaNET.Framework.Client
             
             // Setup filesystem stuff
             // fs file is initialized
-            if (FilesystemUtils.IsFsFileInitialized(fsFilePath))
-            {
-                // TODO: Load Filesystem from here
-            }
-            else // fs file is not initialized!
-            {
+            //if (FilesystemUtils.IsFsFileInitialized(fsFilePath))
+            //{
+            //    // TODO: Load Filesystem from here
+            //}
+            //else // fs file is not initialized!
+            //{
                 // TODO: Provide interface to create a Filesystem
-            }
+            //}
             
             // TODO: Initialize JsInterpreter
         }

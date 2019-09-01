@@ -66,33 +66,13 @@ namespace AlphaNET.Framework.IO
         
         #region Constant Properties
         /// <summary>
-        /// The size (in bytes) of a SuperBlock .fs file section
-        /// </summary>
-        private const int SuperBlockSectionSize = 37;
-        /// <summary>
         /// The target .fs file version
         /// </summary>
         private const byte FsVersion = 1;
         /// <summary>
-        /// The size (in bytes) of a single block in the .fs file
-        /// </summary>
-        private const int BlockSize = 4096;
-        /// <summary>
-        /// The size (in bytes) of a single INode object in the .fs file
-        /// </summary>
-        private const int InodeSize = 132;
-        /// <summary>
         /// The INode Number assigned to the Filesystem's root Directory
         /// </summary>
         private const int RootInodeNumber = 1;
-        /// <summary>
-        /// The ratio of how many Inodes are created per bytes (Currently, per 16kb)
-        /// </summary>
-        private const int InodePerByteRatio = 16384;
-        /// <summary>
-        /// How many Inodes can fit into a single block?
-        /// </summary>
-        private const int InodesPerBlock = BlockSize / InodeSize;
         #endregion
         
         /// <summary>
@@ -106,7 +86,7 @@ namespace AlphaNET.Framework.IO
             // thus, things like AlphaNET Editor can't work with the .fs file unless
             // the AlphaNET client is closed. That sucks, I know, but given the nature of this, data can be incomplete while this instance is active,
             // and things could fall apart!
-            _fsStream = new FileStream(_fsPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096, true);
+            _fsStream = new FileStream(_fsPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite, 4096, true);
             _reader = new BinaryReader(_fsStream);
             _writer = new BinaryWriter(_fsStream);
         }
@@ -116,16 +96,22 @@ namespace AlphaNET.Framework.IO
         /// </summary>
         ~Filesystem()
         {
+            Close();
+        }
+
+        public void Close()
+        {
             _reader.Dispose();
             _writer.Dispose();
             _fsStream.Dispose();
         }
-        
+
+        #region Initialization Methods
         /// <summary>
         /// Initializes a new .fs file
         /// </summary>
         /// <param name="fsSize">The size (in bytes) of the Filesystem file</param>
-        public async Task InitializeFilesystemAsync(ulong fsSize)
+        public async Task NewFilesystemAsync(ulong fsSize)
         {
             // Seeks to the last byte of the specified size
             SetStreamPosition(fsSize);
@@ -139,10 +125,10 @@ namespace AlphaNET.Framework.IO
             // set fs properties
             _fsSize = fsSize;
             // blocks take up the entire .fs file
-            _blockCount = (uint) (fsSize / BlockSize);
+            _blockCount = (uint) (fsSize / Size.Block);
             Console.WriteLine($"Filesystem Block count: {_blockCount}");
             // TODO: Tweak this number, I sense something possibly going wrong
-            _inodeCount = (uint) (fsSize / InodePerByteRatio);
+            _inodeCount = (uint) (fsSize / Size.InodePerBytes);
             Console.WriteLine($"Filesystem Inode count: {_inodeCount}");
             _freeBlockCount = _blockCount;
             _freeInodeCount = _inodeCount;
@@ -152,27 +138,27 @@ namespace AlphaNET.Framework.IO
             for (var i = 0; i < _blockPointers.Length; i++)
             {
                 // the start of each block is the block index * BlockSize
-                _blockPointers[i] = (ulong)(i * BlockSize);
+                _blockPointers[i] = (ulong)(i * Size.Block);
             }
             
             Console.WriteLine($"{_blockPointers.Length} block pointers");
 
             // setup SuperBlock section
-            _superBlock = GenerateSuperBlock();
+            _superBlock = CreateSuperBlock();
             var superBlockBuffer = _superBlock.Serialize();
                 
             // SuperBlock gets written at the very start of the file
             await WriteToBlockAsync(superBlockBuffer, _blockPointers[0]);
             
-            Console.WriteLine("Wrote SuperBlock to block 0");
+            Console.WriteLine($"Wrote SuperBlock to block {_blockPointers[0]}");
             
             //Console.WriteLine(await ReadFromBlockAsync(_blockPointers[0]));
             
             // set inode table pointer property
             _inodeTablePointer = _blockPointers[1]; // INode table starts at the second block
             // amount of blocks needed to hold all inodes
-            var inodeTableBlockCount = _blockCount / (_inodeCount / InodeSize);
-            Console.WriteLine($"Blocks used for Inode Table: {inodeTableBlockCount}");
+            float blkCnt = _blockCount / (_inodeCount / Size.Inode);
+            Console.WriteLine($"Blocks used for Inode Table: {blkCnt}");
 
             // list of all Inodes in the filesystem, serialized
             var completeInodeList = new List<byte[]>();
@@ -190,11 +176,10 @@ namespace AlphaNET.Framework.IO
             Console.WriteLine($"Size of an Inode: {completeInodeList[1].Length}");
 
             // fill blocks 1 to inodeTableBlockCount with inode buffers, containing 31 Inodes
-            for (int i = 1; i < inodeTableBlockCount; i++)
+            for (int i = 1; i < blkCnt; i++)
             {
                 // get current table block inode range from completeInodeList
-                var blockTable = completeInodeList.GetRange((i - 1) * InodesPerBlock, InodesPerBlock - 1);
-                Console.WriteLine($"Table Block contains {blockTable.Count} Inodes");
+                var blockTable = completeInodeList.GetRange((i - 1) * Size.InodesPerBlock, Size.InodesPerBlock - 1);
                 var buffer = new List<byte>();
                 // copy block table into buffer
                 foreach (var inode in blockTable)
@@ -210,13 +195,26 @@ namespace AlphaNET.Framework.IO
                 await WriteToBlockAsync(buffer.ToArray(), _blockPointers[i]);
             }
             
-            // create root inode
+            // allocate root inode
             var rootNode = await GetFreeInode();
-            var a = 1;
-            Console.WriteLine("End of method");
         }
-        
-        #region Inode Methods
+
+        /// <summary>
+        /// Loads state for the Filesystem from the Filesystem's .fs file
+        /// </summary>
+        /// <returns></returns>
+        public async Task LoadFilesystemAsync()
+        {
+            if (!FilesystemUtils.IsFsFileInitialized(_fsStream)) { Console.WriteLine("FS File not init'd"); return; }
+
+            // get superblock
+            var superBuffer = await ReadFromBlockAsync(0);
+            var fullBlock = new List<byte>(superBuffer);
+            _superBlock = new SuperBlock().Deserialize(fullBlock.GetRange(0, Size.SuperBlock).ToArray());
+        }
+        #endregion
+
+        #region Inode Management Methods
         /// <summary>
         /// Returns free Inode in the Inode table
         /// </summary>
@@ -243,16 +241,16 @@ namespace AlphaNET.Framework.IO
             // get the index of the inode in it's block
             var tableIndex = GetInodeIndexInTableBlock(inodeNumber, blockNumber);
             Console.WriteLine($"Inode table index: {tableIndex}");
-            // the inode table starts after the super block, so our inode table block would be blockNumber
+            // the inode table starts after the superblock, so our inode table block would be blockNumber
             var blockPointer = _blockPointers[blockNumber];
             Console.WriteLine($"Inode Block Pointer: {blockPointer}");
             // gets us to the first byte of the index Inode
-            var inodeOffsets =  ((InodesPerBlock - tableIndex) * InodeSize);
-            Console.WriteLine($"Block Inode offsets: {inodeOffsets}");
+            var inodePos = (inodeNumber - 1) * 132;
+            Console.WriteLine($"Block Inode offsets: {inodePos}");
             // read inode bytes
-            var buffer = await ReadBufferFromStreamAsync(blockPointer + inodeOffsets, InodeSize);
-            Console.WriteLine(Inode.Deserialize(buffer).Number);
-            return Inode.Deserialize(buffer);
+            var buffer = await ReadBufferFromStreamAsync(blockPointer + inodePos, Size.Inode);
+            Console.WriteLine(new Inode().Deserialize(buffer).Number);
+            return new Inode().Deserialize(buffer);
         }
 
         /// <summary>
@@ -263,7 +261,7 @@ namespace AlphaNET.Framework.IO
         /// <returns>Index of the Inode object in the Table Block</returns>
         private uint GetInodeIndexInTableBlock(uint inodeNumber, uint tableBlockNumber)
         {
-            return inodeNumber - (InodesPerBlock * (tableBlockNumber - 1));
+            return inodeNumber - (Size.InodesPerBlock * (tableBlockNumber - 1));
         }
         
         /// <summary>
@@ -273,14 +271,14 @@ namespace AlphaNET.Framework.IO
         /// <returns>Table block number</returns>
         private uint GetInodeTableBlock(uint inodeNumber)
         {
-            return (inodeNumber / InodesPerBlock) + 1;
+            return (inodeNumber / Size.InodesPerBlock) + 1;
         }
         #endregion
         
         #region Block IO & Management Methods
         private async Task<byte[]> ReadFromBlockAsync(ulong blockPointer)
         {
-            return await ReadBufferFromStreamAsync(blockPointer, BlockSize);
+            return await ReadBufferFromStreamAsync(blockPointer, Size.Block);
         }
         
         /// <summary>
@@ -293,17 +291,17 @@ namespace AlphaNET.Framework.IO
         private async Task WriteToBlockAsync(byte[] buffer, ulong blockPointer)
         {
             // this method only supports writing directly to a single block, thus exception if the byte length is too large
-            if (buffer.Length > BlockSize)
-                throw new Exception($"The specified byte array to be written was larger than the size of a block! (bytes was {buffer.Length}, and BlockSize is {BlockSize})");
+            if (buffer.Length > Size.Block)
+                throw new Exception($"The specified byte array to be written was larger than the size of a block! (bytes was {buffer.Length}, and BlockSize is {Size.Block})");
             
             // writes the buffer to the block at position block pointer value
             await WriteBufferToStreamAsync(blockPointer, buffer);
             
             // If the buffer is smaller than BlockSize, ensure the rest of the block is filled with zeroes
-            if (buffer.Length < BlockSize)
+            if (buffer.Length < Size.Block)
             {
                 // BlockSize - bytes.length would be the rest of the block that was not written to
-                var fillSize = BlockSize - buffer.Length;
+                var fillSize = Size.Block - buffer.Length;
                 // array filled with zeroes (I think the default value zeroes will suffice, but C# might bitch, conflicting reports!
                 var fillArr = new byte[fillSize];
                 await WriteBufferToStreamAsync(blockPointer + (ulong) buffer.Length + 1, fillArr);
@@ -374,23 +372,12 @@ namespace AlphaNET.Framework.IO
         #endregion
 
         /// <summary>
-        /// Generates a SuperBlock object, based on the current Filesystem instance's properties
+        /// Creates a SuperBlock object, based on the current Filesystem instance's properties
         /// </summary>
         /// <returns>The generated SuperBlock</returns>
-        private SuperBlock GenerateSuperBlock()
+        private SuperBlock CreateSuperBlock()
         {
-            return new SuperBlock
-            {
-                BlockCount = (uint)_blockCount,
-                BlockSize = BlockSize,
-                FreeBlockCount = (uint)_freeBlockCount,
-                FreeINodeCount = (uint)_freeInodeCount,
-                FsFileSize = (ulong)_fsSize,
-                FsVersion = FsVersion,
-                InodeCount = (uint)_inodeCount,
-                InodeSize = InodeSize,
-                InodeTablePointer = SuperBlockSectionSize + 1
-            };
+            return new SuperBlock(FsVersion, _fsSize, Size.Block, Size.Inode, _blockCount, _inodeCount, _freeInodeCount, _freeBlockCount, Size.Block * 2);
         }
     }
 }

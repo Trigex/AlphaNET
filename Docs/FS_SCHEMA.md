@@ -47,4 +47,4 @@ the total count of blocks allocated to it, and it's unique Inode number.
 
 ### Inode Table
 
-A series of sequential blocks near the start of the Filesystem, dedicated to storing all Inodes in the Filesystem.
+A series of sequentially ordered blocks near the start of the Filesystem, dedicated to storing all Inodes in the Filesystem.

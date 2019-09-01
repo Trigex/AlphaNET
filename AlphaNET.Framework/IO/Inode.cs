@@ -4,15 +4,15 @@ using Jint.Parser;
 
 namespace AlphaNET.Framework.IO
 {
-    public class Inode
+    public class Inode : IFilesystemObject<Inode>
     {
         public uint Number { get; set; }
-        public uint BlockCount { get; }
-        public uint TotalSize { get; }
+        public uint BlockCount { get; set; }
+        public uint TotalSize { get; set; }
         public const int DirectDataBlockPointerCount = 13;
-        public ulong[] DirectDataBlockPointers { get; }
-        public ulong PointerBlockPointer { get; }
-        public ulong DoublePointerBlockPointer { get; }
+        public ulong[] DirectDataBlockPointers { get; set; }
+        public ulong PointerBlockPointer { get; set; }
+        public ulong DoublePointerBlockPointer { get; set; }
 
         public Inode(uint number)
         {
@@ -29,11 +29,11 @@ namespace AlphaNET.Framework.IO
             DoublePointerBlockPointer = doublePointerBlockPointer;
         }
 
+        public Inode() { }
+
         public byte[] Serialize()
         {
-            var stream = new MemoryStream();
-            byte[] bytes;
-            using (var writer = new BinaryWriter(stream))
+            return FilesystemUtils.Serialize((writer) =>
             {
                 writer.Write(Number);
                 writer.Write(BlockCount);
@@ -45,17 +45,12 @@ namespace AlphaNET.Framework.IO
                 }
                 writer.Write(PointerBlockPointer);
                 writer.Write(DoublePointerBlockPointer);
-                bytes = stream.ToArray();
-            }
-
-            return bytes;
+            });
         }
 
-        public static Inode Deserialize(byte[] buffer)
+        public Inode Deserialize(byte[] buffer)
         {
-            var stream = new MemoryStream(buffer);
-            Inode inode;
-            using (var reader = new BinaryReader(stream))
+            return FilesystemUtils.Deserialize(buffer, (reader) =>
             {
                 var number = reader.ReadUInt32();
                 var blockCount = reader.ReadUInt32();
@@ -68,11 +63,10 @@ namespace AlphaNET.Framework.IO
 
                 var pointerBlockPointer = reader.ReadUInt64();
                 var doublePointerBlockPointer = reader.ReadUInt64();
-                
-                inode = new Inode(number, blockCount, totalSize, dataBlockPointers.ToArray(), pointerBlockPointer, doublePointerBlockPointer);
-            }
+                var output = new Inode(number, blockCount, totalSize, dataBlockPointers.ToArray(), pointerBlockPointer, doublePointerBlockPointer);
 
-            return inode;
+                return output;
+            });
         }
 
         public static Inode GenerateEmptyInode()

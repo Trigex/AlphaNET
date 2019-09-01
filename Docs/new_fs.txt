@@ -1,5 +1,7 @@
 AlphaFS Filesystem Schema Version 2
 
+TODO: Clean this up, and throw everything into FILESYSTEM.md
+
 Notes:
 All "Size" properties are assumed to be in bytes
 
@@ -59,9 +61,20 @@ Pointer Block Object (4096 bytes in length, an entire block)
 ==============================================================
 (512 unique entries) DataBlockPointer (ulong) - Points to the position in the .fs file of the start of a datablock
 
-Directory Object (Stored in a data block)
+Directory Object (Stored in a data block) (Dynamic size)
 ==============================================================
-Uint - 
+CurrentDirectory (ulong) - A reference to the current directory, who's value contains the current directory's inode number
+ParentDirectory (ulong) - A reference to the parent directory, who's value contains the current directory's parent directory's inode number
+Entries (uint) - The count of how many file entries (not including Current and Parent Directory entries) are in this list
+Files (File Table Object) - Where all the files (that could fit in this block) are stored
+If not all the directory's files could be fit within this block, an extended list can be found in the directory inode's other data block pointers, those blocks containing only File Table objects
+
+
+File Table Object (Stored in a data block, or a directory object) (Dynamic Size)
+==============================================================
+File Object:
+    Title (utf-8 string, padded to 128 bytes with NUL, if the string is shorter than 128 bytes) - The title of this file, 128 character limit
+	InodeNumber (uint) - The Number of the Inode that represents this file
 
 Filesystem File Structure
 ---------------------------------------------
