@@ -9,16 +9,17 @@ namespace AlphaNET.Framework.Net
 {
     public class SocketManager
     {
-        private readonly TcpClient _tcpClient;
+        private readonly INetClient _netClient;
         private readonly List<Socket> _socketList;
         private readonly ManualResetEvent _mre = new ManualResetEvent(false);
 
-        public SocketManager(TcpClient tcpClient)
+        public SocketManager(INetClient netClient)
         {
-            _tcpClient = tcpClient;
+            _netClient = netClient;
             _socketList = new List<Socket>();
         }
 
+        /*
         public NetStatusCode BindSocket(Socket socket, Address address)
         {
             if(FindSocketByBindedAddress(address) == null) // Address isn't in use
@@ -67,20 +68,20 @@ namespace AlphaNET.Framework.Net
             {
                 var port = localPort != 0 ? localPort : (ushort) 24;
 
-                socket.LocalAddress = new Address(_tcpClient.VirtualIp.ip, port);
+                socket.LocalAddress = new Address(_netClient.VirtualIp.ip, port);
             }
 
             socket.EndpointAddress = destinationAddress;
 
             SocketStatus status = null;
-            _tcpClient.SocketStatusRecieved += (socketStatus) =>
+            _netClient.SocketStatusRecieved += (socketStatus) =>
             {
                 status = socketStatus;
                 _mre.Set();
             };
 
             // send socket status request
-            _tcpClient.Send(new SocketStatusRequest(socket.LocalAddress, socket.EndpointAddress));
+            _netClient.Send(new SocketStatusRequest(socket.LocalAddress, socket.EndpointAddress));
             // wait for a response
             
             _mre.WaitOne();
@@ -89,7 +90,7 @@ namespace AlphaNET.Framework.Net
             {
                 if(status.Listening) // destination is open
                 {
-                    _tcpClient.Send(new SocketConnectionRequest(socket.LocalAddress, socket.EndpointAddress)); // attempt to connect
+                    _netClient.Send(new SocketConnectionRequest(socket.LocalAddress, socket.EndpointAddress)); // attempt to connect
                     return NetStatusCode.SocketConnected;
                 } else
                 {
@@ -116,12 +117,12 @@ namespace AlphaNET.Framework.Net
 
         public string GetIpAddress()
         {
-            return _tcpClient.VirtualIp.ip;
+            return _netClient.VirtualIp.ip;
         }
 
         private Socket FindSocketByBindedAddress(Address address)
         {
             return _socketList.SingleOrDefault(s => s.LocalAddress.IpAddress == address.IpAddress && s.LocalAddress.Port == address.Port);
-        }
+        }*/
     }
 }

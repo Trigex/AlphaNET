@@ -22,15 +22,15 @@ namespace AlphaNET.Framework.Net
 
         public TcpClient(string ip, int port)
         {
-            _client = new WatsonTcpClient(ip, port)
+            /*_client = new WatsonTcpClient(ip, port)
             {
                 ServerConnected = ServerConnected,
                 ServerDisconnected = ServerDisconnected,
                 MessageReceived = MessageRecieved
-            };
+            };*/
         }
 
-        public void AddSocketManager(SocketManager socketManager)
+        /*public void AddSocketManager(SocketManager socketManager)
         {
             _socketManager = socketManager;
         }
@@ -91,6 +91,6 @@ namespace AlphaNET.Framework.Net
                 Console.WriteLine(e.ToString());
             }
             return true;
-        }
+        }*/
     }
 }

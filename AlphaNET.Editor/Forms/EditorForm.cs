@@ -176,7 +176,7 @@ namespace AlphaNET.Editor.Forms
                     plaintext = false;
                 }
 
-                var file = new File(bin.Key, IOUtils.GenerateId(), plaintext, bin.Value);
+                var file = new File(bin.Key, IoUtils.GenerateId(), plaintext, bin.Value);
                 var fileItem = new FileGridItem(file.Id, file.Title, file.IsPlaintext, file);
                 _fs.AddObject(file, importDirectory);
 

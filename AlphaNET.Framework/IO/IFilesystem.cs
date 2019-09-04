@@ -4,8 +4,7 @@ using System.Text;
 
 namespace AlphaNET.Framework.IO
 {
-    public class Directory
+    public interface IFilesystem
     {
-        public ulong CurrentDirectoryInode;
     }
 }

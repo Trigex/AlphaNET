@@ -32,7 +32,7 @@ namespace AlphaNET.Framework.JS
             _systemScript = systemScript;
             _console = console;
             //_filesystemProxy = new FilesystemProxy(fs);
-            _socketManagerProxy = new SocketManagerProxy(socketManager);
+            //_socketManagerProxy = new SocketManagerProxy(socketManager);
             ProcessStack = new Stack<Process>();
             _threadList = new List<Thread>();
             _global = new Engine().Execute("var Global = {}").GetValue("Global");
@@ -81,19 +81,18 @@ namespace AlphaNET.Framework.JS
             ///engine.SetValue("DIRECTORY", TypeReference.CreateTypeReference(engine, typeof(Directory)));
             // StatusCodes
             //engine.SetValue("IOStatusCode", TypeReference.CreateTypeReference(engine, typeof(IoStatusCode)));
-            engine.SetValue("NetStatusCode", TypeReference.CreateTypeReference(engine, typeof(NetStatusCode)));
+            //engine.SetValue("NetStatusCode", TypeReference.CreateTypeReference(engine, typeof(NetStatusCode)));
             // FilesystemProxy
             //engine.SetValue("Filesystem", _filesystemProxy);
             // List, pretty ghetto way to offer "generic" lists to JavaScript, since it'll just accept anything, but oh well!
             engine.SetValue("List", TypeReference.CreateTypeReference(engine, typeof(System.Collections.Generic.List<object>)));
-            // This ;) Make a proxy later
             engine.SetValue("JSInterpreter", new JsInterpreterProxy(this));
             // UTF8 encoding
             engine.SetValue("UTF8", Encoding.UTF8);
             // NET
-            engine.SetValue("SocketManager", _socketManagerProxy);
-            engine.SetValue("Socket", TypeReference.CreateTypeReference(engine, typeof(Socket)));
-            engine.SetValue("Address", TypeReference.CreateTypeReference(engine, typeof(Address)));
+            //engine.SetValue("SocketManager", _socketManagerProxy);
+            //engine.SetValue("Socket", TypeReference.CreateTypeReference(engine, typeof(Socket)));
+            //engine.SetValue("Address", TypeReference.CreateTypeReference(engine, typeof(Address)));
             // Shared global object
             engine.SetValue("Global", _global);
             try

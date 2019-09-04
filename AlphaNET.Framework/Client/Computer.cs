@@ -8,7 +8,7 @@ namespace AlphaNET.Framework.Client
 {
     /// <summary>
     /// The Computer class is the main controlling entity of an AlphaNET Client. It holds all components that the client uses throughout it's run,
-    /// such as the Filesystem, the JsInterpreter, Console implementation, TcpClient, etc. It also is what gets the AlphaOS init script up
+    /// such as the Filesystem implementation, the JsInterpreter, Console implementation, TcpClient, etc. It also is what gets the AlphaOS init script up
     /// and running.
     /// </summary>
     public class Computer
@@ -16,32 +16,32 @@ namespace AlphaNET.Framework.Client
         /// <summary>
         /// The Filesystem instance
         /// </summary>
-        private Filesystem _fs;
+        private readonly IFilesystem _fs;
         /// <summary>
-        /// The JsInterpreter instance, used to run all the scripts this Computer may want to execute
-        /// </summary>
-        private readonly JsInterpreter _interpreter;
-        /// <summary>
-        /// The Console implementation this Computer reads and writes stdout text with
+        /// The Console implementation this Computer reads and writes text with
         /// </summary>
         private readonly IConsole _console;
         /// <summary>
         /// The TcpClient instance this Computer uses to communicate with the AlphaNET server
         /// </summary>
-        private TcpClient _tcpClient;
+        private readonly INetClient _netClient;
         /// <summary>
         /// The SocketManager this Computer uses to manage Virtual Sockets
         /// </summary>
-        private SocketManager _socketManager;
+        private readonly SocketManager _socketManager;
         /// <summary>
-        /// Is the computer currently in offline mode?
+        /// The JsInterpreter instance, used to run all the scripts this Computer may want to execute
         /// </summary>
-        private bool _offlineMode;
+        private readonly JsInterpreter _interpreter;
         /// <summary>
         /// The TypescriptCompiler this Computer uses to dynamically compile scripts
         /// </summary>
-        private TypescriptCompiler _compiler;
-        
+        private readonly TypescriptCompiler _compiler;
+        /// <summary>
+        /// Is the computer currently in offline mode?
+        /// </summary>
+        public bool Offline { get; private set; }
+
         /// <summary>
         /// Instantiates a new Computer, with basic initialization of all components
         /// </summary>
@@ -51,47 +51,19 @@ namespace AlphaNET.Framework.Client
         /// <param name="serverIp">If not in Offline Mode, the target AlphaNET Server Ip</param>
         /// <param name="serverPort">If not in Offline Mode, the target AlphaNET Server port</param>
         /// <exception cref="Exception">Invalid server address arguments!</exception>
-        public Computer(string fsFilePath, IConsole console, bool offlineMode, string serverIp = null, int serverPort = 0)
+        public Computer(IFilesystem fs, IConsole console, INetClient netClient)
         {
             _console = console;
-            _offlineMode = offlineMode;
+            _fs = fs;
+            _netClient = netClient;
             
-            // Setup network stuff
             // online mode
-            if (!offlineMode)
+            if (_netClient.Connected)
             {
-                if (serverIp == null || serverPort == 0 || serverPort > 65535) // we're set to online mode, but the server parameters were invalid!
-                {
-                    // TODO: Make custom Exceptions to handle these bits
-                    throw new Exception("Online Mode was enabled, but invalid server address parameters were provided!");
-                }
-                else // everything is cool
-                {
-                    // instantiate tcp client
-                    _tcpClient = new TcpClient(serverIp, serverPort);
-                    // instantiate socket manager
-                    _socketManager = new SocketManager(_tcpClient);
-                    _tcpClient.AddSocketManager(_socketManager);
-                }
+                // instantiate socket manager
+                _socketManager = new SocketManager(_netClient);
             }
-            // offline mode
-            else
-            {
-                _tcpClient = null;
-                _socketManager = null;
-            }
-            
-            // Setup filesystem stuff
-            // fs file is initialized
-            //if (FilesystemUtils.IsFsFileInitialized(fsFilePath))
-            //{
-            //    // TODO: Load Filesystem from here
-            //}
-            //else // fs file is not initialized!
-            //{
-                // TODO: Provide interface to create a Filesystem
-            //}
-            
+
             // TODO: Initialize JsInterpreter
         }
 

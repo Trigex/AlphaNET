@@ -1,6 +1,7 @@
 ﻿using AlphaNET.Framework.IO;
 using Jint;
 using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace AlphaNET.Framework.JS
@@ -14,19 +15,11 @@ namespace AlphaNET.Framework.JS
             _engine = new Engine();
 
             // get bootstrap and services files
-            try
-            {
-                var bootstrap = IOUtils.ReadManifestData<TypescriptCompiler>("TypescriptBootstrap.js");
-                var services = IOUtils.ReadManifestData<TypescriptCompiler>("TypescriptServices.js");
-                // execute them, thus adding them to the global scope
-                Console.WriteLine("Installing compiler...");
-                _engine.Execute(services);
-                _engine.Execute(bootstrap);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Error while initializing compiler: {e.ToString()}");
-            }
+            var bootstrap = IoUtils.ReadManifestData<TypescriptCompiler>("TypescriptBootstrap.js");
+            var services = IoUtils.ReadManifestData<TypescriptCompiler>("TypescriptServices.js");
+            // execute them, thus adding them to the global scope
+            _engine.Execute(services);
+            _engine.Execute(bootstrap);
         }
 
         public string Compile(string script)
@@ -39,7 +32,7 @@ namespace AlphaNET.Framework.JS
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error while compiling TypeScript: {e.ToString()}");
+                Debug.WriteLine($"Error while compiling TypeScript: {e}");
             }
             return outputSource;
         }

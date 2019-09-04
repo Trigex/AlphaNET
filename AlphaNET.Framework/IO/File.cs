@@ -21,11 +21,11 @@ namespace AlphaNET.Framework.IO
         {
             return FilesystemUtils.Deserialize<File>(buffer, (reader) =>
             {
-                var title = reader.ReadBytes(Size.FileTitle - 1);
+                var title = reader.ReadBytes(Size.FILE_TITLE - 1);
                 var inodeNumber = reader.ReadUInt32();
 
                 return new File(Encoding.UTF8.GetString(title), inodeNumber);
-            })
+            });
         }
 
         public byte[] Serialize()
@@ -37,14 +37,14 @@ namespace AlphaNET.Framework.IO
             });
         }
 
-        private string FixTitle(string title)
+        private static string FixTitle(string title)
         {
             // strip title if too long
-            if (title.Length > Size.FileTitle)
-                title.Remove(Size.FileTitle - 1, title.Length - Size.FileTitle);
+            if (title.Length > Size.FILE_TITLE)
+                title.Remove(Size.FILE_TITLE - 1, title.Length - Size.FILE_TITLE);
             else // pad string with ?
             {
-                for(int i=title.Length;i<Size.FileTitle;i++)
+                for(int i=title.Length;i<Size.FILE_TITLE;i++)
                 {
                     title += '?';
                 }

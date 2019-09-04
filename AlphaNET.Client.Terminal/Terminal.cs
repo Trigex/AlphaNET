@@ -1,6 +1,7 @@
 ﻿using System;
+using AlphaNET.Framework.Client;
 
-namespace AlphaNET.Framework.Client
+namespace AlphaNET.Client.Terminal
 {
     /// <summary>
     /// The Terminal Emulator based Console implementation, used in the AlphaNET.Client.Terminal client

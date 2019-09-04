@@ -7,6 +7,7 @@ namespace AlphaNET.Framework.Proxies
 {
     class SocketManagerProxy
     {
+        /*
         private SocketManager _socketManager;
 
         public SocketManagerProxy(SocketManager socketManager)
@@ -37,6 +38,6 @@ namespace AlphaNET.Framework.Proxies
         public string GetIpAddress()
         {
             return _socketManager.GetIpAddress();
-        }
+        }*/
     }
 }

@@ -9,11 +9,11 @@ namespace AlphaNET.Framework.IO
     /// </summary>
     public static class Size
     {
-        public const int SuperBlock = 37;
-        public const int Block = 4096;
-        public const int Inode = 132;
-        public const int InodePerBytes = 16384;
-        public const int InodesPerBlock = Block / Inode;
-        public const int FileTitle = 128;
+        public const int SUPER_BLOCK = 37;
+        public const int BLOCK = 4096;
+        public const int INODE = 132;
+        public const int INODE_PER_BYTES = 16384;
+        public const int INODES_PER_BLOCK = BLOCK / INODE;
+        public const int FILE_TITLE = 128;
     }
 }

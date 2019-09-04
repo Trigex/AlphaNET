@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace AlphaNET.Framework.IO
 {
-    public static class IOUtils
+    public static class IoUtils
     {
         public static string ReadManifestData<TSource>(string embeddedFileName) where TSource : class
         {
